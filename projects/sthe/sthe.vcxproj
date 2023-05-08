@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sthe\components\camera.cpp" />
+    <ClCompile Include="sthe\components\light.cpp" />
+    <ClCompile Include="sthe\components\mesh_renderer.cpp" />
+    <ClCompile Include="sthe\components\renderer.cpp" />
+    <ClCompile Include="sthe\components\terrain_renderer.cpp" />
+    <ClCompile Include="sthe\core\terrain.cpp" />
+    <ClCompile Include="sthe\core\custom_material.cpp" />
+    <ClCompile Include="sthe\core\terrain_layer.cpp" />
+    <ClCompile Include="sthe\components\trackball.cpp" />
+    <ClCompile Include="sthe\components\transform.cpp" />
+    <ClCompile Include="sthe\config\debug.cpp" />
+    <ClCompile Include="sthe\core\application.cpp" />
+    <ClCompile Include="sthe\core\component.cpp" />
+    <ClCompile Include="sthe\core\environment.cpp" />
+    <ClCompile Include="sthe\core\game_object.cpp" />
+    <ClCompile Include="sthe\core\gui.cpp" />
+    <ClCompile Include="sthe\core\importer.cpp" />
+    <ClCompile Include="sthe\core\material.cpp" />
+    <ClCompile Include="sthe\core\mesh.cpp" />
+    <ClCompile Include="sthe\core\pipeline.cpp" />
+    <ClCompile Include="sthe\core\scene.cpp" />
+    <ClCompile Include="sthe\core\sub_mesh.cpp" />
+    <ClCompile Include="sthe\core\window.cpp" />
+    <ClCompile Include="sthe\cu\array.cpp" />
+    <ClCompile Include="sthe\cu\array2d.cpp" />
+    <ClCompile Include="sthe\cu\array3d.cpp" />
+    <ClCompile Include="sthe\cu\buffer.cpp" />
+    <ClCompile Include="sthe\cu\graphics_resource.cpp" />
+    <ClCompile Include="sthe\cu\stopwatch.cpp" />
+    <ClCompile Include="sthe\cu\surface.cpp" />
+    <ClCompile Include="sthe\cu\texture.cpp" />
+    <ClCompile Include="sthe\gl\buffer.cpp" />
+    <ClCompile Include="sthe\gl\framebuffer.cpp" />
+    <ClCompile Include="sthe\gl\image.cpp" />
+    <ClCompile Include="sthe\gl\program.cpp" />
+    <ClCompile Include="sthe\gl\renderbuffer.cpp" />
+    <ClCompile Include="sthe\gl\shader.cpp" />
+    <ClCompile Include="sthe\gl\texture.cpp" />
+    <ClCompile Include="sthe\gl\texture2d.cpp" />
+    <ClCompile Include="sthe\gl\texture3d.cpp" />
+    <ClCompile Include="sthe\gl\vertex_array.cpp" />
+    <ClCompile Include="sthe\pipelines\forward_pipeline.cpp" />
+    <ClCompile Include="sthe\util\io.cpp" />
+    <ClCompile Include="sthe\util\stopwatch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sthe\components\camera.hpp" />
+    <ClInclude Include="sthe\components\light.hpp" />
+    <ClInclude Include="sthe\components\mesh_renderer.hpp" />
+    <ClInclude Include="sthe\components\renderer.hpp" />
+    <ClInclude Include="sthe\components\terrain_renderer.hpp" />
+    <ClInclude Include="sthe\core\custom_material.hpp" />
+    <ClInclude Include="sthe\core\terrain_layer.hpp" />
+    <ClInclude Include="sthe\core\terrain.hpp" />
+    <ClInclude Include="sthe\components\trackball.hpp" />
+    <ClInclude Include="sthe\components\transform.hpp" />
+    <ClInclude Include="sthe\config\binding.hpp" />
+    <ClInclude Include="sthe\config\config.hpp" />
+    <ClInclude Include="sthe\config\debug.hpp" />
+    <ClInclude Include="sthe\core\application.hpp" />
+    <ClInclude Include="sthe\core\component.hpp" />
+    <ClInclude Include="sthe\core\environment.hpp" />
+    <ClInclude Include="sthe\core\event.hpp" />
+    <ClInclude Include="sthe\core\game_object.hpp" />
+    <ClInclude Include="sthe\core\gui.hpp" />
+    <ClInclude Include="sthe\core\importer.hpp" />
+    <ClInclude Include="sthe\core\material.hpp" />
+    <ClInclude Include="sthe\core\mesh.hpp" />
+    <ClInclude Include="sthe\core\pipeline.hpp" />
+    <ClInclude Include="sthe\core\projection.hpp" />
+    <ClInclude Include="sthe\core\scene.hpp" />
+    <ClInclude Include="sthe\core\sub_mesh.hpp" />
+    <ClInclude Include="sthe\core\window.hpp" />
+    <ClInclude Include="sthe\core\world.hpp" />
+    <ClInclude Include="sthe\cu\array.hpp" />
+    <ClInclude Include="sthe\cu\array2d.hpp" />
+    <ClInclude Include="sthe\cu\array3d.hpp" />
+    <ClInclude Include="sthe\cu\buffer.hpp" />
+    <ClInclude Include="sthe\cu\graphics_resource.hpp" />
+    <ClInclude Include="sthe\cu\stopwatch.hpp" />
+    <ClInclude Include="sthe\cu\surface.hpp" />
+    <ClInclude Include="sthe\cu\texture.hpp" />
+    <ClInclude Include="sthe\device\function_qualifier.hpp" />
+    <ClInclude Include="sthe\device\vector_extension.hpp" />
+    <ClInclude Include="sthe\gl\buffer.hpp" />
+    <ClInclude Include="sthe\gl\framebuffer.hpp" />
+    <ClInclude Include="sthe\gl\handle.hpp" />
+    <ClInclude Include="sthe\gl\image.hpp" />
+    <ClInclude Include="sthe\gl\indirect_command.hpp" />
+    <ClInclude Include="sthe\gl\program.hpp" />
+    <ClInclude Include="sthe\gl\renderbuffer.hpp" />
+    <ClInclude Include="sthe\gl\shader.hpp" />
+    <ClInclude Include="sthe\gl\texture.hpp" />
+    <ClInclude Include="sthe\gl\texture2d.hpp" />
+    <ClInclude Include="sthe\gl\texture3d.hpp" />
+    <ClInclude Include="sthe\gl\vertex_array.hpp" />
+    <ClInclude Include="sthe\pipelines\forward_pipeline.hpp" />
+    <ClInclude Include="sthe\sthe.hpp" />
+    <ClInclude Include="sthe\util\io.hpp" />
+    <ClInclude Include="sthe\util\stopwatch.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sthe\core\game_object.inl" />
+    <None Include="sthe\core\scene.inl" />
+    <None Include="sthe\cu\array2d.inl" />
+    <None Include="sthe\cu\array3d.inl" />
+    <None Include="sthe\cu\buffer.inl" />
+    <None Include="sthe\cu\graphics_resource.inl" />
+    <None Include="sthe\device\vector_extension.inl" />
+    <None Include="sthe\gl\buffer.inl" />
+    <None Include="sthe\gl\texture2d.inl" />
+    <None Include="sthe\gl\texture3d.inl" />
+    <None Include="sthe\util\io.inl" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F7AB5BEC-8EF9-4231-9972-E47F2CEE1002}</ProjectGuid>
+    <RootNamespace>dunes</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>sthe</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.1.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);</IncludePath>
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)includes;</ExternalIncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)libraries;</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);</IncludePath>
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)includes;</ExternalIncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)libraries;</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.1.targets" />
+  </ImportGroup>
+</Project>
