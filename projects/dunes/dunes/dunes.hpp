@@ -1,4 +1,4 @@
 #pragma once
 
-#include "core/simulator.hpp"
+#include "core/simulation.hpp"
 #include "util/io.hpp"

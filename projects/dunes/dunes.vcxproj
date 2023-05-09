@@ -11,8 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dunes\device\grid.cuh" />
+    <ClInclude Include="dunes\device\simulation.cuh" />
+    <ClInclude Include="dunes\device\constant.cuh" />
     <ClInclude Include="dunes\dunes.hpp" />
-    <ClInclude Include="dunes\core\simulator.hpp" />
+    <ClInclude Include="dunes\core\simulation.hpp" />
     <ClInclude Include="dunes\util\io.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -21,9 +24,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dunes\core\simulator.cpp" />
+    <ClCompile Include="dunes\core\simulation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dunes\device\grid.inl" />
     <None Include="dunes\util\io.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
