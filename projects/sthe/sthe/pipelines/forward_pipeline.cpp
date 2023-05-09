@@ -238,9 +238,10 @@ void ForwardPipeline::terrainRendererPass(const Scene& t_scene)
 			terrain.bind();
 
 			uniform::Terrain& terrainData{ m_data.terrain };
-			terrainData.size = terrain.getSize();
-			terrainData.subDivision = terrain.getResolution() / terrain.getDetail();
-			terrainData.detail = terrain.getDetail();
+			terrainData.gridSize = terrain.getGridSize();
+			terrainData.gridScale = terrain.getGridScale();
+			terrainData.heightScale = terrain.getHeightScale();
+			terrainData.tesselationLevel = terrain.getTesselationLevel();
 			terrainData.hasHeightMap = terrain.hasHeightMap();
 			terrainData.hasAlphaMap = terrain.hasAlphaMap();
 			terrainData.layerCount = 0;
@@ -257,7 +258,9 @@ void ForwardPipeline::terrainRendererPass(const Scene& t_scene)
 
 			m_pipelineBuffer->upload(reinterpret_cast<char*>(&terrainData), static_cast<int>(offsetof(uniform::ForwardPipeline, terrain)), sizeof(uniform::Terrain));
 			
-			GL_CHECK_ERROR(glDrawArraysInstanced(GL_PATCHES, 0, 4, terrainData.subDivision * terrainData.subDivision));
+			const glm::ivec2 subDivision = terrainData.gridSize / terrainData.tesselationLevel;
+
+			GL_CHECK_ERROR(glDrawArraysInstanced(GL_PATCHES, 0, 4, subDivision.x * subDivision.y));
 		}
 	}
 }

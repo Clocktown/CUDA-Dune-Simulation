@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#define STHE_PROGRAM_MATERIAL_BUFFER_FULL_RANGE 0
+#define STHE_MATERIAL_BUFFER_FULL_RANGE 0
 
 namespace sthe
 {
@@ -35,7 +35,7 @@ void CustomMaterial::bind() const
 {
     for (const auto& [location, descriptor] : m_buffers)
     {
-        if (descriptor.count == STHE_PROGRAM_MATERIAL_BUFFER_FULL_RANGE)
+        if (descriptor.count == STHE_MATERIAL_BUFFER_FULL_RANGE)
         {
             descriptor.buffer->bind(location.first, location.second);
         }
@@ -59,7 +59,7 @@ void CustomMaterial::setProgram(const std::shared_ptr<gl::Program>& t_program)
 
 void CustomMaterial::setBuffer(const GLenum t_target, const int t_location, const std::shared_ptr<gl::Buffer>& t_buffer)
 {
-    setBuffer(t_target, t_location, t_buffer, 0, STHE_PROGRAM_MATERIAL_BUFFER_FULL_RANGE);
+    setBuffer(t_target, t_location, t_buffer, 0, STHE_MATERIAL_BUFFER_FULL_RANGE);
 }
 
 void CustomMaterial::setBuffer(const GLenum t_target, const int t_location, const std::shared_ptr<gl::Buffer>& t_buffer, const int t_count)

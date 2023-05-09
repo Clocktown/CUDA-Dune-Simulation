@@ -1,7 +1,5 @@
 #pragma once
 
-// Programs which will be used with the render pipeline must not use the reserved bindings
-
 #define STHE_VERTEX_ATTRIBUTE_POSITION 0
 #define STHE_VERTEX_ATTRIBUTE_NORMAL 1
 #define STHE_VERTEX_ATTRIBUTE_TANGENT 2

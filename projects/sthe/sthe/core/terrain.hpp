@@ -17,9 +17,10 @@ namespace uniform
 
 struct Terrain
 {
-	glm::vec3 size;
-	int subDivision;
-	int detail;
+	glm::ivec2 gridSize;
+	float gridScale;
+	float heightScale;
+	int tesselationLevel;
 	int layerCount;
 	int hasHeightMap;
 	int hasAlphaMap;
@@ -32,9 +33,7 @@ class Terrain
 {
 public:
 	// Constructors
-	Terrain(const glm::vec3& t_size = glm::vec3{ 512.0f, 16.0f, 512.0f });
-	Terrain(const glm::vec3& t_size, const std::shared_ptr<TerrainLayer>& t_layer);
-	Terrain(const glm::vec3& t_size, const std::vector<std::shared_ptr<TerrainLayer>>& t_layers);
+	explicit Terrain(const glm::ivec2& t_gridSize = glm::ivec2{ 512 }, const float t_gridScale = 1.0f, const float t_heightScale = 1.0f);
 	Terrain(const Terrain& t_terrain) = default;
 	Terrain(Terrain&& t_terrain) = default;
 
@@ -52,18 +51,20 @@ public:
 	void removeLayers();
 
 	// Setters
-	void setSize(const glm::vec3& t_size);
-	void setResolution(const int t_resolution);
-	void setDetail(const int t_detail);
+	void setGridSize(const glm::ivec2& t_gridSize);
+	void setGridScale(const float t_gridScale);
+	void setHeightScale(const float t_heightScale);
+	void setTesselationLevel(const int t_tesselationLevel);
 	void setHeightMap(const std::shared_ptr<gl::Texture2D>& t_heightMap);
 	void setAlphaMap(const std::shared_ptr<gl::Texture2D>& t_alphaMap);
 	void setLayer(const int t_index, const std::shared_ptr<TerrainLayer>& t_layer);
 	void setLayers(const std::vector<std::shared_ptr<TerrainLayer>>& t_layers);
 	
 	// Getters
-	const glm::vec3& getSize() const;
-	int getResolution() const;
-	int getDetail() const;
+	const glm::ivec2& getGridSize() const;
+	const float getGridScale() const;
+	const float getHeightScale() const;
+	int getTesselationLevel() const;
 	const std::shared_ptr<gl::VertexArray> getVertexArray() const;
 	const std::shared_ptr<gl::Texture2D>& getHeightMap() const;
 	const std::shared_ptr<gl::Texture2D>& getAlphaMap() const;
@@ -75,9 +76,10 @@ public:
 	bool hasLayers() const;
 private:
 	// Attributes
-	glm::vec3 m_size;
-	int m_resolution;
-	int m_detail;
+	glm::ivec2 m_gridSize;
+	float m_gridScale;
+	float m_heightScale;
+	int m_tesselationLevel;
 	std::shared_ptr<gl::VertexArray> m_vertexArray;
 	std::shared_ptr<gl::Texture2D> m_heightMap;
 	std::shared_ptr<gl::Texture2D> m_alphaMap;

@@ -49,9 +49,10 @@ struct TerrainLayer
 
 struct Terrain
 {
-    vec3 size;
-	int subDivision;
-	int detail;
+	ivec2 gridSize;
+	float gridScale;
+	float heightScale;
+	int tesselationLevel;
 	int layerCount;
 	bool hasHeightMap;
 	bool hasAlphaMap;
@@ -81,6 +82,9 @@ layout(std140, binding = 0) uniform PipelineBuffer
 	mat4 t_inverseModelViewMatrix;
 	Terrain t_terrain;
 };
+
+layout(binding = 3) uniform sampler2D t_alphaMap;
+layout(binding = 4) uniform sampler2D t_diffuseMaps[4];
 
 layout(early_fragment_tests) in;
 in Fragment fragment;
@@ -118,19 +122,46 @@ float getFogIntensity(const float t_viewDistance)
 	return clamp(fogIntensity, 0.0f, 1.0f);
 }
 
+vec3 getDiffuseColor(const int t_index)
+{
+	if (t_terrain.layers[t_index].hasDiffuseMap)
+	{
+		return t_terrain.layers[t_index].diffuseColor + texture(t_diffuseMaps[t_index], fragment.uv).rgb;
+	}
+
+	return t_terrain.layers[t_index].diffuseColor;
+}
+
+vec3 getSpecularColor(const int t_index)
+{
+	const vec3 specularColor = t_terrain.layers[t_index].specularIntensity * t_terrain.layers[t_index].specularColor;
+	return specularColor;
+}
+
+
 void main()
 {
-	const vec3 diffuseColor = vec3(194.0f, 178.0f, 128.0f) / 255.0f;
-	const vec3 specularColor = 0.0f * vec3(1.0f, 1.0f, 1.0f);
-	const float shininess = 80.0f;
-
 	const vec3 viewVector = t_inverseViewMatrix[3].xyz - fragment.position;
 	const float viewDistance = length(viewVector);
 	const vec3 viewDirection = viewVector / (viewDistance + EPSILON);
 
-	fragmentColor.rgb = getAmbientColor() * diffuseColor;
-	fragmentColor.a = 1.0f;
+	vec4 alphas;
+	int startLayer;
 
+	if (t_terrain.hasAlphaMap) 
+	{
+	    alphas =  texture(t_alphaMap, fragment.uv);
+		startLayer = 0;
+	}
+	else 
+	{
+	    alphas = vec4(1.0f);
+		startLayer = t_terrain.layerCount - 1;
+	}
+
+	const vec3 ambientColor = getAmbientColor();
+	vec3 colors[4] = { vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f) };
+	
 	for (int i = 0; i < t_environment.lightCount; ++i)
 	{
 		vec3 lightDirection;
@@ -159,24 +190,39 @@ void main()
 
 			if (t_environment.lights[i].type == LIGHT_TYPE_SPOT)
 			{
-				const float cosTheta = dot(lightDirection, -t_environment.lights[i].direction);
+			    const float cosTheta = dot(lightDirection, -t_environment.lights[i].direction);
 
 				if (cosTheta < t_environment.lights[i].spotOuterCutOff)
 				{
-					continue;
+				    continue;
 				}
 
 				attenuation *= clamp((cosTheta - t_environment.lights[i].spotOuterCutOff) /
 					                 (t_environment.lights[i].spotInnerCutOff - t_environment.lights[i].spotOuterCutOff), 0.0f, 1.0f);
 			}
 		}
-
+		
 		const vec3 reflection = reflect(-lightDirection, fragment.normal);
 		const float cosPhi = max(dot(fragment.normal, lightDirection), 0.0f);
-		const float cosPsiN = shininess > 0.0f ? pow(max(dot(reflection, viewDirection), 0.0f), shininess) : 0.0f;
+		const float cosPsi = max(dot(reflection, viewDirection), 0.0f);
 		const vec3 lightColor = attenuation * t_environment.lights[i].intensity * t_environment.lights[i].color;
 
-		fragmentColor.rgb += lightColor * (cosPhi * diffuseColor + cosPsiN * specularColor);
+	    for (int j = startLayer; j < t_terrain.layerCount; ++j) 
+	    {
+	        const vec3 diffuseColor = getDiffuseColor(j);
+	        const vec3 specularColor = getSpecularColor(j);
+			const float cosPsiN = t_terrain.layers[j].shininess > 0.0f ? pow(cosPsi, t_terrain.layers[j].shininess) : 0.0f;
+		   
+		    colors[j] += ambientColor * diffuseColor;
+			colors[j] += lightColor * (cosPhi * diffuseColor + cosPsiN * specularColor);
+	    }
+	}
+
+	fragmentColor = vec4(colors[startLayer], 1.0f);
+
+	for (int i = startLayer + 1; i < t_terrain.layerCount; ++i) 
+	{
+	    fragmentColor.rgb = mix(colors[i], fragmentColor.rgb, alphas[i]);
 	}
 
 	fragmentColor.rgb = clamp(fragmentColor.rgb, 0.0f, 1.0f);

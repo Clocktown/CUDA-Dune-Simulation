@@ -40,9 +40,10 @@ struct TerrainLayer
 
 struct Terrain
 {
-    vec3 size;
-	int subDivision;
-	int detail;
+	ivec2 gridSize;
+	float gridScale;
+	float heightScale;
+	int tesselationLevel;
 	int layerCount;
 	bool hasHeightMap;
 	bool hasAlphaMap;
@@ -71,10 +72,14 @@ out vec2 tescUV;
 
 void main()
 {
-    const vec2 position = vec2(gl_InstanceID / t_terrain.subDivision, gl_InstanceID % t_terrain.subDivision);
-	const vec2 offset = vec2(gl_VertexID / 2, gl_VertexID % 2);
-	const float scale = 1.0f / float(t_terrain.subDivision);
+    const ivec2 subDivision = t_terrain.gridSize / t_terrain.tesselationLevel;
+    const vec2 position = vec2(gl_InstanceID / subDivision.x, gl_InstanceID % subDivision.x) + 
+	                      vec2(gl_VertexID / 2, gl_VertexID % 2);
 
-	tescUV = scale * (position + offset);
-	gl_Position = vec4((tescUV.x - 0.5f) * t_terrain.size.x, 0.0f, (tescUV.y - 0.5f) * t_terrain.size.z, 1.0f);
+	tescUV = position / vec2(subDivision);
+
+	gl_Position = vec4(t_terrain.gridScale * (tescUV.x - 0.5f) * t_terrain.gridSize.x, 
+	                   0.0f, 
+					   t_terrain.gridScale * (tescUV.y - 0.5f) * t_terrain.gridSize.y, 
+					   1.0f);
 }

@@ -1,6 +1,6 @@
 #include <sthe/sthe.hpp>
 
-struct CustomComponent : sthe::Component
+struct CustomComponent : public sthe::Component
 {
 	// The following methods will be registered (if they exist) and called automatically
 	// These methods must NOT be overloaded
@@ -79,7 +79,7 @@ int main()
 
 	// Add a custom component
 	// Must be created by using the game object's "add" function
-	customGameObject.addComponent<CustomComponent>();
+	CustomComponent& customComponent{ customGameObject.addComponent<CustomComponent>() };
 
 	// Add predefined game objects 
 	sthe::GameObject& pointLight{ scene.addPointLight() };
@@ -88,7 +88,8 @@ int main()
 	sthe::GameObject& camera{ scene.addTrackball() };
 	camera.getTransform().setLocalPosition(glm::vec3{ 7.0f, 2.0f, -0.25f });
 
-	// Add a game object from a file
+	// Add a model from a file
+	// Uses Assimp internally
 	sthe::GameObject& sponza{ scene.addModel(sthe::getModelPath() + "sponza.gltf") };
 
 	// Run the application

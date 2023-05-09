@@ -40,9 +40,10 @@ struct TerrainLayer
 
 struct Terrain
 {
-    vec3 size;
-	int subDivision;
-	int detail;
+	ivec2 gridSize;
+	float gridScale;
+	float heightScale;
+	int tesselationLevel;
 	int layerCount;
 	bool hasHeightMap;
 	bool hasAlphaMap;
@@ -92,7 +93,7 @@ void main()
 	const vec2 position0 = mix(position00, position01, gl_TessCoord.x);
 	const vec2 position1 = mix(position10, position11, gl_TessCoord.x);
 	geomPosition.xz = mix(position0, position1, gl_TessCoord.y);
-    geomPosition.y = t_terrain.hasHeightMap ? texture(t_heightMap, geomUV).x * t_terrain.size.y : 0.0f;
+    geomPosition.y = t_terrain.hasHeightMap ? texture(t_heightMap, geomUV).x * t_terrain.heightScale : 0.0f;
 
 	const vec4 position = t_modelMatrix * vec4(geomPosition, 1.0f);
 	geomPosition = position.xyz;

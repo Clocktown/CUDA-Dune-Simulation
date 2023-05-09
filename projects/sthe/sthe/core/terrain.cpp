@@ -12,41 +12,20 @@
 namespace sthe
 {
 
-// Constructors
-Terrain::Terrain(const glm::vec3& t_size) :
-	m_size{ t_size },
-	m_resolution{ 512 },
-	m_detail{ 32 },
+// Constructor
+Terrain::Terrain(const glm::ivec2& t_gridSize, const float t_gridScale, const float t_heightScale) :
+	m_gridSize{ t_gridSize },
+	m_gridScale{ t_gridScale },
+	m_heightScale{ t_heightScale },
+	m_tesselationLevel{ 32 },
 	m_vertexArray{ std::make_shared<gl::VertexArray>() },
 	m_heightMap{ nullptr },
 	m_alphaMap{ nullptr }
 {
-	m_layers.reserve(4);
-}
-
-Terrain::Terrain(const glm::vec3& t_size, const std::shared_ptr<TerrainLayer>& t_layer) :
-	m_size{ t_size },
-	m_resolution{ 512 },
-	m_detail{ 32 },
-	m_vertexArray{ std::make_shared<gl::VertexArray>() },
-	m_heightMap{ nullptr },
-	m_alphaMap{ nullptr },
-	m_layers{ t_layer }
-{
-	STHE_ASSERT(t_layer != nullptr, "Layer cannot be nullptr");
-
-	m_layers.reserve(4);
-}
-
-Terrain::Terrain(const glm::vec3& t_size, const std::vector<std::shared_ptr<TerrainLayer>>& t_layers) :
-    m_size { t_size },
-    m_resolution{ 32 },
-    m_detail{ 16 },
-    m_heightMap{ nullptr },
-    m_alphaMap{ nullptr },
-    m_layers{ t_layers }
-{
-	STHE_ASSERT(std::find(t_layers.begin(), t_layers.end(), nullptr) == t_layers.end(), "No layer can be nullptr");
+	STHE_ASSERT(t_gridSize.x > 0, "Grid size x must be greater than 0");
+	STHE_ASSERT(t_gridSize.y > 0, "Grid size y must be greater than 0");
+	STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be equal to 0");
+	STHE_ASSERT(t_heightScale != 0.0f, "Height scale cannot be equal to 0");
 
 	m_layers.reserve(4);
 }
@@ -96,23 +75,33 @@ void Terrain::removeLayers()
 }
 
 // Setters
-void Terrain::setSize(const glm::vec3& t_size)
+void Terrain::setGridSize(const glm::ivec2& t_gridSize)
 {
-	m_size = t_size;
+	STHE_ASSERT(t_gridSize.x > 0, "Grid size x must be greater than 0");
+	STHE_ASSERT(t_gridSize.y > 0, "Grid size y must be greater than 0");
+
+	m_gridSize = t_gridSize;
 }
 
-void Terrain::setResolution(const int t_resolution)
+void Terrain::setGridScale(const float t_gridScale)
 {
-	STHE_ASSERT(t_resolution > 0, "Resolution must be greater than 0");
+	STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be equal to 0");
 
-	m_resolution = t_resolution;
+	m_gridScale = t_gridScale;
 }
 
-void Terrain::setDetail(const int t_detail)
+void Terrain::setHeightScale(const float t_heightScale)
 {
-	STHE_ASSERT(t_detail > 0, "Detail must be greater than 0");
+	STHE_ASSERT(t_heightScale != 0.0f, "Height scale cannot be equal to 0");
 
-	m_detail = t_detail;
+	m_heightScale = t_heightScale;
+}
+
+void Terrain::setTesselationLevel(const int t_tesselationLevel)
+{
+	STHE_ASSERT(t_tesselationLevel > 0, "Tesselation level must be greater than 0");
+
+	m_tesselationLevel = t_tesselationLevel;
 }
 
 void Terrain::setHeightMap(const std::shared_ptr<sthe::gl::Texture2D>& t_heightMap)
@@ -142,19 +131,24 @@ void Terrain::setLayers(const std::vector<std::shared_ptr<TerrainLayer>>& t_laye
 }
 
 // Getters
-const glm::vec3& Terrain::getSize() const
+const glm::ivec2& Terrain::getGridSize() const
 {
-	return m_size;
+	return m_gridSize;
 }
 
-int Terrain::getResolution() const
+const float Terrain::getGridScale() const
 {
-	return m_resolution;
+	return m_gridScale;
 }
 
-int Terrain::getDetail() const
+const float Terrain::getHeightScale() const
 {
-	return m_detail;
+	return m_heightScale;
+}
+
+int Terrain::getTesselationLevel() const
+{
+	return m_tesselationLevel;
 }
 
 const std::shared_ptr<gl::VertexArray> Terrain::getVertexArray() const

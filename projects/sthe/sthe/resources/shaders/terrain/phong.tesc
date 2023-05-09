@@ -40,9 +40,10 @@ struct TerrainLayer
 
 struct Terrain
 {
-    vec3 size;
-	int subDivision;
-	int detail;
+	ivec2 gridSize;
+	float gridScale;
+	float heightScale;
+	int tesselationLevel;
 	int layerCount;
 	bool hasHeightMap;
 	bool hasAlphaMap;
@@ -76,15 +77,15 @@ void main()
 {
     if (gl_InvocationID == 0)
     {
-        const float detail = float(t_terrain.detail);
+        const float tesselationLevel = float(t_terrain.tesselationLevel);
 
-        gl_TessLevelInner[0] = detail;
-        gl_TessLevelInner[1] = detail;
+        gl_TessLevelInner[0] = tesselationLevel;
+        gl_TessLevelInner[1] = tesselationLevel;
 
-        gl_TessLevelOuter[0] = detail;
-        gl_TessLevelOuter[1] = detail;
-        gl_TessLevelOuter[2] = detail;
-        gl_TessLevelOuter[3] = detail;
+        gl_TessLevelOuter[0] = tesselationLevel;
+        gl_TessLevelOuter[1] = tesselationLevel;
+        gl_TessLevelOuter[2] = tesselationLevel;
+        gl_TessLevelOuter[3] = tesselationLevel;
     }
 
     teseUV[gl_InvocationID] = tescUV[gl_InvocationID];

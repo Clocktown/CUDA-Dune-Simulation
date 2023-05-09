@@ -5,7 +5,7 @@
 namespace dunes
 {
 
-class Simulator : sthe::Component
+class Simulator : public sthe::Component
 {
 public:
 	// Constructors
