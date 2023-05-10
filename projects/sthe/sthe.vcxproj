@@ -38,10 +38,7 @@
     <ClCompile Include="sthe\cu\array2d.cpp" />
     <ClCompile Include="sthe\cu\array3d.cpp" />
     <ClCompile Include="sthe\cu\buffer.cpp" />
-    <ClCompile Include="sthe\cu\graphics_resource.cpp" />
     <ClCompile Include="sthe\cu\stopwatch.cpp" />
-    <ClCompile Include="sthe\cu\surface.cpp" />
-    <ClCompile Include="sthe\cu\texture.cpp" />
     <ClCompile Include="sthe\gl\buffer.cpp" />
     <ClCompile Include="sthe\gl\framebuffer.cpp" />
     <ClCompile Include="sthe\gl\image.cpp" />
@@ -89,12 +86,9 @@
     <ClInclude Include="sthe\cu\array2d.hpp" />
     <ClInclude Include="sthe\cu\array3d.hpp" />
     <ClInclude Include="sthe\cu\buffer.hpp" />
-    <ClInclude Include="sthe\cu\graphics_resource.hpp" />
     <ClInclude Include="sthe\cu\stopwatch.hpp" />
-    <ClInclude Include="sthe\cu\surface.hpp" />
-    <ClInclude Include="sthe\cu\texture.hpp" />
-    <ClInclude Include="sthe\device\function_qualifier.hpp" />
-    <ClInclude Include="sthe\device\vector_extension.hpp" />
+    <ClInclude Include="sthe\device\function_qualifier.cuh" />
+    <ClInclude Include="sthe\device\vector_extension.cuh" />
     <ClInclude Include="sthe\gl\buffer.hpp" />
     <ClInclude Include="sthe\gl\framebuffer.hpp" />
     <ClInclude Include="sthe\gl\handle.hpp" />
@@ -118,8 +112,6 @@
     <None Include="sthe\cu\array2d.inl" />
     <None Include="sthe\cu\array3d.inl" />
     <None Include="sthe\cu\buffer.inl" />
-    <None Include="sthe\cu\graphics_resource.inl" />
-    <None Include="sthe\device\vector_extension.inl" />
     <None Include="sthe\gl\buffer.inl" />
     <None Include="sthe\gl\texture2d.inl" />
     <None Include="sthe\gl\texture3d.inl" />

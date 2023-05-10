@@ -1,5 +1,8 @@
 #pragma once
 
+#include <sthe/gl/buffer.hpp>
+#include <glad/glad.h>
+#include <cuda_runtime.h>
 #include <vector>
 
 namespace sthe
@@ -13,6 +16,8 @@ public:
 	// Constructors
 	Buffer();
 	Buffer(const int t_count, const int t_stride);
+	explicit Buffer(gl::Buffer& t_buffer, const unsigned int t_flags = cudaGraphicsRegisterFlagsNone);
+	explicit Buffer(const GLuint t_buffer, const unsigned int t_flags = cudaGraphicsRegisterFlagsNone);
 	Buffer(const Buffer& t_buffer) noexcept;
 	Buffer(Buffer&& t_buffer) noexcept;
 
@@ -28,8 +33,13 @@ public:
 
 	// Functionality
 	void reinitialize(const int t_count, const int t_stride);
+	void reinitialize(gl::Buffer& t_buffer, const unsigned int t_flags = cudaGraphicsRegisterFlagsNone);
+	void reinitialize(const GLuint t_buffer, const unsigned int t_flags = cudaGraphicsRegisterFlagsNone);
 	void reinterpret(const int t_stride);
 	void release();
+	void map(const int t_stride);
+	void map();
+	void unmap();
 
 	template<typename T>
 	void reinitialize(const std::vector<T>& t_source);
@@ -68,7 +78,6 @@ public:
 	int getCount() const;
 	int getStride() const;
 	bool hasStorage() const;
-	bool isMapped() const;
 
 	template<typename T>
 	const T* getData() const;
@@ -80,10 +89,9 @@ private:
 	void* m_data;
 	int m_count;
 	int m_stride;
-	bool m_isMapped;
 
-	// Friend
-	friend class GraphicsResource;
+	cudaGraphicsResource_t m_graphicsResource;
+	bool m_isMapped;
 };
 
 }

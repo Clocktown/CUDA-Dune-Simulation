@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef __CUDACC_RTC__
+#if !defined(__CUDACC__) && !defined(__CUDABE__)
 #    define CU_INLINE inline
 #    define CU_HOST_DEVICE
 #else

@@ -27,7 +27,11 @@ public:
 	Array& operator=(Array&& t_array) = delete;
 
 	// Functionality
+	virtual void recreateSurface() = 0;
+	virtual void recreateTexture(const cudaTextureDesc& t_descriptor = {}) = 0;
 	virtual void release() = 0;
+	virtual void map(const int t_layer = 0, const int t_mipLevel = 0) = 0;
+	virtual void unmap() = 0;
 
 	// Getters
 	virtual cudaArray_t getHandle() const = 0;
@@ -37,8 +41,9 @@ public:
 	virtual const cudaChannelFormatDesc& getFormat() const = 0;
 	int getStride() const;
 	virtual unsigned int getFlags() const = 0;
+	virtual cudaSurfaceObject_t getSurface() const = 0;
+	virtual cudaTextureObject_t getTexture() const = 0;
 	bool hasStorage() const;
-	virtual bool isMapped() const = 0;
 };
 
 }

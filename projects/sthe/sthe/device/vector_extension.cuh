@@ -1,9 +1,10 @@
-#include "vector_extension.hpp"
-#include "function_qualifier.hpp"
+#pragma once
+
+#include "function_qualifier.cuh"
 #include <vector_types.h>
 #include <vector_functions.h>
 
-#ifndef __CUDACC_RTC__
+#ifndef __CUDACC__
 #   include <cmath>
 
 	CU_INLINE CU_HOST_DEVICE int min(const int a, const int b)

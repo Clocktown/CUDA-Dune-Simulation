@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/config.hpp"
+#include "config/binding.hpp"
 #include "config/debug.hpp"
 
 #include "util/io.hpp"
@@ -48,10 +49,7 @@
 #include "cu/array.hpp"
 #include "cu/array2d.hpp"
 #include "cu/array3d.hpp"
-#include "cu/surface.hpp"
-#include "cu/texture.hpp"
-#include "cu/graphics_resource.hpp"
 #include "cu/stopwatch.hpp"
 
-#include "device/function_qualifier.hpp"
-#include "device/vector_extension.hpp"
+#include "device/function_qualifier.cuh"
+#include "device/vector_extension.cuh"
