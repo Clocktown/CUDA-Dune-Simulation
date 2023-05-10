@@ -27,8 +27,8 @@ public:
 	Array& operator=(Array&& t_array) = delete;
 
 	// Functionality
-	virtual void recreateSurface() = 0;
-	virtual void recreateTexture(const cudaTextureDesc& t_descriptor = {}) = 0;
+	virtual cudaSurfaceObject_t recreateSurface() = 0;
+	virtual cudaTextureObject_t recreateTexture(const cudaTextureDesc& t_descriptor = {}) = 0;
 	virtual void release() = 0;
 	virtual void map(const int t_layer = 0, const int t_mipLevel = 0) = 0;
 	virtual void unmap() = 0;

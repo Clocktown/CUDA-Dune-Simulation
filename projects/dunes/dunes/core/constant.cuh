@@ -16,3 +16,5 @@ __constant__ float c_rDistances[8]{ 1.0f, RSQRT2, 1.0f, RSQRT2,
                                     1.0f, RSQRT2, 1.0f, RSQRT2 };
 
 }
+
+#undef RSQRT2

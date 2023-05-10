@@ -35,8 +35,8 @@ public:
 	void reinitialize(const int t_width, const int t_height, const cudaChannelFormatDesc& t_format, const unsigned int t_flags = cudaArrayDefault);
 	void reinitialize(gl::Image& t_image, const unsigned int t_flags = cudaGraphicsRegisterFlagsNone);
 	void reinitialize(const GLuint t_image, const GLenum t_target, const unsigned int t_flags = cudaGraphicsRegisterFlagsNone);
-	void recreateSurface() override;
-	void recreateTexture(const cudaTextureDesc& t_descriptor = {}) override;
+	cudaSurfaceObject_t recreateSurface() override;
+	cudaTextureObject_t recreateTexture(const cudaTextureDesc& t_descriptor = {}) override;
 	void release() override;
 	void map(const int t_layer = 0, const int t_mipLevel = 0) override;
 	void unmap() override;

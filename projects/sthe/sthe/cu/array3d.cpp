@@ -184,6 +184,9 @@ void Array3D::reinitialize(const int t_width, const int t_height, const int t_de
 	STHE_ASSERT(t_height >= 0, "Height must be greater than or equal to 0");
 	STHE_ASSERT(t_depth >= 0, "Depth must be greater than or equal to 0");
 
+	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
+	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
+
 	if (m_graphicsResource != nullptr)
 	{
 		if (m_isMapped)
@@ -231,22 +234,26 @@ void Array3D::reinitialize(const GLuint t_image, const GLenum t_target, const un
 	CU_CHECK_ERROR(cudaGraphicsGLRegisterImage(&m_graphicsResource, t_image, t_target, t_flags));
 }
 
-void Array3D::recreateSurface()
+cudaSurfaceObject_t Array3D::recreateSurface()
 {
 	const cudaResourceDesc resource{ .resType{ cudaResourceTypeArray },
 								     .res{.array{.array{ m_handle } } } };
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaCreateSurfaceObject(&m_surface, &resource));
+
+	return m_surface;
 }
 
-void Array3D::recreateTexture(const cudaTextureDesc& t_descriptor)
+cudaTextureObject_t Array3D::recreateTexture(const cudaTextureDesc& t_descriptor)
 {
 	const cudaResourceDesc resource{ .resType{ cudaResourceTypeArray },
 								     .res{.array{.array{ m_handle } } } };
 
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
 	CU_CHECK_ERROR(cudaCreateTextureObject(&m_texture, &resource, &t_descriptor, nullptr));
+
+	return m_texture;
 }
 
 void Array3D::release()
