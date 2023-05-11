@@ -73,13 +73,13 @@ out vec2 tescUV;
 void main()
 {
     const ivec2 subDivision = t_terrain.gridSize / t_terrain.tesselationLevel;
-    const vec2 position = vec2(gl_InstanceID / subDivision.x, gl_InstanceID % subDivision.x) + 
-	                      vec2(gl_VertexID / 2, gl_VertexID % 2);
+    const vec2 position = vec2(gl_InstanceID % subDivision.x, gl_InstanceID / subDivision.x);
+	const vec2 offset = vec2(gl_VertexID % 2, gl_VertexID / 2);
 
-	tescUV = position / vec2(subDivision);
+	tescUV = (position + offset) / vec2(subDivision + 1);
 
-	gl_Position = vec4(t_terrain.gridScale * (tescUV.x - 0.5f) * t_terrain.gridSize.x, 
+	gl_Position = vec4(t_terrain.gridScale * (tescUV.x - 0.5f) * float(t_terrain.gridSize.x), 
 	                   0.0f, 
-					   t_terrain.gridScale * (tescUV.y - 0.5f) * t_terrain.gridSize.y, 
+					   t_terrain.gridScale * (tescUV.y - 0.5f) * float(t_terrain.gridSize.y), 
 					   1.0f);
 }

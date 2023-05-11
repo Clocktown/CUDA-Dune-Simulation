@@ -79,20 +79,20 @@ out vec2 geomUV;
 void main()
 {
 	const vec2 uv00 = teseUV[0];
-	const vec2 uv01 = teseUV[1];
+	const vec2 uv10 = teseUV[1];
+	const vec2 uv01 = teseUV[2];
 	const vec2 uv11 = teseUV[3];
-	const vec2 uv10 = teseUV[2];
-	const vec2 uv0 = mix(uv00, uv01, gl_TessCoord.x);
-	const vec2 uv1 = mix(uv10, uv11, gl_TessCoord.x);
-	geomUV = mix(uv0, uv1, gl_TessCoord.y);
+	const vec2 uv0 = mix(uv00, uv10, gl_TessCoord.y);
+	const vec2 uv1 = mix(uv01, uv11, gl_TessCoord.y);
+	geomUV = mix(uv0, uv1, gl_TessCoord.x);
 
     const vec2 position00 = gl_in[0].gl_Position.xz;
-	const vec2 position01 = gl_in[1].gl_Position.xz;
+	const vec2 position10 = gl_in[1].gl_Position.xz;
+	const vec2 position01 = gl_in[2].gl_Position.xz;
 	const vec2 position11 = gl_in[3].gl_Position.xz;
-	const vec2 position10 = gl_in[2].gl_Position.xz;
-	const vec2 position0 = mix(position00, position01, gl_TessCoord.x);
-	const vec2 position1 = mix(position10, position11, gl_TessCoord.x);
-	geomPosition.xz = mix(position0, position1, gl_TessCoord.y);
+	const vec2 position0 = mix(position00, position10, gl_TessCoord.y);
+	const vec2 position1 = mix(position01, position11, gl_TessCoord.y);
+	geomPosition.xz = mix(position0, position1, gl_TessCoord.x);
     geomPosition.y = t_terrain.hasHeightMap ? texture(t_heightMap, geomUV).x * t_terrain.heightScale : 0.0f;
 
 	const vec4 position = t_modelMatrix * vec4(geomPosition, 1.0f);
