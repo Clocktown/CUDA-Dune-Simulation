@@ -34,6 +34,7 @@
     <None Include="dunes\util\io.inl" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="dunes\core\constant.cu" />
     <CudaCompile Include="dunes\core\initialization.cu" />
     <CudaCompile Include="dunes\core\simulation_parameter.cu" />
   </ItemGroup>
@@ -94,6 +95,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

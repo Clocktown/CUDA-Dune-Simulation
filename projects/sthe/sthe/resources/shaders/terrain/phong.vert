@@ -76,7 +76,7 @@ void main()
     const vec2 position = vec2(gl_InstanceID % subDivision.x, gl_InstanceID / subDivision.x);
 	const vec2 offset = vec2(gl_VertexID % 2, gl_VertexID / 2);
 
-	tescUV = (position + offset) / vec2(subDivision + 1);
+	tescUV = (position + offset) / vec2(subDivision);
 
 	gl_Position = vec4(t_terrain.gridScale * (tescUV.x - 0.5f) * float(t_terrain.gridSize.x), 
 	                   0.0f, 

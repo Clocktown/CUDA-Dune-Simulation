@@ -10,7 +10,6 @@ struct SimulationParameter
 	int2 gridSize{ 2048, 2048 };
 	int gridLength{ gridSize.x * gridSize.y };
 	float gridScale{ 1.0f };
-	float deltaTime{ 1.0f };
 
 	float2 windDirection{ 1.0f, 0.0f };
 	float windStrength{ 1.0f };
@@ -22,6 +21,7 @@ struct SimulationParameter
 	float maxShadowAngle{ 0.2679f }; // tan(15°)
 
 	float reptationStrength{ 1.0f };
+	float deltaTime {1.0f};
 };
 
 void upload(const SimulationParameter& t_simulationParameter);

@@ -5,6 +5,8 @@
 namespace dunes
 {
 
+
+
 void upload(const SimulationParameter& t_simulationParameter)
 {
 	CU_CHECK_ERROR(cudaMemcpyToSymbol(c_simulationParameter, &t_simulationParameter, sizeof(SimulationParameter)));

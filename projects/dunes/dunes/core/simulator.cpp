@@ -12,7 +12,7 @@ namespace dunes
 
 // Constructor
 Simulator::Simulator() :
-	m_terrain{ std::make_shared<sthe::Terrain>() },
+	m_terrain{ std::make_shared<sthe::Terrain>()},
 	m_material{ std::make_shared<sthe::CustomMaterial>() },
 	m_program{ std::make_shared<sthe::gl::Program>() },
 	m_heightMap{ std::make_shared<sthe::gl::Texture2D>() },
@@ -37,7 +37,8 @@ void Simulator::awake()
 	m_terrainRenderer->setTerrain(m_terrain);
 	m_terrainRenderer->setMaterial(m_material);
 
-	m_terrain->setGridSize(glm::ivec2{ m_simulationParameter.gridSize.x, m_simulationParameter.gridSize.y });
+	m_terrain->setGridSize(glm::ivec2 {m_simulationParameter.gridSize.x,
+                                           m_simulationParameter.gridSize.y});
 	m_terrain->setGridScale(m_simulationParameter.gridScale);
 	m_terrain->setHeightMap(m_heightMap);
 	m_terrain->addLayer(std::make_shared<sthe::TerrainLayer>(glm::vec3(194.0f, 178.0f, 128.0f) / 255.0f));
