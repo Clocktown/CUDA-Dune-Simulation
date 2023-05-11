@@ -15,8 +15,9 @@ __global__ void initializeKernel(const cudaSurfaceObject_t t_heightMap)
 		return;
 	}
 
-	const float2 height{ 50.0f * (sinf(10.0f * static_cast<float>(cell.x) / static_cast<float>(c_simulationParameter.gridSize.x - 1)) + 1.0f), 
-		                 50.0f * (cosf(10.0f * static_cast<float>(cell.y) / static_cast<float>(c_simulationParameter.gridSize.y - 1)) + 1.0f) };
+
+	const float2 height{ 50.0f * (sinf(2*3.14f * static_cast<float>(cell.x) / static_cast<float>(c_simulationParameter.gridSize.x - 1))), 
+		                 50.0f * (cosf(2*3.14f * static_cast<float>(cell.y) / static_cast<float>(c_simulationParameter.gridSize.y - 1))) };
 
 	surf2Dwrite<float2>(height, t_heightMap, cell.x * static_cast<int>(sizeof(float2)), cell.y);
 }
