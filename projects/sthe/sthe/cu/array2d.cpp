@@ -21,10 +21,10 @@ Array2D::Array2D() :
 	m_height{ 0 },
 	m_format{ cudaCreateChannelDesc<cudaChannelFormatKindNone>() },
 	m_flags{ cudaArrayDefault },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
 {
 	
 }
@@ -34,10 +34,10 @@ Array2D::Array2D(const int t_width, const int t_height, const cudaChannelFormatD
 	m_height{ t_height },
 	m_format{ t_format },
 	m_flags{ t_flags },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
 {
 	STHE_ASSERT(t_width >= 0, "Width must be greater than or equal to 0");
 	STHE_ASSERT(t_height >= 0, "Height must be greater than or equal to 0");
@@ -58,9 +58,9 @@ Array2D::Array2D(gl::Image& t_image, const unsigned int t_flags) :
 	m_height{ 0 },
 	m_format{ cudaCreateChannelDesc<cudaChannelFormatKindNone>() },
 	m_flags{ cudaArrayDefault },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_isMapped{ false }
 {
 	CU_CHECK_ERROR(cudaGraphicsGLRegisterImage(&m_graphicsResource, t_image.getHandle(), t_image.getTarget(), t_flags));
 }
@@ -71,19 +71,19 @@ Array2D::Array2D(const GLuint t_image, const GLenum t_target, const unsigned int
 	m_height{ 0 },
 	m_format{ cudaCreateChannelDesc<cudaChannelFormatKindNone>() },
 	m_flags{ cudaArrayDefault },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_isMapped{ false }
 {
 	CU_CHECK_ERROR(cudaGraphicsGLRegisterImage(&m_graphicsResource, t_image, t_target, t_flags));
 }
 
 Array2D::Array2D(const std::string& t_file, const unsigned int t_flags) :
 	m_flags{ t_flags },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
 {
 	const std::shared_ptr<unsigned char> source{ readImage2D(t_file, m_width, m_height, m_format) };
 
@@ -99,10 +99,10 @@ Array2D::Array2D(const Array2D& t_array2D) noexcept :
 	m_height{ t_array2D.m_height },
 	m_format{ t_array2D.m_format },
 	m_flags{ t_array2D.m_flags },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
 {
 	if (t_array2D.hasStorage())
 	{
@@ -123,10 +123,10 @@ Array2D::Array2D(Array2D&& t_array2D) noexcept :
 	m_height{ std::exchange(t_array2D.m_height, 0) },
 	m_format{ std::exchange(t_array2D.m_format, cudaCreateChannelDesc<cudaChannelFormatKindNone>()) },
 	m_flags{ std::exchange(t_array2D.m_flags, cudaArrayDefault) },
-	m_graphicsResource{ std::exchange(t_array2D.m_graphicsResource, nullptr) },
-	m_isMapped{ std::exchange(t_array2D.m_isMapped, false) },
 	m_surface{ std::exchange(t_array2D.m_surface, 0) },
-	m_texture{ std::exchange(t_array2D.m_texture, 0) }
+	m_texture{ std::exchange(t_array2D.m_texture, 0) },
+	m_graphicsResource{ std::exchange(t_array2D.m_graphicsResource, nullptr) },
+	m_isMapped{ std::exchange(t_array2D.m_isMapped, false) }
 {
 
 }
@@ -168,10 +168,10 @@ Array2D& Array2D::operator=(Array2D&& t_array2D) noexcept
 		m_height = std::exchange(t_array2D.m_height, 0);
 		m_format = std::exchange(t_array2D.m_format, cudaCreateChannelDesc<cudaChannelFormatKindNone>());
 		m_flags = std::exchange(t_array2D.m_flags, cudaArrayDefault);
-		m_graphicsResource = std::exchange(t_array2D.m_graphicsResource, nullptr);
-		m_isMapped = std::exchange(t_array2D.m_isMapped, false);
 		m_surface = std::exchange(t_array2D.m_surface, 0);
 		m_texture = std::exchange(t_array2D.m_texture, 0);
+		m_graphicsResource = std::exchange(t_array2D.m_graphicsResource, nullptr);
+		m_isMapped = std::exchange(t_array2D.m_isMapped, false);
 	}
 
 	return *this;
@@ -185,6 +185,8 @@ void Array2D::reinitialize(const int t_width, const int t_height, const cudaChan
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
+	m_surface = 0;
+	m_texture = 0;
 
 	if (m_graphicsResource != nullptr)
 	{
@@ -234,7 +236,7 @@ void Array2D::reinitialize(const GLuint t_image, const GLenum t_target, const un
 cudaSurfaceObject_t Array2D::recreateSurface()
 {
 	const cudaResourceDesc resource{ .resType{ cudaResourceTypeArray },
-								     .res{.array{.array{ m_handle } } } };
+								     .res{ .array{ .array{ m_handle } } } };
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaCreateSurfaceObject(&m_surface, &resource));
@@ -245,7 +247,7 @@ cudaSurfaceObject_t Array2D::recreateSurface()
 cudaTextureObject_t Array2D::recreateTexture(const cudaTextureDesc& t_descriptor)
 {
 	const cudaResourceDesc resource{ .resType{ cudaResourceTypeArray },
-								     .res{.array{.array{ m_handle } } } };
+								     .res{ .array{ .array{ m_handle } } } };
 
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
 	CU_CHECK_ERROR(cudaCreateTextureObject(&m_texture, &resource, &t_descriptor, nullptr));
@@ -303,6 +305,9 @@ void Array2D::unmap()
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
+	m_surface = 0;
+	m_texture = 0;
+
 	CU_CHECK_ERROR(cudaGraphicsUnmapResources(1, &m_graphicsResource));
 	m_isMapped = false;
 }

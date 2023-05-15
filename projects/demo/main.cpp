@@ -14,6 +14,8 @@ int main()
 
 	sthe::GameObject& desert{ scene.addGameObject() };
 	dunes::Simulator& simulator{ desert.addComponent<dunes::Simulator>() };
+	dunes::UI& ui{ desert.addComponent<dunes::UI>() };
+
 	desert.getTransform().setLocalScale(1.0f / 128.0f);
 
 	application.run();

@@ -1,0 +1,35 @@
+#include "kernels.cuh"
+#include "constants.cuh"
+#include "grid.cuh"
+#include <dunes/core/simulation_parameters.hpp>
+#include <dunes/core/launch_parameters.hpp>
+#include <sthe/device/vector_extension.cuh>
+
+namespace dunes
+{
+
+__global__ void initializationKernel(Array2D<float2> t_terrainArray, Array2D<float4> t_resistanceArray)
+{
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell))
+	{
+		return;
+	}
+	 
+	const int2 gridCenter{ c_parameters.gridSize / 2 };
+	const float sandHeight = abs(gridCenter.x - cell.x) < 100 && abs(gridCenter.y - cell.y) < 100 ? 200.0f : 0.0f;
+
+	const float2 terrain{ 0.0f, sandHeight };
+	t_terrainArray.write(cell, terrain);
+	
+	const float4 resistance{ 0.0f, 0.0f, 0.0f, 0.0f };
+	t_resistanceArray.write(cell, resistance);
+}
+
+void initialization(const LaunchParameters& t_launchParameters)
+{
+	initializationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray);
+}
+
+}

@@ -40,7 +40,6 @@ ForwardPipeline::ForwardPipeline() :
 	m_terrainProgram->attachShader(gl::Shader{ GL_VERTEX_SHADER, getShaderPath() + "terrain/phong.vert" });
 	m_terrainProgram->attachShader(gl::Shader{ GL_TESS_CONTROL_SHADER, getShaderPath() + "terrain/phong.tesc" });
 	m_terrainProgram->attachShader(gl::Shader{ GL_TESS_EVALUATION_SHADER, getShaderPath() + "terrain/phong.tese" });
-	m_terrainProgram->attachShader(gl::Shader{ GL_GEOMETRY_SHADER, getShaderPath() + "terrain/phong.geom" });
 	m_terrainProgram->attachShader(gl::Shader{ GL_FRAGMENT_SHADER, getShaderPath() + "terrain/phong.frag" });
 	m_terrainProgram->link();
 }

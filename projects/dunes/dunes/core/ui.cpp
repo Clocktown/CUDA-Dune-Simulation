@@ -1,10 +1,16 @@
-#include "ui_parameter.hpp"
-#include "simulator.hpp"
+#include "ui.hpp"
 
 namespace dunes
 {
 
-void Simulator::onGUI()
+// Constructor
+UI::UI()
+{
+
+}
+
+// Functionality
+void UI::onGUI()
 {
 
 }

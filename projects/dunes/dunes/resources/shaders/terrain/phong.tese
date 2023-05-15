@@ -73,8 +73,14 @@ layout(quads, equal_spacing, ccw) in;
 in vec2 teseUV[];
 
 // Output
-out vec3 geomPosition;
-out vec2 geomUV;
+struct Fragment
+{
+	vec3 position;
+	vec3 normal;
+	vec2 uv;
+};
+
+out Fragment fragment;
 
 void main()
 {
@@ -84,7 +90,7 @@ void main()
 	const vec2 uv11 = teseUV[3];
 	const vec2 uv0 = mix(uv00, uv10, gl_TessCoord.y);
 	const vec2 uv1 = mix(uv01, uv11, gl_TessCoord.y);
-	geomUV = mix(uv0, uv1, gl_TessCoord.x);
+	fragment.uv = mix(uv0, uv1, gl_TessCoord.x);
 
     const vec2 position00 = gl_in[0].gl_Position.xz;
 	const vec2 position10 = gl_in[1].gl_Position.xz;
@@ -92,20 +98,33 @@ void main()
 	const vec2 position11 = gl_in[3].gl_Position.xz;
 	const vec2 position0 = mix(position00, position10, gl_TessCoord.y);
 	const vec2 position1 = mix(position01, position11, gl_TessCoord.y);
-	geomPosition.xz = mix(position0, position1, gl_TessCoord.x);
+	fragment.position.xz = mix(position0, position1, gl_TessCoord.x);
 
 	if (t_terrain.hasHeightMap) 
 	{
-	    const vec2 heights = texture(t_heightMap, geomUV).xy;
-		geomPosition.y = (heights.x + heights.y) * t_terrain.heightScale;
+	    const vec2 terrain = texture(t_heightMap, fragment.uv).xy;
+		const float height = t_terrain.heightScale * (terrain.x + terrain.y);
+		fragment.position.y = height;
+
+		const vec2 size = vec2(2.0f,0.0f);
+        const ivec3 offset = ivec3(-1, 0, 1);
+
+		const vec2 terrain01 = textureOffset(t_heightMap, fragment.uv, offset.xy).xy;
+        const vec2 terrain21 = textureOffset(t_heightMap, fragment.uv, offset.zy).xy;
+        const vec2 terrain10 = textureOffset(t_heightMap, fragment.uv, offset.yx).xy;
+        const vec2 terrain12 = textureOffset(t_heightMap, fragment.uv, offset.yz).xy;
+		const vec3 edge1 = normalize(vec3(size.xy, t_terrain.heightScale * ((terrain21.x + terrain21.y) - (terrain01.x + terrain01.y))));
+		const vec3 edge2 = normalize(vec3(size.yx, t_terrain.heightScale * ((terrain12.x + terrain12.y) - (terrain10.x + terrain10.y))));
+		fragment.normal = cross(edge1, edge2);
 	}
 	else 
 	{
-	    geomPosition.y = 0.0f;
+	    fragment.position.y = 0.0f;
+		fragment.normal = vec3(0.0f, 1.0f, 0.0f);
 	}
 
-	const vec4 position = t_modelMatrix * vec4(geomPosition, 1.0f);
-	geomPosition = position.xyz;
+	const vec4 position = t_modelMatrix * vec4(fragment.position, 1.0f);
+	fragment.position = position.xyz;
 
     gl_Position = t_viewProjectionMatrix * position;
 }

@@ -81,11 +81,11 @@ private:
 	cudaChannelFormatDesc m_format;
 	unsigned int m_flags;
 
-	cudaGraphicsResource_t m_graphicsResource;
-	bool m_isMapped;
-
 	cudaSurfaceObject_t m_surface;
 	cudaTextureObject_t m_texture;
+
+	cudaGraphicsResource_t m_graphicsResource;
+	bool m_isMapped;
 };
 
 }

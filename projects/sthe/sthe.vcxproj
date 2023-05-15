@@ -87,6 +87,9 @@
     <ClInclude Include="sthe\cu\array3d.hpp" />
     <ClInclude Include="sthe\cu\buffer.hpp" />
     <ClInclude Include="sthe\cu\stopwatch.hpp" />
+    <ClInclude Include="sthe\device\array2d.cuh" />
+    <ClInclude Include="sthe\device\array3d.cuh" />
+    <ClInclude Include="sthe\device\buffer.cuh" />
     <ClInclude Include="sthe\device\function_qualifier.cuh" />
     <ClInclude Include="sthe\device\vector_extension.cuh" />
     <ClInclude Include="sthe\gl\buffer.hpp" />

@@ -20,10 +20,10 @@ Array3D::Array3D() :
 	m_depth{ 0 },
 	m_format{ cudaCreateChannelDesc<cudaChannelFormatKindNone>() },
 	m_flags{ cudaArrayDefault },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
 {
 
 }
@@ -34,10 +34,11 @@ Array3D::Array3D(const int t_width, const int t_height, const int t_depth, const
 	m_depth{ t_depth },
 	m_format{ t_format },
 	m_flags{ t_flags },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
+
 {
 	STHE_ASSERT(t_width >= 0, "Width must be greater than or equal to 0");
 	STHE_ASSERT(t_height >= 0, "Height must be greater than or equal to 0");
@@ -61,9 +62,9 @@ Array3D::Array3D(gl::Image& t_image, const unsigned int t_flags) :
 	m_depth{ 0 },
 	m_format{ cudaCreateChannelDesc<cudaChannelFormatKindNone>() },
 	m_flags{ cudaArrayDefault },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_isMapped{ false }
 {
 	CU_CHECK_ERROR(cudaGraphicsGLRegisterImage(&m_graphicsResource, t_image.getHandle(), t_image.getTarget(), t_flags));
 }
@@ -75,9 +76,9 @@ Array3D::Array3D(const GLuint t_image, const GLenum t_target, const unsigned int
 	m_depth{ 0 },
 	m_format{ cudaCreateChannelDesc<cudaChannelFormatKindNone>() },
 	m_flags{ cudaArrayDefault },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_isMapped{ false }
 {
 	CU_CHECK_ERROR(cudaGraphicsGLRegisterImage(&m_graphicsResource, t_image, t_target, t_flags));
 }
@@ -88,10 +89,10 @@ Array3D::Array3D(const Array3D& t_array3D) noexcept :
 	m_depth{ t_array3D.m_depth },
 	m_format{ t_array3D.m_format },
 	m_flags{ t_array3D.m_flags },
-	m_graphicsResource{ nullptr },
-	m_isMapped{ false },
 	m_surface{ 0 },
-	m_texture{ 0 }
+	m_texture{ 0 },
+	m_graphicsResource{ nullptr },
+	m_isMapped{ false }
 {
 	if (t_array3D.hasStorage())
 	{
@@ -118,10 +119,10 @@ Array3D::Array3D(Array3D&& t_array3D) noexcept :
 	m_depth{ std::exchange(t_array3D.m_depth, 0) },
 	m_format{ std::exchange(t_array3D.m_format, cudaCreateChannelDesc<cudaChannelFormatKindNone>()) },
 	m_flags{ std::exchange(t_array3D.m_flags, cudaArrayDefault) },
-	m_graphicsResource{ std::exchange(t_array3D.m_graphicsResource, nullptr) },
-	m_isMapped{ std::exchange(t_array3D.m_isMapped, false) },
 	m_surface{ std::exchange(t_array3D.m_surface, 0) },
-	m_texture{ std::exchange(t_array3D.m_texture, 0) }
+	m_texture{ std::exchange(t_array3D.m_texture, 0) },
+	m_graphicsResource{ std::exchange(t_array3D.m_graphicsResource, nullptr) },
+	m_isMapped{ std::exchange(t_array3D.m_isMapped, false) }
 {
 
 }
@@ -168,10 +169,10 @@ Array3D& Array3D::operator=(Array3D&& t_array3D) noexcept
 		m_depth = std::exchange(t_array3D.m_depth, 0);
 		m_format = std::exchange(t_array3D.m_format, cudaCreateChannelDesc<cudaChannelFormatKindNone>());
 		m_flags = std::exchange(t_array3D.m_flags, cudaArrayDefault);
-		m_graphicsResource = std::exchange(t_array3D.m_graphicsResource, nullptr);
-		m_isMapped = std::exchange(t_array3D.m_isMapped, false);
 		m_surface = std::exchange(t_array3D.m_surface, 0);
 		m_texture = std::exchange(t_array3D.m_texture, 0);
+		m_graphicsResource = std::exchange(t_array3D.m_graphicsResource, nullptr);
+		m_isMapped = std::exchange(t_array3D.m_isMapped, false);
 	}
 
 	return *this;
@@ -186,6 +187,8 @@ void Array3D::reinitialize(const int t_width, const int t_height, const int t_de
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
+	m_surface = 0;
+	m_texture = 0;
 
 	if (m_graphicsResource != nullptr)
 	{
@@ -237,7 +240,7 @@ void Array3D::reinitialize(const GLuint t_image, const GLenum t_target, const un
 cudaSurfaceObject_t Array3D::recreateSurface()
 {
 	const cudaResourceDesc resource{ .resType{ cudaResourceTypeArray },
-								     .res{.array{.array{ m_handle } } } };
+								     .res{ .array{ .array{ m_handle } } } };
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaCreateSurfaceObject(&m_surface, &resource));
@@ -248,7 +251,7 @@ cudaSurfaceObject_t Array3D::recreateSurface()
 cudaTextureObject_t Array3D::recreateTexture(const cudaTextureDesc& t_descriptor)
 {
 	const cudaResourceDesc resource{ .resType{ cudaResourceTypeArray },
-								     .res{.array{.array{ m_handle } } } };
+								     .res{ .array{ .array{ m_handle } } } };
 
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
 	CU_CHECK_ERROR(cudaCreateTextureObject(&m_texture, &resource, &t_descriptor, nullptr));
@@ -308,6 +311,9 @@ void Array3D::unmap()
 
 	CU_CHECK_ERROR(cudaDestroySurfaceObject(m_surface));
 	CU_CHECK_ERROR(cudaDestroyTextureObject(m_texture));
+	m_surface = 0;
+	m_texture = 0;
+
 	CU_CHECK_ERROR(cudaGraphicsUnmapResources(1, &m_graphicsResource));
 	m_isMapped = false;
 }

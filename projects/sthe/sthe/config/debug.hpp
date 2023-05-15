@@ -4,7 +4,9 @@
 #include <cuda_runtime.h>
 #include <curand.h>
 
-#ifdef NDEBUG
+#define STHE_FORCE_DEBUG
+
+#if defined(NDEBUG) && !defined(STHE_FORCE_DEBUG)
 #   define STHE_ERROR(t_message) static_cast<void>(0)
 #   define STHE_ASSERT(t_condition, t_message) static_cast<void>(0)
 #   define GLFW_CHECK_ERROR(t_function) t_function

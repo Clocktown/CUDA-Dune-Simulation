@@ -53,3 +53,6 @@
 
 #include "device/function_qualifier.cuh"
 #include "device/vector_extension.cuh"
+#include "device/buffer.cuh"
+#include "device/array2d.cuh"
+#include "device/array3d.cuh"
