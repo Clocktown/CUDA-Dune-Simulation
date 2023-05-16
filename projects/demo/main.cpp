@@ -10,7 +10,7 @@ int main()
 	sthe::GameObject& light{ scene.addDirectionalLight() };
 	sthe::GameObject& camera{ scene.addTrackball() };
 	camera.getComponent<sthe::Camera>()->setClipPlane(glm::vec2{ 0.1f, 1000.0f });
-	camera.getTransform().setLocalPosition(glm::vec3{ 0.0f, 15.0f, 15.0f });
+	camera.getTransform().setLocalPosition(glm::vec3{ 0.0f, 10.0f, 10.0f });
 
 	sthe::GameObject& desert{ scene.addGameObject() };
 	dunes::Simulator& simulator{ desert.addComponent<dunes::Simulator>() };

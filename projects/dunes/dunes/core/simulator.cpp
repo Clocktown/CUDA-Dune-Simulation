@@ -28,11 +28,11 @@ Simulator::Simulator() :
 	CU_CHECK_ERROR(cudaDeviceGetAttribute(&smCount, cudaDevAttrMultiProcessorCount, device));
 	CU_CHECK_ERROR(cudaDeviceGetAttribute(&smThreadCount, cudaDevAttrMaxThreadsPerMultiProcessor, device));
 	const float threadCount{ static_cast<float>(smCount * smThreadCount) };
-
-	m_launchParameters.blockSize1D = 512;
-	m_launchParameters.blockSize2D = dim3{ 16, 16 };
+	
+	m_launchParameters.blockSize1D = 256;
+	m_launchParameters.blockSize2D = dim3{ 8, 8 };
 	m_launchParameters.optimalGridSize1D = static_cast<unsigned int>(glm::ceil(threadCount / static_cast<float>(m_launchParameters.blockSize1D)));
-	m_launchParameters.optimalGridSize2D.x = static_cast<unsigned int>(glm::ceil(glm::sqrt(threadCount / static_cast<float>(m_launchParameters.gridSize2D.x * m_launchParameters.gridSize2D.y))));
+	m_launchParameters.optimalGridSize2D.x = static_cast<unsigned int>(0.0625f * glm::ceil(glm::sqrt(threadCount / static_cast<float>(m_launchParameters.gridSize2D.x * m_launchParameters.gridSize2D.y))));
 	m_launchParameters.optimalGridSize2D.y = m_launchParameters.optimalGridSize2D.x;
 
 	m_terrain->setHeightMap(m_terrainMap);

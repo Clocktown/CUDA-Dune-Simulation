@@ -57,9 +57,14 @@ void Camera::update() const
 		
 			if (!m_customAspectRatio)
 			{
-				STHE_ASSERT(m_resolution.y != 0, "Resolution y cannot be than 0");
-
-				m_aspectRatio = static_cast<float>(m_resolution.x) / static_cast<float>(m_resolution.y);
+				if (m_resolution.y == 0.0f)
+				{
+					m_aspectRatio = 0.0f;
+				}
+				else
+				{
+					m_aspectRatio = static_cast<float>(m_resolution.x) / static_cast<float>(m_resolution.y);
+				}
 			}
 
 			m_hasChanged = true;
