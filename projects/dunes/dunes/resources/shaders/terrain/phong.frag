@@ -83,6 +83,7 @@ layout(std140, binding = 0) uniform PipelineBuffer
 	Terrain t_terrain;
 };
 
+layout(binding = 2) uniform sampler2D t_heightMap;
 layout(binding = 3) uniform sampler2D t_alphaMap;
 layout(binding = 4) uniform sampler2D t_diffuseMaps[4];
 layout(binding = 8) uniform sampler2D t_resistanceMap;
@@ -146,6 +147,21 @@ void main()
 	const float viewDistance = length(viewVector);
 	const vec3 viewDirection = viewVector / (viewDistance + EPSILON);
 
+	vec3 normal = fragment.normal;
+	if(normal.y == 0.0f) {
+		// TODO: This is bugged for non-square resolutions.
+		const vec2 size = vec2(2.0f * t_terrain.gridScale,0.0f);
+        const ivec3 offset = ivec3(-1, 0, 1);
+
+		const vec2 terrain01 = textureOffset(t_heightMap, fragment.uv, offset.xy).xy;
+        const vec2 terrain21 = textureOffset(t_heightMap, fragment.uv, offset.zy).xy;
+        const vec2 terrain10 = textureOffset(t_heightMap, fragment.uv, offset.yx).xy;
+        const vec2 terrain12 = textureOffset(t_heightMap, fragment.uv, offset.yz).xy;
+		const vec3 edge1 = normalize(vec3(size.x, t_terrain.heightScale * ((terrain21.x + terrain21.y) - (terrain01.x + terrain01.y)), size.y));
+		const vec3 edge2 = normalize(vec3(size.y, t_terrain.heightScale * ((terrain12.x + terrain12.y) - (terrain10.x + terrain10.y)), size.x));
+		normal = cross(edge2, edge1);
+	} 
+
 	vec4 alphas;
 	int startLayer;
 
@@ -203,8 +219,8 @@ void main()
 			}
 		}
 		
-		const vec3 reflection = reflect(-lightDirection, fragment.normal);
-		const float cosPhi = max(dot(fragment.normal, lightDirection), 0.0f);
+		const vec3 reflection = reflect(-lightDirection, normal);
+		const float cosPhi = max(dot(normal, lightDirection), 0.0f);
 		const float cosPsi = max(dot(reflection, viewDirection), 0.0f);
 		const vec3 lightColor = attenuation * t_environment.lights[i].intensity * t_environment.lights[i].color;
 
