@@ -99,7 +99,7 @@ void Simulator::update()
 		saltation(m_launchParameters);
 		reptation(m_launchParameters);
 		avalanching(m_launchParameters);
-
+		
 		unmap();
 	}
 }
