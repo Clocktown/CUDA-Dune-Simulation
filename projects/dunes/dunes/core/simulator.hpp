@@ -3,7 +3,6 @@
 #include "simulation_parameters.hpp"
 #include "launch_parameters.hpp"
 #include <sthe/sthe.hpp>
-#include <bitset>
 
 namespace dunes
 {
@@ -24,25 +23,29 @@ public:
 	Simulator& operator=(Simulator&& t_simulator) = default;
 
 	// Functionality
+	void reinitialize(const glm::ivec2& t_gridSize, const float t_gridScale);
 	void awake();
 	void update();
 	void resume();
 	void pause();
 
 	// Setters
-	void setGridSize(const glm::ivec2& t_gridSize);
-	void setGridScale(const float t_gridScale);
 	void setWindAngle(const float t_windAngle);
 	void setWindSpeed(const float t_windSpeed);
+	void setVenturiStrength(const float t_venturiStrength);
 	void setWindShadowDistance(const float t_windShadowDistance);
 	void setMinWindShadowAngle(const float t_minWindShadowAngle);
 	void setMaxWindShadowAngle(const float t_maxWindShadowAngle);
 	void setSaltationSpeed(const float t_saltationSpeed);
 	void setReptationStrength(const float t_reptationStrength);
 	void setAvalancheIterations(const int t_avalancheIterations);
+	void setAvalancheStrength(const float t_avalancheStrength);
 	void setAvalancheAngle(const float t_avalancheAngle);
 	void setVegetationAngle(const float t_vegetationAngle);
-	void setDeltaTime(const float t_deltaTime);
+	void setTimeScale(const float t_timeScale);
+
+	// Getters
+	bool isPaused() const;
 private:
 	// Functionality
 	void map();
@@ -51,6 +54,7 @@ private:
 	// Attributes
 	SimulationParameters m_simulationParameters;
 	LaunchParameters m_launchParameters;
+	float m_timeScale;
 	
 	sthe::TerrainRenderer* m_terrainRenderer;
 	std::shared_ptr<sthe::Terrain> m_terrain;
@@ -65,7 +69,7 @@ private:
 	sthe::cu::Buffer m_slabBuffer;
 	cudaTextureDesc m_textureDescriptor;
 
-	std::bitset<2> m_hasChanged;
+	bool m_isAwake;
 	bool m_isPaused;
 };
 

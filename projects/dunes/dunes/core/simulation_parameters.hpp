@@ -2,6 +2,11 @@
 
 #include <cuda_runtime.h>
 
+#define TAN10 0.1763f
+#define TAN15 0.2679f
+#define TAN33 0.6494f
+#define TAN45 1.0f
+
 namespace dunes
 {
 
@@ -13,18 +18,20 @@ struct SimulationParameters
 	int cellCount{ gridSize.x * gridSize.y };
 
 	float2 windDirection{ 1.0f, 0.0f };
-	float windSpeed{ 20.0f };
+	float windSpeed{ 10.0f };
+
+	float venturiStrength{ 0.005f };
 	
 	float windShadowDistance{ 10.0f };
-	float minWindShadowAngle{ 0.1763f }; // tan(10°)
-	float maxWindShadowAngle{ 0.2679f }; // tan(15°)
+	float minWindShadowAngle{ TAN10 };
+	float maxWindShadowAngle{ TAN15 };
 
-	float saltationSpeed{ 1.0f };
+	float saltationSpeed{ 100.0f };
 	float reptationStrength{ 1.0f };
 
-	float avalancheStrength{ 1.0f };
-	float avalancheAngle{ 0.6494f }; // tan(33°)
-	float vegetationAngle{ 1.0f }; // tan(45°)
+	float avalancheStrength{ 0.5f };
+	float avalancheAngle{ TAN33 };
+	float vegetationAngle{ TAN45 };
 
 	float deltaTime{ 1.0f };
 };
@@ -32,3 +39,8 @@ struct SimulationParameters
 void upload(const SimulationParameters& t_simulationParameters);
 
 }
+
+#undef TAN10
+#undef TAN15
+#undef TAN33
+#undef TAN45

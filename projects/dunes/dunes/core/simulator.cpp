@@ -5,20 +5,19 @@
 #include <dunes/util/io.hpp>
 #include <sthe/sthe.hpp>
 
-#define DUNES_SIMULATOR_REUPLOAD_BIT 0
-#define DUNES_SIMULATOR_RECREATE_BIT 1
-
 namespace dunes
 {
 
 // Constructor
 Simulator::Simulator() :
+	m_timeScale{ 1.0f },
 	m_terrain{ std::make_shared<sthe::Terrain>() },
 	m_material{ std::make_shared<sthe::CustomMaterial>() },
 	m_program{ std::make_shared<sthe::gl::Program>() },
 	m_terrainMap{ std::make_shared<sthe::gl::Texture2D>() },
 	m_resistanceMap{ std::make_shared<sthe::gl::Texture2D>() },
 	m_textureDescriptor{},
+	m_isAwake{ false },
 	m_isPaused{ false }
 {
 	int device;
@@ -55,6 +54,22 @@ Simulator::Simulator() :
 }
 
 // Functionality
+void Simulator::reinitialize(const glm::ivec2& t_gridSize, const float t_gridScale)
+{
+	STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be 0");
+
+	m_simulationParameters.gridSize.x = t_gridSize.x;
+	m_simulationParameters.gridSize.y = t_gridSize.y;
+	m_simulationParameters.cellCount = t_gridSize.x * t_gridSize.y;
+	m_simulationParameters.gridScale = t_gridScale;
+	m_simulationParameters.rGridScale = 1.0f / t_gridScale;
+
+	if (m_isAwake)
+	{
+		awake();
+	}
+}
+
 void Simulator::awake()
 {
 	m_launchParameters.gridSize1D = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.cellCount) / static_cast<float>(m_launchParameters.blockSize1D)));
@@ -86,6 +101,8 @@ void Simulator::awake()
 	initialization(m_launchParameters);
 
 	unmap();
+
+	m_isAwake = true;
 }
 
 void Simulator::update()
@@ -99,7 +116,7 @@ void Simulator::update()
 		saltation(m_launchParameters);
 		reptation(m_launchParameters);
 		avalanching(m_launchParameters);
-		
+
 		unmap();
 	}
 }
@@ -116,18 +133,10 @@ void Simulator::pause()
 
 void Simulator::map()
 {
-	if (m_hasChanged.test(DUNES_SIMULATOR_REUPLOAD_BIT))
-	{
-		upload(m_simulationParameters);
-		m_hasChanged.reset(DUNES_SIMULATOR_REUPLOAD_BIT);
-	}
+	m_simulationParameters.deltaTime = m_timeScale * sthe::getApplication().getDeltaTime();
 
-	if (m_hasChanged.test(DUNES_SIMULATOR_RECREATE_BIT))
-	{
-		awake();
-		m_hasChanged.reset(DUNES_SIMULATOR_RECREATE_BIT);
-	}
-	
+	upload(m_simulationParameters);
+
 	m_terrainArray.map();
 	m_launchParameters.terrainArray.surface = m_terrainArray.recreateSurface();
 	m_launchParameters.terrainArray.texture = m_terrainArray.recreateTexture(m_textureDescriptor);
@@ -144,64 +153,45 @@ void Simulator::unmap()
 }
 
 // Setters
-void Simulator::setGridSize(const glm::ivec2& t_gridSize)
-{
-	m_simulationParameters.gridSize = int2{ t_gridSize.x, t_gridSize.y };
-	m_simulationParameters.cellCount = t_gridSize.x * t_gridSize.y;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
-	m_hasChanged.set(DUNES_SIMULATOR_RECREATE_BIT);
-}
-
-void Simulator::setGridScale(const float t_gridScale)
-{
-	STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be 0");
-
-	m_simulationParameters.gridScale = t_gridScale;
-	m_simulationParameters.rGridScale = 1.0f / t_gridScale;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
-}
-
 void Simulator::setWindAngle(const float t_windAngle)
 {
 	const float windAngle{ glm::radians(t_windAngle) };
 	m_simulationParameters.windDirection = float2{ glm::cos(windAngle), glm::sin(windAngle) };
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setWindSpeed(const float t_windSpeed)
 {
 	m_simulationParameters.windSpeed = t_windSpeed;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
+}
+
+void Simulator::setVenturiStrength(const float t_venturiStrength)
+{
+	m_simulationParameters.venturiStrength = t_venturiStrength;
 }
 
 void Simulator::setWindShadowDistance(const float t_windShadowDistance)
 {
 	m_simulationParameters.windShadowDistance = t_windShadowDistance;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setMinWindShadowAngle(const float t_minWindShadowAngle)
 {
 	m_simulationParameters.minWindShadowAngle = glm::tan(glm::radians(t_minWindShadowAngle));
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setMaxWindShadowAngle(const float t_maxWindShadowAngle)
 {
 	m_simulationParameters.maxWindShadowAngle = glm::tan(glm::radians(t_maxWindShadowAngle));
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setSaltationSpeed(const float t_saltationSpeed)
 {
 	m_simulationParameters.saltationSpeed = t_saltationSpeed;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setReptationStrength(const float t_reptationStrength)
 {
 	m_simulationParameters.reptationStrength = t_reptationStrength;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setAvalancheIterations(const int t_avalancheIterations)
@@ -209,22 +199,30 @@ void Simulator::setAvalancheIterations(const int t_avalancheIterations)
 	m_launchParameters.avalancheIterations = t_avalancheIterations;
 }
 
+void Simulator::setAvalancheStrength(const float t_avalancheStrength)
+{
+	m_simulationParameters.avalancheStrength = t_avalancheStrength;
+}
+
 void Simulator::setAvalancheAngle(const float t_avalancheAngle)
 {
 	m_simulationParameters.avalancheAngle = glm::tan(glm::radians(t_avalancheAngle));
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
 void Simulator::setVegetationAngle(const float t_vegetationAngle)
 {
 	m_simulationParameters.vegetationAngle = glm::tan(glm::radians(t_vegetationAngle));
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
 }
 
-void Simulator::setDeltaTime(const float t_deltaTime)
+void Simulator::setTimeScale(const float t_timeScale)
 {
-	m_simulationParameters.deltaTime = t_deltaTime;
-	m_hasChanged.set(DUNES_SIMULATOR_REUPLOAD_BIT);
+	m_timeScale = t_timeScale;
+}
+
+// Getters
+bool Simulator::isPaused() const
+{
+	return m_isPaused;
 }
 
 }

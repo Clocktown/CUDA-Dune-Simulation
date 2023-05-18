@@ -17,8 +17,11 @@ __global__ void initializationKernel(Array2D<float2> t_terrainArray, Array2D<flo
 		return;
 	}
 	 
-	const int2 gridCenter{ c_parameters.gridSize / 2 };
-	const float sandHeight = abs(gridCenter.x - cell.x) < 100 && abs(gridCenter.y - cell.y) < 100 ? 200.0f : 0.0f;
+	const int2 center{ c_parameters.gridSize / 2 };
+	const int2 size{ c_parameters.gridSize / 20 };
+	const float maxSandHeight{ static_cast<float>(c_parameters.gridSize.x + c_parameters.gridSize.y) * c_parameters.gridScale / 20.0f };
+
+	const float sandHeight = abs(center.x - cell.x) < size.x && abs(center.y - cell.y) < size.y ? maxSandHeight : 0.0f;
 
 	const float2 terrain{ 0.0f, sandHeight };
 	t_terrainArray.write(cell, terrain);

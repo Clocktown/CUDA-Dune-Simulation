@@ -33,11 +33,11 @@ __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<fl
 	const float2 windVelocity{ t_windArray.read(cell) };
 	const float4 resistance{ t_resistanceArray.read(cell) };
 
-	const float2 nextPosition{ make_float2(cell) + windVelocity * c_parameters.deltaTime };
+	const float2 nextPosition{ make_float2(cell) + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
 	const int2 nextCell{ getWrappedCell(getNearestCell(nextPosition)) };
 
 	const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
-	const float slab{ fminf(saltationResistance * c_parameters.saltationSpeed * c_parameters.deltaTime * c_parameters.rGridScale * c_parameters.rGridScale, terrain.y) };
+	const float slab{ fminf(saltationResistance * c_parameters.saltationSpeed * c_parameters.rGridScale * c_parameters.rGridScale * c_parameters.deltaTime, terrain.y) };
 	terrain.y -= slab;
 
 	t_terrainArray.write(cell, terrain);

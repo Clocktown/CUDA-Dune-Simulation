@@ -68,7 +68,7 @@ __forceinline__ __device__ int getCellIndex(const int2& t_cell, const int2 t_gri
 	return t_cell.x + t_cell.y * t_gridSize.x;
 }
 
-__forceinline__ __device__ bool isOutside(const int t_cellIndex, const const int t_cellCount = c_parameters.cellCount)
+__forceinline__ __device__ bool isOutside(const int t_cellIndex, const int t_cellCount = c_parameters.cellCount)
 {
 	return t_cellIndex >= t_cellCount;
 }
