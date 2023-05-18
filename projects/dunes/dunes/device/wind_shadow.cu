@@ -27,11 +27,11 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 
 	for (float distance = c_parameters.gridScale; distance <= c_parameters.windShadowDistance; distance += c_parameters.gridScale)
 	{
-		nextPosition += windDirection;
+		nextPosition -= windDirection;
 		
 		const float2 nextTerrain{ t_terrainArray.sample(nextPosition) };
 		const float nextHeight{ nextTerrain.x + nextTerrain.y };
-		const float heightDifference{ height - nextHeight };
+		const float heightDifference{ nextHeight - height };
 		const float angle{ heightDifference / distance };
 	
 		maxAngle = fmaxf(maxAngle, angle);
