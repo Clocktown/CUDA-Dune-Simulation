@@ -11,6 +11,7 @@ namespace dunes
 // Constructor
 Simulator::Simulator() :
 	m_timeScale{ 1.0f },
+	m_fixedDeltaTime{ 0.02f },
 	m_terrain{ std::make_shared<sthe::Terrain>() },
 	m_material{ std::make_shared<sthe::CustomMaterial>() },
 	m_program{ std::make_shared<sthe::gl::Program>() },
@@ -28,11 +29,15 @@ Simulator::Simulator() :
 	CU_CHECK_ERROR(cudaDeviceGetAttribute(&smThreadCount, cudaDevAttrMaxThreadsPerMultiProcessor, device));
 	const float threadCount{ static_cast<float>(smCount * smThreadCount) };
 	
-	m_launchParameters.blockSize1D = 256;
+	m_launchParameters.blockSize1D = 512;
 	m_launchParameters.blockSize2D = dim3{ 8, 8 };
-	m_launchParameters.optimalGridSize1D = static_cast<unsigned int>(glm::ceil(threadCount / static_cast<float>(m_launchParameters.blockSize1D)));
-	m_launchParameters.optimalGridSize2D.x = static_cast<unsigned int>(0.0625f * glm::ceil(glm::sqrt(threadCount / static_cast<float>(m_launchParameters.gridSize2D.x * m_launchParameters.gridSize2D.y))));
+
+	m_launchParameters.optimalBlockSize1D = 256;
+	m_launchParameters.optimalBlockSize2D = dim3{ 16, 16 };
+	m_launchParameters.optimalGridSize1D = static_cast<unsigned int>(threadCount / static_cast<float>(m_launchParameters.blockSize1D));
+	m_launchParameters.optimalGridSize2D.x = 2 * 5 * static_cast<unsigned int>(glm::sqrt(threadCount / static_cast<float>(m_launchParameters.optimalBlockSize2D.x * m_launchParameters.optimalBlockSize2D.y)));
 	m_launchParameters.optimalGridSize2D.y = m_launchParameters.optimalGridSize2D.x;
+	m_launchParameters.optimalGridSize2D.z = 1;
 
 	m_terrain->setHeightMap(m_terrainMap);
 	m_terrain->addLayer(std::make_shared<sthe::TerrainLayer>(glm::vec3(194.0f, 178.0f, 128.0f) / 255.0f));
@@ -133,7 +138,8 @@ void Simulator::pause()
 
 void Simulator::map()
 {
-	m_simulationParameters.deltaTime = m_timeScale * sthe::getApplication().getDeltaTime();
+	m_simulationParameters.deltaTime = m_launchParameters.timeMode == TimeMode::None ? sthe::getApplication().getDeltaTime() : m_fixedDeltaTime;
+	m_simulationParameters.deltaTime *= m_timeScale;
 
 	upload(m_simulationParameters);
 
@@ -184,14 +190,19 @@ void Simulator::setMaxWindShadowAngle(const float t_maxWindShadowAngle)
 	m_simulationParameters.maxWindShadowAngle = glm::tan(glm::radians(t_maxWindShadowAngle));
 }
 
-void Simulator::setSaltationSpeed(const float t_saltationSpeed)
+void Simulator::setSaltationStrength(const float t_saltationStrength)
 {
-	m_simulationParameters.saltationSpeed = t_saltationSpeed;
+	m_simulationParameters.saltationStrength = t_saltationStrength;
 }
 
 void Simulator::setReptationStrength(const float t_reptationStrength)
 {
 	m_simulationParameters.reptationStrength = t_reptationStrength;
+}
+
+void Simulator::setAvalancheMode(const AvalancheMode t_avalancheMode)
+{
+	m_launchParameters.avalancheMode = t_avalancheMode;
 }
 
 void Simulator::setAvalancheIterations(const int t_avalancheIterations)
@@ -214,9 +225,19 @@ void Simulator::setVegetationAngle(const float t_vegetationAngle)
 	m_simulationParameters.vegetationAngle = glm::tan(glm::radians(t_vegetationAngle));
 }
 
+void Simulator::setTimeMode(const TimeMode t_timeMode)
+{
+	m_launchParameters.timeMode = t_timeMode;
+}
+
 void Simulator::setTimeScale(const float t_timeScale)
 {
 	m_timeScale = t_timeScale;
+}
+
+void Simulator::setFixedDeltaTime(const float t_fixedDeltaTime)
+{
+	m_fixedDeltaTime = t_fixedDeltaTime;
 }
 
 // Getters

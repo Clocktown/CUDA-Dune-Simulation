@@ -9,11 +9,26 @@ namespace dunes
 void UI::awake()
 {
 	m_simulator = getGameObject().getComponent<Simulator>();
-	m_simulator->pause();
-
-	runAllSimulatorSetters();
 
 	STHE_ASSERT(m_simulator != nullptr, "Simulator cannot be nullptr");
+
+	m_simulator->pause();
+	m_simulator->setWindAngle(m_windAngle);
+	m_simulator->setWindSpeed(m_windSpeed);
+	m_simulator->setVenturiStrength(m_venturiStrength);
+	m_simulator->setWindShadowDistance(m_windShadowDistance);
+	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
+	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+	m_simulator->setSaltationStrength(m_saltationStrength);
+	m_simulator->setReptationStrength(m_reptationStrength);
+	m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
+	m_simulator->setAvalancheIterations(m_avalancheIterations);
+	m_simulator->setAvalancheStrength(m_avalancheStrength);
+	m_simulator->setAvalancheAngle(m_avalancheAngle);
+	m_simulator->setVegetationAngle(m_vegetationAngle);
+	m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
+	m_simulator->setTimeScale(m_timeScale);
+	m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
 }
 
 void UI::onGUI()
@@ -62,22 +77,6 @@ void UI::createSceneNode()
 		ImGui::TreePop();
 	}
 
-}
-
-void UI::runAllSimulatorSetters() {
-	m_simulator->setWindAngle(m_windAngle);
-	m_simulator->setWindSpeed(m_windSpeed);
-	m_simulator->setVenturiStrength(m_venturiStrength);
-	m_simulator->setWindShadowDistance(m_windShadowDistance);
-	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
-	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
-	m_simulator->setSaltationSpeed(m_saltationSpeed);
-	m_simulator->setReptationStrength(m_reptationStrength);
-	m_simulator->setAvalancheIterations(m_avalancheIterations);
-	m_simulator->setAvalancheStrength(m_avalancheStrength);
-	m_simulator->setAvalancheAngle(m_avalancheAngle);
-	m_simulator->setVegetationAngle(m_vegetationAngle);
-	m_simulator->setTimeScale(m_timeScale);
 }
 
 void UI::createSimulationNode()
@@ -129,14 +128,19 @@ void UI::createSimulationNode()
 			m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
 		}
 
-		if (ImGui::InputFloat("Saltation Speed", &m_saltationSpeed))
+		if (ImGui::InputFloat("Saltation Strength", &m_saltationStrength))
 		{
-			m_simulator->setSaltationSpeed(m_saltationSpeed);
+			m_simulator->setSaltationStrength(m_saltationStrength);
 		}
 
 		if (ImGui::InputFloat("Reptation Strength", &m_reptationStrength))
 		{
 			m_simulator->setReptationStrength(m_reptationStrength);
+		}
+
+		if (ImGui::Combo("Avalanche Mode", &m_avalancheMode, avalancheModes, IM_ARRAYSIZE(avalancheModes)))
+		{
+			m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
 		}
 
 		if (ImGui::InputInt("Avalanche Iterations", &m_avalancheIterations))
@@ -159,9 +163,19 @@ void UI::createSimulationNode()
 			m_simulator->setVegetationAngle(m_vegetationAngle);
 		}
 
+		if (ImGui::Combo("Time Mode", &m_timeMode, timeModes, IM_ARRAYSIZE(timeModes)))
+		{
+			m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
+		}
+
 		if (ImGui::InputFloat("Time Scale", &m_timeScale))
 		{
 			m_simulator->setTimeScale(m_timeScale);
+		}
+
+		if (ImGui::InputFloat("Fixed Delta Time", &m_fixedDeltaTime))
+		{
+			m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
 		}
 
 		ImGui::TreePop();

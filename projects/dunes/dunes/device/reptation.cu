@@ -16,16 +16,11 @@ __global__ void reptationKernel(Array2D<float2> t_terrainArray, Buffer<float> t_
 	{
 		return;
 	}
-
-	float2 terrain{ t_terrainArray.read(cell) };
-	terrain.y += t_slabBuffer[getCellIndex(cell)];
-
-	t_terrainArray.write(cell, terrain);
 }
 
 void reptation(const LaunchParameters& t_launchParameters)
 {
-	reptationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+	
 }
 
 }

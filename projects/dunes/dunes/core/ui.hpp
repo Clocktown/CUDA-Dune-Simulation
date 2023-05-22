@@ -25,12 +25,14 @@ public:
 	void awake();
 	void onGUI();
 private:
+	// Static
+	static inline const char* avalancheModes[3] = { "Atomic", "Shared Atomic", "Swap" };
+	static inline const char* timeModes[2]{ "None", "Fixed" };
+
 	// Functionality
 	void createApplicationNode();
 	void createSceneNode();
 	void createSimulationNode();
-
-	void runAllSimulatorSetters();
 
 	// Attributes
 	Simulator* m_simulator{ nullptr };
@@ -52,15 +54,18 @@ private:
 	float m_minWindShadowAngle{ 10.0f };
 	float m_maxWindShadowAngle{ 15.0f };
 
-	float m_saltationSpeed{ 1.0f };
+	float m_saltationStrength{ 0.05f };
 	float m_reptationStrength{ 1.0f };
 
+	int m_avalancheMode{ static_cast<int>(AvalancheMode::Atomic) };
 	int m_avalancheIterations{ 50 };
 	float m_avalancheStrength{ 0.5f };
 	float m_avalancheAngle{ 33.0f };
 	float m_vegetationAngle{ 45.0f };
 
+	int m_timeMode{ static_cast<int>(TimeMode::None) };
 	float m_timeScale{ 50.0f };
+	float m_fixedDeltaTime{ 0.02f };
 };
 
 }

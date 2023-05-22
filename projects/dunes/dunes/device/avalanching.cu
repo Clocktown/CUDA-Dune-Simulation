@@ -174,7 +174,7 @@ __global__ void avalanchingKernelShared8x8Remapped(Buffer<float2> t_terrainBuffe
     }
 	__syncthreads();
 
-	if (avalancheSum > 1e-6f)
+	if (avalancheSum > 0.0f)
 	{
 		const float rAvalancheSum{ 1.0f / avalancheSum };
 		const float avalancheSize{ fminf((UseAvalanchingStrength ? c_parameters.avalancheStrength : 1.0f) * maxAvalanche /
@@ -217,7 +217,7 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			avalanchingKernelShared8x8Remapped<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
 		}
 		else {
-			avalanchingKernel<false><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
+			avalanchingKernelShared8x8Remapped<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
 		}
 	}
 	for (int i = t_launchParameters.avalancheIterations - 5; i < (t_launchParameters.avalancheIterations); ++i)

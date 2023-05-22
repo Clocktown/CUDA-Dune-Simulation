@@ -13,16 +13,31 @@ using Array2D = sthe::device::Array2D<T>;
 template<typename T>
 using Buffer = sthe::device::Buffer<T>;
 
+enum class TimeMode : unsigned char
+{
+	None, Fixed
+};
+
+enum class AvalancheMode : unsigned char
+{
+	Atomic, SharedAtomic, Swap
+};
+
 struct LaunchParameters
 {
 	unsigned int blockSize1D;
 	dim3 blockSize2D;
 	unsigned int gridSize1D;
 	dim3 gridSize2D;
+
+	unsigned int optimalBlockSize1D;
+	dim3 optimalBlockSize2D;
 	unsigned int optimalGridSize1D;
 	dim3 optimalGridSize2D;
 
+	AvalancheMode avalancheMode{ AvalancheMode::Atomic };
 	int avalancheIterations{ 50 };
+	TimeMode timeMode{ TimeMode::None };
 
 	Array2D<float2> terrainArray;
 	Array2D<float2> windArray;

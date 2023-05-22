@@ -7,6 +7,10 @@
 namespace dunes
 {
 
+
+
+
+
 class Simulator : public sthe::Component
 {
 public:
@@ -36,13 +40,16 @@ public:
 	void setWindShadowDistance(const float t_windShadowDistance);
 	void setMinWindShadowAngle(const float t_minWindShadowAngle);
 	void setMaxWindShadowAngle(const float t_maxWindShadowAngle);
-	void setSaltationSpeed(const float t_saltationSpeed);
+	void setSaltationStrength(const float t_saltationStrength);
 	void setReptationStrength(const float t_reptationStrength);
+	void setAvalancheMode(const AvalancheMode t_avalancheMode);
 	void setAvalancheIterations(const int t_avalancheIterations);
 	void setAvalancheStrength(const float t_avalancheStrength);
 	void setAvalancheAngle(const float t_avalancheAngle);
 	void setVegetationAngle(const float t_vegetationAngle);
+	void setTimeMode(const TimeMode t_timeMode);
 	void setTimeScale(const float t_timeScale);
+	void setFixedDeltaTime(const float t_fixedDeltaTime);
 
 	// Getters
 	bool isPaused() const;
@@ -55,6 +62,7 @@ private:
 	SimulationParameters m_simulationParameters;
 	LaunchParameters m_launchParameters;
 	float m_timeScale;
+	float m_fixedDeltaTime;
 	
 	sthe::TerrainRenderer* m_terrainRenderer;
 	std::shared_ptr<sthe::Terrain> m_terrain;

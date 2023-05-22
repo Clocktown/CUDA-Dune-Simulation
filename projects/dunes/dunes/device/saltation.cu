@@ -10,14 +10,12 @@ namespace dunes
 
 __global__ void setupSaltationKernel(Buffer<float> t_slabBuffer)
 {
-	const int cellIndex{ getGlobalIndex1D() };
+	const int stride{ getGridStride1D() };
 
-	if (isOutside(cellIndex))
+	for (int cellIndex{ getGlobalIndex1D() }; cellIndex < c_parameters.cellCount; cellIndex += stride)
 	{
-		return;
+		t_slabBuffer[cellIndex] = 0.0f;
 	}
-
-	t_slabBuffer[cellIndex] = 0.0f;
 }
 
 __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer)
@@ -30,24 +28,67 @@ __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<fl
 	}
 
 	float2 terrain{ t_terrainArray.read(cell) };
+
 	const float2 windVelocity{ t_windArray.read(cell) };
+	const float windSpeed{ length(windVelocity) };
+
 	const float4 resistance{ t_resistanceArray.read(cell) };
-
-	const float2 nextPosition{ make_float2(cell) + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
-	const int2 nextCell{ getWrappedCell(getNearestCell(nextPosition)) };
-
 	const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
-	const float slab{ fminf(saltationResistance * c_parameters.saltationSpeed * c_parameters.rGridScale * c_parameters.rGridScale * c_parameters.deltaTime, terrain.y) };
-	terrain.y -= slab;
 
-	t_terrainArray.write(cell, terrain);
-	atomicAdd(t_slabBuffer + getCellIndex(nextCell), slab);
+	const float slab{ fminf(c_parameters.saltationStrength * saltationResistance * windSpeed * c_parameters.rGridScale * c_parameters.rGridScale * c_parameters.deltaTime, terrain.y) };
+
+	if (slab > 0.0f)
+	{
+		const float2 nextPosition{ make_float2(cell) + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
+		const int2 nextCell{ make_int2(nextPosition) };
+
+		for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
+		{
+			const float u{ 1.0f - abs(nextPosition.x - static_cast<float>(x)) };
+
+			for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
+			{
+				const float v{ 1.0f - abs(nextPosition.y - static_cast<float>(y)) };
+				const float weight{ u * v };
+
+				if (weight > 0.0f)
+				{
+					atomicAdd(t_slabBuffer + getCellIndex(getWrappedCell(int2{ x, y })), weight * slab);
+				}
+			}
+		}
+
+		terrain.y -= slab;
+		t_terrainArray.write(cell, terrain);
+	}
+}
+
+__global__ void finishSaltationKernel(Array2D<float2> t_terrainArray, Buffer<float> t_slabBuffer)
+{
+	const int2 index{ getGlobalIndex2D() };
+	const int2 stride{ getGridStride2D() };
+
+	int2 cell;
+
+	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
+	{
+		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
+		{
+			const int cellIndex{ getCellIndex(cell) };
+
+			float2 terrain{ t_terrainArray.read(cell) };
+			terrain.y += t_slabBuffer[getCellIndex(cell)];
+
+			t_terrainArray.write(cell, terrain);
+		}
+	}
 }
 
 void saltation(const LaunchParameters& t_launchParameters)
 {
-	setupSaltationKernel<<<t_launchParameters.gridSize1D, t_launchParameters.blockSize1D>>>(t_launchParameters.tmpBuffer);
+	setupSaltationKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.tmpBuffer);
 	saltationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
+	finishSaltationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
 }
 
 }

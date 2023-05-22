@@ -22,11 +22,11 @@ struct SimulationParameters
 
 	float venturiStrength{ 0.005f };
 	
-	float windShadowDistance{ 10.0f };
+	float windShadowDistance{ 1.0f };
 	float minWindShadowAngle{ TAN10 };
 	float maxWindShadowAngle{ TAN15 };
 
-	float saltationSpeed{ 100.0f };
+	float saltationStrength{ 0.05f };
 	float reptationStrength{ 1.0f };
 
 	float avalancheStrength{ 0.5f };

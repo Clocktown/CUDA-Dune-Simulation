@@ -41,6 +41,17 @@ __forceinline__ __device__ int2 getBlockSize2D()
 				 static_cast<int>(blockDim.y) };
 }
 
+__forceinline__ __device__ int getGridStride1D()
+{
+	return static_cast<int>(blockDim.x * gridDim.x);
+}
+
+__forceinline__ __device__ int2 getGridStride2D()
+{
+	return int2{ static_cast<int>(blockDim.x * gridDim.x),
+				 static_cast<int>(blockDim.y * gridDim.y) };
+}
+
 __forceinline__ __device__ int getGlobalIndex1D()
 {
 	return static_cast<int>(threadIdx.x + blockIdx.x * blockDim.x);
