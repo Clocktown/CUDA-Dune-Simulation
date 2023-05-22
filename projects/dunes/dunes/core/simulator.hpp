@@ -7,10 +7,6 @@
 namespace dunes
 {
 
-
-
-
-
 class Simulator : public sthe::Component
 {
 public:

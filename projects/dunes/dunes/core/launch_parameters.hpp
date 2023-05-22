@@ -1,26 +1,19 @@
 #pragma once
 
-#include <sthe/device/buffer.cuh>
-#include <sthe/device/array2d.cuh>
+#include "simulation_parameters.hpp"
 #include <cuda_runtime.h>
 
 namespace dunes
 {
 
-template<typename T>
-using Array2D = sthe::device::Array2D<T>;
-
-template<typename T>
-using Buffer = sthe::device::Buffer<T>;
-
 enum class TimeMode : unsigned char
 {
-	None, Fixed
+	DeltaTime, FixedDeltaTime
 };
 
 enum class AvalancheMode : unsigned char
 {
-	Atomic, SharedAtomic, Swap
+	Atomic, AtomicInPlace, SharedAtomicInPlace
 };
 
 struct LaunchParameters
@@ -37,7 +30,7 @@ struct LaunchParameters
 
 	AvalancheMode avalancheMode{ AvalancheMode::Atomic };
 	int avalancheIterations{ 50 };
-	TimeMode timeMode{ TimeMode::None };
+	TimeMode timeMode{ TimeMode::DeltaTime };
 
 	Array2D<float2> terrainArray;
 	Array2D<float2> windArray;

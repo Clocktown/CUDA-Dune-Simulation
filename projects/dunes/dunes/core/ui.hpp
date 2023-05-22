@@ -26,8 +26,8 @@ public:
 	void onGUI();
 private:
 	// Static
-	static inline const char* avalancheModes[3] = { "Atomic", "Shared Atomic", "Swap" };
-	static inline const char* timeModes[2]{ "None", "Fixed" };
+	static inline const char* avalancheModes[2] = { "Atomic", "Atomic In-Place" };
+	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 
 	// Functionality
 	void createApplicationNode();
@@ -63,7 +63,7 @@ private:
 	float m_avalancheAngle{ 33.0f };
 	float m_vegetationAngle{ 45.0f };
 
-	int m_timeMode{ static_cast<int>(TimeMode::None) };
+	int m_timeMode{ static_cast<int>(TimeMode::DeltaTime) };
 	float m_timeScale{ 50.0f };
 	float m_fixedDeltaTime{ 0.02f };
 };

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sthe/device/buffer.cuh>
+#include <sthe/device/array2d.cuh>
 #include <cuda_runtime.h>
 
 #define TAN10 0.1763f
@@ -9,6 +11,12 @@
 
 namespace dunes
 {
+
+template<typename T>
+using Array2D = sthe::device::Array2D<T>;
+
+template<typename T>
+using Buffer = sthe::device::Buffer<T>;
 
 struct SimulationParameters
 {

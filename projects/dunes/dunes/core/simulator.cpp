@@ -138,7 +138,7 @@ void Simulator::pause()
 
 void Simulator::map()
 {
-	m_simulationParameters.deltaTime = m_launchParameters.timeMode == TimeMode::None ? sthe::getApplication().getDeltaTime() : m_fixedDeltaTime;
+	m_simulationParameters.deltaTime = m_launchParameters.timeMode == TimeMode::DeltaTime ? sthe::getApplication().getDeltaTime() : m_fixedDeltaTime;
 	m_simulationParameters.deltaTime *= m_timeScale;
 
 	upload(m_simulationParameters);

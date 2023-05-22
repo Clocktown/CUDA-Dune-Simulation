@@ -12,6 +12,10 @@ void UI::awake()
 
 	STHE_ASSERT(m_simulator != nullptr, "Simulator cannot be nullptr");
 
+	sthe::Application& application{ sthe::getApplication() };
+	application.setVSyncCount(m_vSync);
+	application.setTargetFrameRate(m_targetFrameRate);
+
 	m_simulator->pause();
 	m_simulator->setWindAngle(m_windAngle);
 	m_simulator->setWindSpeed(m_windSpeed);

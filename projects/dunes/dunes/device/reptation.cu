@@ -8,16 +8,6 @@
 namespace dunes
 {
 
-__global__ void reptationKernel(Array2D<float2> t_terrainArray, Buffer<float> t_slabBuffer)
-{
-	const int2 cell{ getGlobalIndex2D() };
-	
-	if (isOutside(cell))
-	{
-		return;
-	}
-}
-
 void reptation(const LaunchParameters& t_launchParameters)
 {
 	
