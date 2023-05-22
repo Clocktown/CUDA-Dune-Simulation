@@ -30,6 +30,8 @@ private:
 	void createSceneNode();
 	void createSimulationNode();
 
+	void runAllSimulatorSetters();
+
 	// Attributes
 	Simulator* m_simulator{ nullptr };
 

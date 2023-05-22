@@ -11,6 +11,8 @@ void UI::awake()
 	m_simulator = getGameObject().getComponent<Simulator>();
 	m_simulator->pause();
 
+	runAllSimulatorSetters();
+
 	STHE_ASSERT(m_simulator != nullptr, "Simulator cannot be nullptr");
 }
 
@@ -60,6 +62,22 @@ void UI::createSceneNode()
 		ImGui::TreePop();
 	}
 
+}
+
+void UI::runAllSimulatorSetters() {
+	m_simulator->setWindAngle(m_windAngle);
+	m_simulator->setWindSpeed(m_windSpeed);
+	m_simulator->setVenturiStrength(m_venturiStrength);
+	m_simulator->setWindShadowDistance(m_windShadowDistance);
+	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
+	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+	m_simulator->setSaltationSpeed(m_saltationSpeed);
+	m_simulator->setReptationStrength(m_reptationStrength);
+	m_simulator->setAvalancheIterations(m_avalancheIterations);
+	m_simulator->setAvalancheStrength(m_avalancheStrength);
+	m_simulator->setAvalancheAngle(m_avalancheAngle);
+	m_simulator->setVegetationAngle(m_vegetationAngle);
+	m_simulator->setTimeScale(m_timeScale);
 }
 
 void UI::createSimulationNode()
