@@ -18,6 +18,7 @@ __global__ void setupAtomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buf
 	}
 }
 
+template <bool TUseAvalancheStrength>
 __global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buffer<float> t_avalancheBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
@@ -54,7 +55,7 @@ __global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buffer<f
 	if (avalancheSum > 0.0f)
 	{
 		const float rAvalancheSum{ 1.0f / avalancheSum };
-		const float avalancheSize{ fminf(c_parameters.avalancheStrength * maxAvalanche /
+		const float avalancheSize{ fminf((TUseAvalancheStrength ? c_parameters.avalancheStrength : 1.0f) * maxAvalanche /
 										 (1.0f + maxAvalanche * rAvalancheSum), terrain.y) };
 
 		atomicAdd(t_avalancheBuffer + cellIndex, -avalancheSize);
@@ -296,8 +297,13 @@ void avalanching(const LaunchParameters& t_launchParameters)
 
 	    for (int i = 0; i < t_launchParameters.avalancheIterations; ++i)
 	    {
-			atomicAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
-		    finishAtomicAvalanchingKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+			if (i % 10 == 0 || i >= t_launchParameters.avalancheIterations - 5) {
+				atomicAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+			}
+			else {
+				atomicAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+			}
+			finishAtomicAvalanchingKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
 	    } 
 
 	    break;
