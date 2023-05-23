@@ -59,6 +59,8 @@ private:
 
 	int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 	int m_avalancheIterations{ 50 };
+	int m_avalancheSoftIterationModulus{ 10 };
+	int m_avalancheFinalSoftIterations{ 5 };
 	float m_avalancheStrength{ 0.5f };
 	float m_avalancheAngle{ 33.0f };
 	float m_vegetationAngle{ 45.0f };

@@ -210,6 +210,16 @@ void Simulator::setAvalancheIterations(const int t_avalancheIterations)
 	m_launchParameters.avalancheIterations = t_avalancheIterations;
 }
 
+void Simulator::setAvalancheFinalSoftIterations(const int t_avalancheFinalSoftIterations)
+{
+	m_launchParameters.avalancheFinalSoftIterations = t_avalancheFinalSoftIterations;
+}
+
+void Simulator::setAvalancheSoftIterationModulus(const int t_avalancheSoftIterationModulus)
+{
+	m_launchParameters.avalancheSoftIterationModulus = t_avalancheSoftIterationModulus;
+}
+
 void Simulator::setAvalancheStrength(const float t_avalancheStrength)
 {
 	m_simulationParameters.avalancheStrength = t_avalancheStrength;

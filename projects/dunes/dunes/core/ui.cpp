@@ -26,6 +26,8 @@ void UI::awake()
 	m_simulator->setSaltationStrength(m_saltationStrength);
 	m_simulator->setReptationStrength(m_reptationStrength);
 	m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
+	m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
+	m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 	m_simulator->setAvalancheIterations(m_avalancheIterations);
 	m_simulator->setAvalancheStrength(m_avalancheStrength);
 	m_simulator->setAvalancheAngle(m_avalancheAngle);
@@ -150,6 +152,16 @@ void UI::createSimulationNode()
 		if (ImGui::InputInt("Avalanche Iterations", &m_avalancheIterations))
 		{
 			m_simulator->setAvalancheIterations(m_avalancheIterations);
+		}
+
+		if (ImGui::InputInt("Avalanche Soft Iterations", &m_avalancheFinalSoftIterations))
+		{
+			m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
+		}
+
+		if (ImGui::InputInt("Avalanche Soft Iteration Modulus", &m_avalancheSoftIterationModulus))
+		{
+			m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 		}
 
 		if (ImGui::InputFloat("Avalanche Strength", &m_avalancheStrength))

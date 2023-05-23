@@ -40,6 +40,8 @@ public:
 	void setReptationStrength(const float t_reptationStrength);
 	void setAvalancheMode(const AvalancheMode t_avalancheMode);
 	void setAvalancheIterations(const int t_avalancheIterations);
+	void setAvalancheFinalSoftIterations(const int t_avalancheFinalSoftIterations);
+	void setAvalancheSoftIterationModulus(const int t_avalancheSoftIterationModulus);
 	void setAvalancheStrength(const float t_avalancheStrength);
 	void setAvalancheAngle(const float t_avalancheAngle);
 	void setVegetationAngle(const float t_vegetationAngle);

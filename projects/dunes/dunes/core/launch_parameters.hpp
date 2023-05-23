@@ -30,6 +30,8 @@ struct LaunchParameters
 
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	int avalancheIterations{ 50 };
+	int avalancheSoftIterationModulus{ 10 };
+	int avalancheFinalSoftIterations{ 5 };
 	TimeMode timeMode{ TimeMode::DeltaTime };
 
 	Array2D<float2> terrainArray;
