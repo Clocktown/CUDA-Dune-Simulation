@@ -39,7 +39,7 @@ private:
 
 	// Application
 	bool m_vSync{ false };
-	int m_targetFrameRate{ 60 };
+	int m_targetFrameRate{ 0 };
 
 	// Simulation
 	glm::ivec2 m_gridSize{ 2048, 2048 };
