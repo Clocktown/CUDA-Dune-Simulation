@@ -26,7 +26,7 @@ public:
 	void onGUI();
 private:
 	// Static
-	static inline const char* avalancheModes[2] = { "Atomic", "Atomic In-Place" };
+	static inline const char* avalancheModes[4] = { "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place"};
 	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 
 	// Functionality
@@ -57,7 +57,7 @@ private:
 	float m_saltationStrength{ 0.05f };
 	float m_reptationStrength{ 1.0f };
 
-	int m_avalancheMode{ static_cast<int>(AvalancheMode::Atomic) };
+	int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 	int m_avalancheIterations{ 50 };
 	float m_avalancheStrength{ 0.5f };
 	float m_avalancheAngle{ 33.0f };

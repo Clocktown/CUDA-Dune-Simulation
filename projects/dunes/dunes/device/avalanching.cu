@@ -287,9 +287,11 @@ __global__ void finishAtomicInPlaceAvalanchingKernel(Array2D<float2> t_terrainAr
 
 void avalanching(const LaunchParameters& t_launchParameters)
 {
+	Buffer<float2> terrainBuffer{ reinterpret_cast<Buffer<float2>>(t_launchParameters.tmpBuffer) };
+
 	switch (t_launchParameters.avalancheMode)
 	{
-	case AvalancheMode::Atomic:
+	case AvalancheMode::AtomicBuffered:
 		setupAtomicAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
 
 	    for (int i = 0; i < t_launchParameters.avalancheIterations; ++i)
@@ -300,8 +302,6 @@ void avalanching(const LaunchParameters& t_launchParameters)
 
 	    break;
 	case AvalancheMode::AtomicInPlace:
-		Buffer<float2> terrainBuffer{ reinterpret_cast<Buffer<float2>>(t_launchParameters.tmpBuffer) };
-
 		setupAtomicInPlaceAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
 
 		// Todo: Magic constants (5 and 10) - might want to make these named
@@ -309,7 +309,7 @@ void avalanching(const LaunchParameters& t_launchParameters)
 		{
 			if (i % 10 == 0)
 			{
-				sharedAtomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
+				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
 			}
 			else
 			{
@@ -319,10 +319,58 @@ void avalanching(const LaunchParameters& t_launchParameters)
 
 		for (int i = t_launchParameters.avalancheIterations - 5; i < (t_launchParameters.avalancheIterations); ++i)
 		{
-			sharedAtomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
+			atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
 		}
 
 		finishAtomicInPlaceAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
+
+		break;
+	case AvalancheMode::SharedAtomicInPlace:
+		setupAtomicInPlaceAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, terrainBuffer);
+
+		// Todo: Magic constants (5 and 10) - might want to make these named
+		for (int i = 0; i < (t_launchParameters.avalancheIterations - 5); ++i)
+		{
+			if (i % 10 == 0)
+			{
+				sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+			}
+			else
+			{
+				sharedAtomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+			}
+		}
+
+		for (int i = t_launchParameters.avalancheIterations - 5; i < (t_launchParameters.avalancheIterations); ++i)
+		{
+			sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+		}
+
+		finishAtomicInPlaceAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, terrainBuffer);
+
+		break;
+	case AvalancheMode::MixedInPlace:
+		setupAtomicInPlaceAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, terrainBuffer);
+
+		// Todo: Magic constants (5 and 10) - might want to make these named
+		for (int i = 0; i < (t_launchParameters.avalancheIterations - 5); ++i)
+		{
+			if (i % 10 == 0)
+			{
+				sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+			}
+			else
+			{
+				atomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+			}
+		}
+
+		for (int i = t_launchParameters.avalancheIterations - 5; i < (t_launchParameters.avalancheIterations); ++i)
+		{
+			sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+		}
+
+		finishAtomicInPlaceAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, terrainBuffer);
 
 		break;
 	}

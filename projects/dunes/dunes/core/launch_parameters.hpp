@@ -13,7 +13,7 @@ enum class TimeMode : unsigned char
 
 enum class AvalancheMode : unsigned char
 {
-	Atomic, AtomicInPlace, SharedAtomicInPlace
+	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace
 };
 
 struct LaunchParameters
@@ -28,7 +28,7 @@ struct LaunchParameters
 	unsigned int optimalGridSize1D;
 	dim3 optimalGridSize2D;
 
-	AvalancheMode avalancheMode{ AvalancheMode::Atomic };
+	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	int avalancheIterations{ 50 };
 	TimeMode timeMode{ TimeMode::DeltaTime };
 
