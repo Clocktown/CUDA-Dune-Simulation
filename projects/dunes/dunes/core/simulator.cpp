@@ -4,6 +4,7 @@
 #include <dunes/device/kernels.cuh>
 #include <dunes/util/io.hpp>
 #include <sthe/sthe.hpp>
+#include <vector>
 
 namespace dunes
 {
@@ -77,29 +78,11 @@ void Simulator::reinitialize(const glm::ivec2& t_gridSize, const float t_gridSca
 
 void Simulator::awake()
 {
-	m_launchParameters.gridSize1D = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.cellCount) / static_cast<float>(m_launchParameters.blockSize1D)));
-	m_launchParameters.gridSize2D.x = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.gridSize.x) / static_cast<float>(m_launchParameters.blockSize2D.x)));
-	m_launchParameters.gridSize2D.y = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.gridSize.y) / static_cast<float>(m_launchParameters.blockSize2D.y)));
-	
-	m_terrainRenderer = &getGameObject().addComponent<sthe::TerrainRenderer>();
-	m_terrainRenderer->setTerrain(m_terrain);
-	m_terrainRenderer->setMaterial(m_material);
-
-	m_terrain->setGridSize(glm::ivec2{ m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y });
-	m_terrain->setGridScale(m_simulationParameters.gridScale);
-
-	m_terrainMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RG32F, false);
-	m_resistanceMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RGBA32F, false);
-
-	m_windArray.reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cudaCreateChannelDesc<float2>());
-	m_launchParameters.windArray.surface = m_windArray.recreateSurface();
-	m_launchParameters.windArray.texture = m_windArray.recreateTexture(m_textureDescriptor);
-
-	m_terrainArray.reinitialize(*m_terrainMap);
-	m_resistanceArray.reinitialize(*m_resistanceMap);
-
-	m_slabBuffer.reinitialize(8 * m_simulationParameters.cellCount, sizeof(float));
-	m_launchParameters.tmpBuffer = m_slabBuffer.getData<float>();
+	setupLaunchParameters();
+	setupTerrain();
+	setupArrays();
+	setupBuffers();
+	setupMultigrid();
 
 	map();
 
@@ -134,6 +117,70 @@ void Simulator::resume()
 void Simulator::pause()
 {
 	m_isPaused = true;
+}
+
+void Simulator::setupLaunchParameters()
+{
+	m_launchParameters.gridSize1D = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.cellCount) / static_cast<float>(m_launchParameters.blockSize1D)));
+	m_launchParameters.gridSize2D.x = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.gridSize.x) / static_cast<float>(m_launchParameters.blockSize2D.x)));
+	m_launchParameters.gridSize2D.y = static_cast<unsigned int>(glm::ceil(static_cast<float>(m_simulationParameters.gridSize.y) / static_cast<float>(m_launchParameters.blockSize2D.y)));
+}
+
+void Simulator::setupTerrain()
+{
+	m_terrainRenderer = &getGameObject().addComponent<sthe::TerrainRenderer>();
+	m_terrainRenderer->setTerrain(m_terrain);
+	m_terrainRenderer->setMaterial(m_material);
+
+	m_terrain->setGridSize(glm::ivec2{ m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y });
+	m_terrain->setGridScale(m_simulationParameters.gridScale);
+
+	m_terrainMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RG32F, false);
+	m_resistanceMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RGBA32F, false);
+}
+
+void Simulator::setupArrays()
+{
+	m_windArray.reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cudaCreateChannelDesc<float2>());
+	m_launchParameters.windArray.surface = m_windArray.recreateSurface();
+	m_launchParameters.windArray.texture = m_windArray.recreateTexture(m_textureDescriptor);
+
+	m_terrainArray.reinitialize(*m_terrainMap);
+	m_resistanceArray.reinitialize(*m_resistanceMap);
+}
+
+void Simulator::setupBuffers()
+{
+	m_tmpBuffer.reinitialize(4 * m_simulationParameters.cellCount, sizeof(float));
+	m_launchParameters.tmpBuffer = m_tmpBuffer.getData<float>();
+}
+
+void Simulator::setupMultigrid()
+{
+	int2 gridSize{ m_simulationParameters.gridSize };
+	float gridScale{ m_simulationParameters.gridScale };
+	int cellCount{ m_simulationParameters.cellCount };
+
+	m_multigrid.resize(m_launchParameters.multigridLevelCount);
+	m_launchParameters.multigrid.resize(m_launchParameters.multigridLevelCount);
+
+	for (int i{ 0 }; i < m_launchParameters.multigridLevelCount; ++i)
+	{
+		sthe::cu::Buffer& buffer{ m_multigrid[i] };
+		buffer.reinitialize(4 * cellCount, sizeof(float));
+
+		MultigridLevel& level{ m_launchParameters.multigrid[i] };
+		level.gridSize = gridSize;
+		level.gridScale = gridScale;
+		level.cellCount = cellCount;
+		level.terrainBuffer = reinterpret_cast<Buffer<float2>>(buffer.getData<float>());
+		level.fluxBuffer = buffer.getData<float>() + 2 * cellCount;
+		level.avalancheBuffer = level.fluxBuffer + cellCount;
+
+		gridSize /= 2;
+		gridScale *= 2.0f;
+		cellCount /= 4;
+	}
 }
 
 void Simulator::map()
@@ -233,6 +280,23 @@ void Simulator::setAvalancheAngle(const float t_avalancheAngle)
 void Simulator::setVegetationAngle(const float t_vegetationAngle)
 {
 	m_simulationParameters.vegetationAngle = glm::tan(glm::radians(t_vegetationAngle));
+}
+
+void Simulator::setMultigridLevelCount(const int t_multigridLevelCount)
+{
+	STHE_ASSERT(t_multigridLevelCount >= 1, "Multigrid level count must be greater than or equal to 1");
+
+	m_launchParameters.multigridLevelCount = t_multigridLevelCount;
+
+	if (m_isAwake)
+	{
+		setupMultigrid();
+	}
+}
+
+void Simulator::setMultigridPresweepCount(const int t_multigridPresweepCount)
+{
+	m_launchParameters.multigridPresweepCount = t_multigridPresweepCount;
 }
 
 void Simulator::setTimeMode(const TimeMode t_timeMode)

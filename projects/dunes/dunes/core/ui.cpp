@@ -32,6 +32,8 @@ void UI::awake()
 	m_simulator->setAvalancheStrength(m_avalancheStrength);
 	m_simulator->setAvalancheAngle(m_avalancheAngle);
 	m_simulator->setVegetationAngle(m_vegetationAngle);
+	m_simulator->setMultigridLevelCount(m_multigridLevelCount);
+	m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
 	m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
 	m_simulator->setTimeScale(m_timeScale);
 	m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
@@ -174,9 +176,24 @@ void UI::createSimulationNode()
 			m_simulator->setAvalancheAngle(m_avalancheAngle);
 		}
 
-		if (ImGui::InputFloat("VegetationAngle", &m_vegetationAngle))
+		if (ImGui::InputFloat("Vegetation Angle", &m_vegetationAngle))
 		{
 			m_simulator->setVegetationAngle(m_vegetationAngle);
+		}
+
+		if (ImGui::InputInt("Multigrid Level Count", &m_multigridLevelCount))
+		{
+			m_simulator->setMultigridLevelCount(m_multigridLevelCount);
+		}
+
+		if (ImGui::InputInt("Multigrid Presweep Count", &m_multigridPresweepCount))
+		{
+			m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
+		}
+
+		if (ImGui::InputInt("Avalanche Soft Iteration Modulus", &m_avalancheSoftIterationModulus))
+		{
+			m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 		}
 
 		if (ImGui::Combo("Time Mode", &m_timeMode, timeModes, IM_ARRAYSIZE(timeModes)))

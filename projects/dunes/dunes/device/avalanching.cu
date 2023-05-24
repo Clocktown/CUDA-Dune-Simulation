@@ -1,6 +1,7 @@
 #include "kernels.cuh"
 #include "constants.cuh"
 #include "grid.cuh"
+#include "multigrid.cuh"
 #include <dunes/core/simulation_parameters.hpp>
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
@@ -366,6 +367,10 @@ void avalanching(const LaunchParameters& t_launchParameters)
 		finishAtomicInPlaceAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, terrainBuffer);
 
 		break;
+	case AvalancheMode::Multigrid:
+	    multigrid(t_launchParameters);
+
+	    break;
 	}
 }
 

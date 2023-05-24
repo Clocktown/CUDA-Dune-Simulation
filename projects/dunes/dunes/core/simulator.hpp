@@ -3,6 +3,7 @@
 #include "simulation_parameters.hpp"
 #include "launch_parameters.hpp"
 #include <sthe/sthe.hpp>
+#include <vector>
 
 namespace dunes
 {
@@ -45,6 +46,8 @@ public:
 	void setAvalancheStrength(const float t_avalancheStrength);
 	void setAvalancheAngle(const float t_avalancheAngle);
 	void setVegetationAngle(const float t_vegetationAngle);
+	void setMultigridLevelCount(const int t_multigridLevelCount);
+	void setMultigridPresweepCount(const int t_multigridPresweepCount);
 	void setTimeMode(const TimeMode t_timeMode);
 	void setTimeScale(const float t_timeScale);
 	void setFixedDeltaTime(const float t_fixedDeltaTime);
@@ -53,6 +56,11 @@ public:
 	bool isPaused() const;
 private:
 	// Functionality
+	void setupLaunchParameters();
+	void setupTerrain();
+	void setupArrays();
+	void setupBuffers();
+	void setupMultigrid();
 	void map();
 	void unmap();
 
@@ -72,7 +80,8 @@ private:
 	sthe::cu::Array2D m_terrainArray;
 	sthe::cu::Array2D m_windArray;
 	sthe::cu::Array2D m_resistanceArray;
-	sthe::cu::Buffer m_slabBuffer;
+	sthe::cu::Buffer m_tmpBuffer;
+	std::vector<sthe::cu::Buffer> m_multigrid;
 	cudaTextureDesc m_textureDescriptor;
 
 	bool m_isAwake;

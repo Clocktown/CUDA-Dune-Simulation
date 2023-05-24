@@ -30,6 +30,7 @@
     <ClInclude Include="dunes\device\constants.cuh" />
     <ClInclude Include="dunes\device\grid.cuh" />
     <ClInclude Include="dunes\device\kernels.cuh" />
+    <ClInclude Include="dunes\device\multigrid.cuh" />
     <ClInclude Include="dunes\dunes.hpp" />
     <ClInclude Include="dunes\util\io.hpp" />
   </ItemGroup>
@@ -38,6 +39,7 @@
     <CudaCompile Include="dunes\device\avalanching.cu" />
     <CudaCompile Include="dunes\device\constants.cu" />
     <CudaCompile Include="dunes\device\initialization.cu" />
+    <CudaCompile Include="dunes\device\multigrid.cu" />
     <CudaCompile Include="dunes\device\reptation.cu" />
     <CudaCompile Include="dunes\device\saltation.cu" />
     <CudaCompile Include="dunes\device\venturi.cu" />

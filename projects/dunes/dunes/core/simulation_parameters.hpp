@@ -18,6 +18,16 @@ using Array2D = sthe::device::Array2D<T>;
 template<typename T>
 using Buffer = sthe::device::Buffer<T>;
 
+struct MultigridLevel
+{
+	int2 gridSize;
+	float gridScale;
+	int cellCount;
+	Buffer<float2> terrainBuffer;
+	Buffer<float> fluxBuffer;
+	Buffer<float> avalancheBuffer;
+};
+
 struct SimulationParameters
 {
 	int2 gridSize{ 2048, 2048 };

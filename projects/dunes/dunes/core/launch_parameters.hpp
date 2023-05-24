@@ -2,6 +2,7 @@
 
 #include "simulation_parameters.hpp"
 #include <cuda_runtime.h>
+#include <vector>
 
 namespace dunes
 {
@@ -13,7 +14,7 @@ enum class TimeMode : unsigned char
 
 enum class AvalancheMode : unsigned char
 {
-	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace
+	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid
 };
 
 struct LaunchParameters
@@ -32,12 +33,15 @@ struct LaunchParameters
 	int avalancheIterations{ 50 };
 	int avalancheSoftIterationModulus{ 10 };
 	int avalancheFinalSoftIterations{ 5 };
+	int multigridLevelCount{ 3 };
+	int multigridPresweepCount{ 0 };
 	TimeMode timeMode{ TimeMode::DeltaTime };
 
 	Array2D<float2> terrainArray;
 	Array2D<float2> windArray;
 	Array2D<float4> resistanceArray; // .x = wind shadow, .y = vegetation, .z = erosion
-	Buffer<float> tmpBuffer; // 8 * gridSize.x * gridSize.y
+	Buffer<float> tmpBuffer; // 4 * gridSize.x * gridSize.y
+	std::vector<MultigridLevel> multigrid;
 };
 
 }
