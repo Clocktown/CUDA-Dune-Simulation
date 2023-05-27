@@ -182,7 +182,7 @@ __global__ void downscaleMultigridLevelKernel(const MultigridLevel t_level, cons
 				}
 			}
 
-			nextTerrain.x *= 0.25f;
+			nextTerrain *= 0.25f;
 			nextFlux *= 0.25f;
 			
 			t_nextLevel.terrainBuffer[nextCellIndex] = nextTerrain;
