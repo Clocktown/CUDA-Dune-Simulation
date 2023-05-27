@@ -82,6 +82,66 @@ __global__ void multigridAvalanchingKernel(const MultigridLevel t_level)
 	}
 }
 
+__global__ void multigridCorrectionKernel(const MultigridLevel t_level)
+{
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell, t_level.gridSize))
+	{
+		return;
+	}
+
+	const int cellIndex{ getCellIndex(cell, t_level.gridSize) };
+	const float flux{ t_level.fluxBuffer[cellIndex] };
+
+	if (flux <= 0.0f)
+	{
+		return;
+	}
+
+	const float2 terrain{ t_level.terrainBuffer[cellIndex] };
+	const float height{ terrain.x + terrain.y + flux };
+
+	int nextCellIndices[8];
+	float corrections[8];
+	float correctionSum{ 0.0f };
+	float maxCorrection{ 0.0f };
+
+	for (int i{ 0 }; i < 8; ++i)
+	{
+		const int2 nextCell{ getWrappedCell(cell + c_offsets[i], t_level.gridSize) };
+		nextCellIndices[i] = getCellIndex(nextCell, t_level.gridSize);
+
+		const float2 nextTerrain{ t_level.terrainBuffer[nextCellIndices[i]] };
+		const float nextFlux{ t_level.fluxBuffer[nextCellIndices[i]] };
+		const float nextHeight{ nextTerrain.x + nextTerrain.y + nextFlux };
+
+		const float heightDifference{ nextHeight - height };
+		corrections[i] = fmaxf(c_parameters.avalancheAngle * c_distances[i] * t_level.gridScale - heightDifference, 0.0f);
+		correctionSum += corrections[i];
+		maxCorrection = fmaxf(maxCorrection, corrections[i]);
+	}
+	
+	if (correctionSum > 0.0f)
+	{
+		const float rCorrectionSum{ 1.0f / correctionSum };
+		const float correctionSize{ fminf(c_parameters.avalancheStrength * correctionSum /
+										 (1.0f + correctionSum * rCorrectionSum), flux) };
+
+		atomicAdd(t_level.avalancheBuffer + cellIndex, -correctionSize);
+
+		const float scale{ correctionSize * rCorrectionSum };
+
+		for (int i{ 0 }; i < 8; ++i)
+		{
+			if (corrections[i] > 0.0f)
+			{
+				atomicAdd(t_level.avalancheBuffer + nextCellIndices[i], scale * corrections[i]);
+			}
+		}
+	}
+}
+
 __global__ void applyMultigridAvalanchingKernel(const MultigridLevel t_level)
 {
 	const int stride{ getGridStride1D() };
@@ -114,17 +174,16 @@ __global__ void downscaleMultigridLevelKernel(const MultigridLevel t_level, cons
 			{
 				for (int y{ 0 }; y <= 1; ++y)
 				{
-					const int cellIndex{ getCellIndex(getWrappedCell(cell + make_int2(x, y), t_level.gridSize), t_level.gridSize) };
-					
-					nextTerrain += t_level.terrainBuffer[cellIndex];
+					const int cellIndex{ getCellIndex(cell + make_int2(x, y), t_level.gridSize) };
+					const float2 terrain{ t_level.terrainBuffer[cellIndex] };
+
+					nextTerrain += terrain;
 					nextFlux += t_level.fluxBuffer[cellIndex];
 				}
 			}
 
-			nextTerrain *= 0.25f;
+			nextTerrain.x *= 0.25f;
 			nextFlux *= 0.25f;
-
-			nextFlux = fmaxf(nextTerrain.y + nextFlux, 0.0f) - nextTerrain.y;
 			
 			t_nextLevel.terrainBuffer[nextCellIndex] = nextTerrain;
 			t_nextLevel.fluxBuffer[nextCellIndex] = nextFlux;
@@ -138,23 +197,49 @@ __global__ void upscaleMultigridLevelKernel(const MultigridLevel t_level, const 
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
 
-	int2 nextCell;
+	int2 cell;
 
-	for (nextCell.x = index.x; nextCell.x < t_nextLevel.gridSize.x; nextCell.x += stride.x)
+	for (cell.x = index.x; cell.x < t_level.gridSize.x; cell.x += stride.x)
 	{
-		for (nextCell.y = index.y; nextCell.y < t_nextLevel.gridSize.y; nextCell.y += stride.y)
+		for (cell.y = index.y; cell.y < t_level.gridSize.y; cell.y += stride.y)
 		{
-			const int2 cell{ nextCell / 2 };
 			const int cellIndex{ getCellIndex(cell, t_level.gridSize) };
 
-			const int nextCellIndex{ getCellIndex(nextCell, t_nextLevel.gridSize) };
-			const float2 nextTerrain{ t_nextLevel.terrainBuffer[nextCellIndex] };
-			float nextFlux{ t_level.fluxBuffer[cellIndex] };
+			const int2 nextCell{ 2 * cell };
+			int nextCellIndices[4];
+			float nextSand[4];
+			float nextSandSum{ 0.0f };
+			float nextSandCorrection{ 0.0f };
+			const float nextFlux{ t_level.fluxBuffer[cellIndex] };
+	
+			for (int x{ 0 }; x <= 1; ++x)
+			{
+				for (int y{ 0 }; y <= 1; ++y)
+				{
+					const int localCellIndex{ x + 2 * y };
 
-			nextFlux = fmaxf(nextTerrain.y + nextFlux, 0.0f) - nextTerrain.y;
+					nextCellIndices[localCellIndex] = getCellIndex(nextCell + int2{ x, y }, t_nextLevel.gridSize);
+					nextSand[localCellIndex] = t_nextLevel.terrainBuffer[nextCellIndices[localCellIndex]].y + nextFlux;
 
-			t_nextLevel.fluxBuffer[nextCellIndex] = nextFlux;
-			t_nextLevel.avalancheBuffer[nextCellIndex] = 0.0f;
+					if (nextSand[localCellIndex] < 0.0f)
+					{
+						nextSandCorrection += -nextSand[localCellIndex];
+						nextSand[localCellIndex] = 0.0f;
+					}
+
+					nextSandSum += nextSand[localCellIndex];
+				}
+			}
+
+			const float scale{ nextSandSum > 0.0f ? nextSandCorrection / nextSandSum : 0.0f };
+
+			for (int i{ 0 }; i < 4; ++i)
+			{
+				const float nextFluxCorrection{ scale * nextSand[i] };
+
+				t_nextLevel.fluxBuffer[nextCellIndices[i]] = nextFlux + nextFluxCorrection;
+				t_nextLevel.avalancheBuffer[nextCellIndices[i]] = 0.0f;
+			}
 		}
 	}
 }
@@ -203,6 +288,12 @@ void multigrid(const LaunchParameters& t_launchParameters)
 	    }
 
 		upscaleMultigridLevelKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.multigrid[i], t_launchParameters.multigrid[i - 1]);
+
+		for (int j{ 0 }; j < t_launchParameters.multigridPostsweepCount; ++j)
+	    {
+			multigridCorrectionKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i - 1]);
+			applyMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.multigrid[i - 1]);
+		}
 	}
 
 	for (int i{ 0 }; i < iterations; ++i)

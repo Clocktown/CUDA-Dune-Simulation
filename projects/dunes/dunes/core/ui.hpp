@@ -66,6 +66,7 @@ private:
 	float m_vegetationAngle{ 45.0f };
 	int m_multigridLevelCount{ 3 };
 	int m_multigridPresweepCount{ 0 };
+	int m_multigridPostsweepCount{ 0 };
 
 	int m_timeMode{ static_cast<int>(TimeMode::DeltaTime) };
 	float m_timeScale{ 10.0f };

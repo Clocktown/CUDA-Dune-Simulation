@@ -35,6 +35,7 @@ struct LaunchParameters
 	int avalancheFinalSoftIterations{ 5 };
 	int multigridLevelCount{ 3 };
 	int multigridPresweepCount{ 0 };
+	int multigridPostsweepCount{ 0 };
 	TimeMode timeMode{ TimeMode::DeltaTime };
 
 	Array2D<float2> terrainArray;

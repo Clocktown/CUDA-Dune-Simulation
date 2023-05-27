@@ -62,6 +62,8 @@ Simulator::Simulator() :
 // Functionality
 void Simulator::reinitialize(const glm::ivec2& t_gridSize, const float t_gridScale)
 {
+	STHE_ASSERT(t_gridSize.x > 0 && (t_gridSize.x & (t_gridSize.x - 1)) == 0, "Grid size x must be a power of 2");
+	STHE_ASSERT(t_gridSize.y > 0 && (t_gridSize.y & (t_gridSize.y - 1)) == 0, "Grid size y must be a power of 2");
 	STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be 0");
 
 	m_simulationParameters.gridSize.x = t_gridSize.x;
@@ -297,6 +299,11 @@ void Simulator::setMultigridLevelCount(const int t_multigridLevelCount)
 void Simulator::setMultigridPresweepCount(const int t_multigridPresweepCount)
 {
 	m_launchParameters.multigridPresweepCount = t_multigridPresweepCount;
+}
+
+void Simulator::setMultigridPostsweepCount(const int t_multigridPostsweepCount)
+{
+	m_launchParameters.multigridPostsweepCount = t_multigridPostsweepCount;
 }
 
 void Simulator::setTimeMode(const TimeMode t_timeMode)

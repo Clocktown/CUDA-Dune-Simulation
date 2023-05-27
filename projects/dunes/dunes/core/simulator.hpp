@@ -48,6 +48,7 @@ public:
 	void setVegetationAngle(const float t_vegetationAngle);
 	void setMultigridLevelCount(const int t_multigridLevelCount);
 	void setMultigridPresweepCount(const int t_multigridPresweepCount);
+	void setMultigridPostsweepCount(const int t_multigridPostsweepCount);
 	void setTimeMode(const TimeMode t_timeMode);
 	void setTimeScale(const float t_timeScale);
 	void setFixedDeltaTime(const float t_fixedDeltaTime);

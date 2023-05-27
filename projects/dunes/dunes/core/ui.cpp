@@ -34,6 +34,7 @@ void UI::awake()
 	m_simulator->setVegetationAngle(m_vegetationAngle);
 	m_simulator->setMultigridLevelCount(m_multigridLevelCount);
 	m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
+	m_simulator->setMultigridPostsweepCount(m_multigridPostsweepCount);
 	m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
 	m_simulator->setTimeScale(m_timeScale);
 	m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
@@ -189,6 +190,11 @@ void UI::createSimulationNode()
 		if (ImGui::InputInt("Multigrid Presweep Count", &m_multigridPresweepCount))
 		{
 			m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
+		}
+
+		if (ImGui::InputInt("Multigrid Postsweep Count", &m_multigridPostsweepCount))
+		{
+			m_simulator->setMultigridPostsweepCount(m_multigridPostsweepCount);
 		}
 
 		if (ImGui::InputInt("Avalanche Soft Iteration Modulus", &m_avalancheSoftIterationModulus))
