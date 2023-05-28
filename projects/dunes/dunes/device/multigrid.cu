@@ -197,49 +197,32 @@ __global__ void upscaleMultigridLevelKernel(const MultigridLevel t_level, const 
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
 
-	int2 cell;
+	int2 nextCell;
 
-	for (cell.x = index.x; cell.x < t_level.gridSize.x; cell.x += stride.x)
+	for (nextCell.x = index.x; nextCell.x < t_nextLevel.gridSize.x; nextCell.x += stride.x)
 	{
-		for (cell.y = index.y; cell.y < t_level.gridSize.y; cell.y += stride.y)
+		for (nextCell.y = index.y; nextCell.y < t_nextLevel.gridSize.y; nextCell.y += stride.y)
 		{
-			const int cellIndex{ getCellIndex(cell, t_level.gridSize) };
+			const int2 cell{ getWrappedCell((nextCell - 1) / 2, t_level.gridSize) };
+		
+			const int nextCellIndex{ getCellIndex(nextCell, t_nextLevel.gridSize) };
+			const float nextSand{ t_nextLevel.terrainBuffer[nextCellIndex].y };
+			float nextFlux{ 0.0f };
 
-			const int2 nextCell{ 2 * cell };
-			int nextCellIndices[4];
-			float nextSand[4];
-			float nextSandSum{ 0.0f };
-			float nextSandCorrection{ 0.0f };
-			const float nextFlux{ t_level.fluxBuffer[cellIndex] };
-	
 			for (int x{ 0 }; x <= 1; ++x)
 			{
 				for (int y{ 0 }; y <= 1; ++y)
 				{
-					const int localCellIndex{ x + 2 * y };
-
-					nextCellIndices[localCellIndex] = getCellIndex(nextCell + int2{ x, y }, t_nextLevel.gridSize);
-					nextSand[localCellIndex] = t_nextLevel.terrainBuffer[nextCellIndices[localCellIndex]].y + nextFlux;
-
-					if (nextSand[localCellIndex] < 0.0f)
-					{
-						nextSandCorrection += -nextSand[localCellIndex];
-						nextSand[localCellIndex] = 0.0f;
-					}
-
-					nextSandSum += nextSand[localCellIndex];
+					const int cellIndex{ getCellIndex(getWrappedCell(cell + make_int2(x, y), t_level.gridSize), t_level.gridSize)};
+					nextFlux += t_level.fluxBuffer[cellIndex];
 				}
 			}
 
-			const float scale{ nextSandSum > 0.0f ? nextSandCorrection / nextSandSum : 0.0f };
+			nextFlux *= 0.25f;
+			nextFlux = fmaxf(nextFlux, -nextSand); // Creation of sand !!!
 
-			for (int i{ 0 }; i < 4; ++i)
-			{
-				const float nextFluxCorrection{ scale * nextSand[i] };
-
-				t_nextLevel.fluxBuffer[nextCellIndices[i]] = nextFlux + nextFluxCorrection;
-				t_nextLevel.avalancheBuffer[nextCellIndices[i]] = 0.0f;
-			}
+			t_nextLevel.fluxBuffer[nextCellIndex] = nextFlux;
+			t_nextLevel.avalancheBuffer[nextCellIndex] = 0.0f;
 		}
 	}
 }

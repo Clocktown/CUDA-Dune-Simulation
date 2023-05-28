@@ -85,7 +85,7 @@ void Simulator::awake()
 	setupArrays();
 	setupBuffers();
 	setupMultigrid();
-
+	
 	map();
 
 	initialization(m_launchParameters);
@@ -100,7 +100,7 @@ void Simulator::update()
 	if (!m_isPaused)
 	{
 		map();
-
+		
 		venturi(m_launchParameters);
 		windShadow(m_launchParameters);
 		saltation(m_launchParameters);
