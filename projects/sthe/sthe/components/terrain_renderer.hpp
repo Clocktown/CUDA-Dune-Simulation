@@ -24,7 +24,7 @@ public:
 	TerrainRenderer& operator=(const TerrainRenderer& t_terrainRenderer) = delete;
 	TerrainRenderer& operator=(TerrainRenderer&& t_terrainRenderer) = default;
 
-	// Setter
+	// Setters
 	void setTerrain(const std::shared_ptr<Terrain>& t_terrain);
 	void setMaterial(const std::shared_ptr<CustomMaterial>& t_material);
 

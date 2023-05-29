@@ -203,18 +203,25 @@ __global__ void upscaleMultigridLevelKernel(const MultigridLevel t_level, const 
 	{
 		for (nextCell.y = index.y; nextCell.y < t_nextLevel.gridSize.y; nextCell.y += stride.y)
 		{
-			const int2 cell{ getWrappedCell((nextCell - 1) / 2, t_level.gridSize) };
+			const int2 cell{ (nextCell + t_nextLevel.gridSize - 1) / 2 - t_level.gridSize };
+			const float2 position{ make_float2(2 * cell + 1) };
 		
 			const int nextCellIndex{ getCellIndex(nextCell, t_nextLevel.gridSize) };
+			const float2 nextPosition{ make_float2(nextCell) + 0.5f };
 			const float nextSand{ t_nextLevel.terrainBuffer[nextCellIndex].y };
 			float nextFlux{ 0.0f };
 
 			for (int x{ 0 }; x <= 1; ++x)
 			{
+				const float u{ 2.0f - abs(position.x + 2.0f * static_cast<float>(x) - nextPosition.x) };
+				
 				for (int y{ 0 }; y <= 1; ++y)
 				{
-					const int cellIndex{ getCellIndex(getWrappedCell(cell + make_int2(x, y), t_level.gridSize), t_level.gridSize)};
-					nextFlux += t_level.fluxBuffer[cellIndex];
+					const float v{ 2.0f - abs(position.y + 2.0f * static_cast<float>(y) - nextPosition.y) };
+					const float weight{ u * v };
+					
+					const int cellIndex{ getCellIndex(getWrappedCell(cell + make_int2(x, y), t_level.gridSize), t_level.gridSize) };
+					nextFlux += weight * t_level.fluxBuffer[cellIndex];
 				}
 			}
 
