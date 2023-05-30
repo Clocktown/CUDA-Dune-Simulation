@@ -7,6 +7,8 @@
 #include <sthe/config/debug.hpp>
 #include <cstdio>
 
+#define MAX_HEIGHT 1000000.0f
+
 namespace dunes
 {
 
@@ -168,7 +170,8 @@ __global__ void downscaleMultigridLevelKernel(const MultigridLevel t_level, cons
 			const int2 cell{ 2 * nextCell };
 
 			const int nextCellIndex{ getCellIndex(nextCell, t_nextLevel.gridSize) };
-			float2 nextTerrain{ 0.0f, 0.0f };
+			//float2 nextTerrain{ 0.0f, 0.0f };
+			float2 nextTerrain{ 0.0f, MAX_HEIGHT };
 			float nextFlux{ 0.0f };
 
 			for (int x{ 0 }; x <= 1; ++x)
@@ -178,12 +181,14 @@ __global__ void downscaleMultigridLevelKernel(const MultigridLevel t_level, cons
 					const int cellIndex{ getCellIndex(cell + make_int2(x, y), t_level.gridSize) };
 					const float2 terrain{ t_level.terrainBuffer[cellIndex] };
 
-					nextTerrain = fminf(terrain, nextTerrain);
+					//nextTerrain += terrain;
+					nextTerrain.x = fmaxf(nextTerrain.x, terrain.x);
+					nextTerrain.y = fminf(nextTerrain.y, terrain.y);
 					nextFlux += t_level.fluxBuffer[cellIndex];
 				}
 			}
 
-			nextTerrain *= 0.25f;
+			//nextTerrain *= 0.25f;
 			nextFlux *= 0.25f;
 			
 			t_nextLevel.terrainBuffer[nextCellIndex] = nextTerrain;
