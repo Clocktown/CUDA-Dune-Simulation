@@ -94,7 +94,7 @@ private:
 	Scene* m_activeScene;
 	Scene* m_nextScene;
 
-	// Friend
+	// Friends
 	friend Application& createApplication(const std::string& t_name, const int t_width, const int t_height);
 	friend Application& getApplication();
 };

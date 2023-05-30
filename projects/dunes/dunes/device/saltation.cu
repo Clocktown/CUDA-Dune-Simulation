@@ -41,17 +41,17 @@ __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<fl
 	if (slab > 0.0f)
 	{
 		const float2 nextPosition{ position + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
-		const int2 nextCell{ make_int2(nextPosition) };
+		const int2 nextCell{ make_int2(nextPosition - 0.5f) };
 
 		for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
 		{
-			const float u{ 1.0f - abs(nextPosition.x - static_cast<float>(x)) };
+			const float u{ 1.0f - abs(static_cast<float>(x) + 0.5f - nextPosition.x) };
 
 			for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
 			{
-				const float v{ 1.0f - abs(nextPosition.y - static_cast<float>(y)) };
+				const float v{ 1.0f - abs(static_cast<float>(y) + 0.5f - nextPosition.y) };
 				const float weight{ u * v };
-
+		
 				if (weight > 0.0f)
 				{
 					atomicAdd(t_slabBuffer + getCellIndex(getWrappedCell(int2{ x, y })), weight * slab);

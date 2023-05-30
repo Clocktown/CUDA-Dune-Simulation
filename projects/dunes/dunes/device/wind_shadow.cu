@@ -35,6 +35,11 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 		const float angle{ heightDifference / distance };
 	
 		maxAngle = fmaxf(maxAngle, angle);
+
+		if (maxAngle >= c_parameters.maxWindShadowAngle)
+		{
+			break;
+		}
 	}
 
 	resistance.x = clamp((maxAngle - c_parameters.minWindShadowAngle) /

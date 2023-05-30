@@ -53,8 +53,9 @@ __global__ void multigridAvalanchingKernel(const MultigridLevel t_level)
 		const int2 nextCell{ getWrappedCell(cell + c_offsets[i], t_level.gridSize) };
 		nextCellIndices[i] = getCellIndex(nextCell, t_level.gridSize);
 
-		const float2 nextTerrain{ t_level.terrainBuffer[nextCellIndices[i]] + make_float2(0.0f, t_level.fluxBuffer[nextCellIndices[i]]) };
-		const float nextHeight{ nextTerrain.x + nextTerrain.y };
+		const float2 nextTerrain{ t_level.terrainBuffer[nextCellIndices[i]] };
+		const float nextFlux{ t_level.fluxBuffer[nextCellIndices[i]] };
+		const float nextHeight{ nextTerrain.x + nextTerrain.y + nextFlux };
 
 		const float heightDifference{ height - nextHeight };
 		avalanches[i] = fmaxf(heightDifference - c_parameters.avalancheAngle * c_distances[i] * t_level.gridScale, 0.0f);
@@ -177,7 +178,7 @@ __global__ void downscaleMultigridLevelKernel(const MultigridLevel t_level, cons
 					const int cellIndex{ getCellIndex(cell + make_int2(x, y), t_level.gridSize) };
 					const float2 terrain{ t_level.terrainBuffer[cellIndex] };
 
-					nextTerrain += terrain;
+					nextTerrain = fminf(terrain, nextTerrain);
 					nextFlux += t_level.fluxBuffer[cellIndex];
 				}
 			}
