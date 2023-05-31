@@ -35,7 +35,7 @@ Simulator::Simulator() :
 
 	m_launchParameters.optimalBlockSize1D = 256;
 	m_launchParameters.optimalBlockSize2D = dim3{ 16, 16 };
-	m_launchParameters.optimalGridSize1D = static_cast<unsigned int>(threadCount / static_cast<float>(m_launchParameters.blockSize1D));
+	m_launchParameters.optimalGridSize1D = static_cast<unsigned int>(threadCount / static_cast<float>(m_launchParameters.optimalBlockSize1D));
 	m_launchParameters.optimalGridSize2D.x = 2 * 5 * static_cast<unsigned int>(glm::sqrt(threadCount / static_cast<float>(m_launchParameters.optimalBlockSize2D.x * m_launchParameters.optimalBlockSize2D.y)));
 	m_launchParameters.optimalGridSize2D.y = m_launchParameters.optimalGridSize2D.x;
 	m_launchParameters.optimalGridSize2D.z = 1;
