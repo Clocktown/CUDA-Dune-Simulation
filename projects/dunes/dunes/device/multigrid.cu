@@ -5,6 +5,8 @@
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
 #include <sthe/config/debug.hpp>
+#include <thrust/execution_policy.h>
+#include <thrust/reduce.h>
 #include <cstdio>
 
 #define MAX_HEIGHT 1000000.0f
@@ -232,7 +234,7 @@ __global__ void upscaleMultigridLevelKernel(const MultigridLevel t_level, const 
 			}
 
 			nextFlux *= 0.25f;
-			nextFlux = fmaxf(nextFlux, -nextSand); // Creation of sand !!!
+			//nextFlux = fmaxf(nextFlux, -nextSand); // Creation of sand !!!
 
 			t_nextLevel.fluxBuffer[nextCellIndex] = nextFlux;
 			t_nextLevel.avalancheBuffer[nextCellIndex] = 0.0f;
@@ -273,7 +275,7 @@ void multigrid(const LaunchParameters& t_launchParameters)
 		downscaleMultigridLevelKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.multigrid[i], t_launchParameters.multigrid[i + 1]);
 	}
 	
-	const int iterations{ t_launchParameters.avalancheIterations / static_cast<int>(pow(2.0f, static_cast<float>(t_launchParameters.multigridLevelCount))) };
+	const int iterations{ t_launchParameters.avalancheIterations / static_cast<int>(powf(2.0f, static_cast<float>(t_launchParameters.multigridLevelCount))) };
 
 	for (int i{ t_launchParameters.multigridLevelCount - 1 }; i >= 1; --i)
 	{
@@ -297,7 +299,7 @@ void multigrid(const LaunchParameters& t_launchParameters)
 		multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[0]);
 		applyMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.multigrid[0]);
 	}
-
+	
 	finishMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.multigrid[0]);
 }
 

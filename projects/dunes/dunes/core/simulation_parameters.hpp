@@ -45,7 +45,7 @@ struct SimulationParameters
 	float maxWindShadowAngle{ TAN15 };
 
 	float saltationStrength{ 0.05f };
-	float reptationStrength{ 1.0f };
+	float reptationStrength{ 0.0f };
 
 	float avalancheStrength{ 0.5f };
 	float avalancheAngle{ TAN33 };
