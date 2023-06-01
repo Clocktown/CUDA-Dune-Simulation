@@ -33,42 +33,25 @@ __global__ void reptationKernel(const Array2D<float2> t_terrainArray, Buffer<flo
 
 	float slab{ t_slabBuffer[cellIndex] };
 
-	int nextCellIndices[8];
-	float avalanches[8];
-	float avalancheSum{ 0.0f };
-	float maxAvalanche{ 0.0f };
+	float change{ 0.0f };
 
 	for (int i{ 0 }; i < 8; ++i)
 	{
 		const int2 nextCell{ getWrappedCell(cell + c_offsets[i]) };
-		nextCellIndices[i] = getCellIndex(nextCell);
+		const float nextSlab{ t_slabBuffer[getCellIndex(nextCell)] };
 
 		const float2 nextTerrain{ t_terrainArray.read(nextCell) };
 		const float nextHeight{ nextTerrain.x + nextTerrain.y };
 
-		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - c_parameters.avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
-		avalancheSum += avalanches[i];
+		const float heightDifference{ (nextHeight - height) * c_parameters.rGridScale * c_rDistances[i]};
+		const float heightScale = 3.f * abs(heightDifference); // maybe do this, maybe not
+
+
+		float step = fmaxf(0.5f * heightScale * (slab + nextSlab) * c_parameters.reptationStrength, 0.f);
+        change += signbit(heightDifference) ? -fminf(step, terrain.y) : fminf(step, nextTerrain.y);
 	}
 
-	if (avalancheSum > 0.0f)
-	{
-		const float reptation{ clamp(c_parameters.reptationStrength * slab, 0.0f, slab) };
-		slab -= reptation;
-
-		const float rAvalancheSum{ 1.0f / avalancheSum };
-		const float scale{ reptation * rAvalancheSum };
-		
-		for (int i{ 0 }; i < 8; ++i)
-		{
-			if (avalanches[i] > 0.0f)
-			{
-				atomicAdd(t_reptationBuffer + nextCellIndices[i], scale * avalanches[i]);
-			}
-		}
-	}
-
-	atomicAdd(t_reptationBuffer + cellIndex, slab);
+	t_reptationBuffer[cellIndex] = slab + change * 0.125;
 }
 
 __global__ void finishReptationKernel(Array2D<float2> t_terrainArray, Buffer<float> t_reptationBuffer)
