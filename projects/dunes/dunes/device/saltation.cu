@@ -35,21 +35,21 @@ __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<fl
 	const float4 resistance{ t_resistanceArray.read(cell) };
 	const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 
-	const float2 position{ make_float2(cell) + 0.5f };
+	const float2 position{ make_float2(cell) };
 	const float slab{ fminf(c_parameters.saltationStrength * saltationResistance * windSpeed * c_parameters.rGridScale * c_parameters.rGridScale * c_parameters.deltaTime, terrain.y) };
 
 	if (slab > 0.0f)
 	{
 		const float2 nextPosition{ position + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
-		const int2 nextCell{ make_int2(nextPosition - 0.5f) };
+		const int2 nextCell{ make_int2(nextPosition) };
 
 		for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
 		{
-			const float u{ 1.0f - abs(static_cast<float>(x) + 0.5f - nextPosition.x) };
+			const float u{ 1.0f - abs(static_cast<float>(x) - nextPosition.x) };
 
 			for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
 			{
-				const float v{ 1.0f - abs(static_cast<float>(y) + 0.5f - nextPosition.y) };
+				const float v{ 1.0f - abs(static_cast<float>(y) - nextPosition.y) };
 				const float weight{ u * v };
 		
 				if (weight > 0.0f)
