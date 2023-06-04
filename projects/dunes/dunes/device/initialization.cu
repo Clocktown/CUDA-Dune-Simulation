@@ -26,7 +26,7 @@ __global__ void initializationKernel(Array2D<float2> t_terrainArray, Array2D<flo
 	const float2 terrain{ 0.0f, sandHeight };
 	t_terrainArray.write(cell, terrain);
 	
-	const float4 resistance{ 0.0f, 0.0f, 0.0f, 0.0f };
+	const float4 resistance{ 0.0f, 0.0f, 1.0f, 0.0f };
 	t_resistanceArray.write(cell, resistance);
 }
 
