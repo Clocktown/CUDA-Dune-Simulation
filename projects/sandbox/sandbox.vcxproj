@@ -11,15 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\dunes\dunes.vcxproj">
       <Project>{6c426e5d-348c-472a-86df-a29986670cc8}</Project>
     </ProjectReference>
     <ProjectReference Include="..\sthe\sthe.vcxproj">
       <Project>{f7ab5bec-8ef9-4231-9972-e47f2cee1002}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="main.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{39E8D0A2-706D-487A-86AD-D7D806CB514A}</ProjectGuid>

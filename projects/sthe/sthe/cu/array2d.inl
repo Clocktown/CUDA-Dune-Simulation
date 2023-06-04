@@ -1,8 +1,5 @@
 #include "array2d.hpp"
 #include <sthe/config/debug.hpp>
-#include <sthe/util/io.hpp>
-#include <sthe/gl/texture2d.hpp>
-#include <sthe/gl/renderbuffer.hpp>
 #include <cuda_runtime.h>
 #include <vector>
 
