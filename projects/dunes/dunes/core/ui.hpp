@@ -55,7 +55,7 @@ private:
 	float m_maxWindShadowAngle{ 15.0f };
 
 	float m_abrasionStrength{ 0.0f };
-	float m_abrasionThreshold{ 1.0f };
+	float m_abrasionThreshold{ 0.1f };
 	float m_saltationStrength{ 0.1f };
 	float m_reptationStrength{ 0.0f };
 
