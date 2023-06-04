@@ -37,6 +37,8 @@ public:
 	void setWindShadowDistance(const float t_windShadowDistance);
 	void setMinWindShadowAngle(const float t_minWindShadowAngle);
 	void setMaxWindShadowAngle(const float t_maxWindShadowAngle);
+	void setAbrasionStrength(const float t_abrasionStrength);
+	void setAbrasionThreshold(const float t_abrasionThreshold);
 	void setSaltationStrength(const float t_saltationStrength);
 	void setReptationStrength(const float t_reptationStrength);
 	void setAvalancheMode(const AvalancheMode t_avalancheMode);

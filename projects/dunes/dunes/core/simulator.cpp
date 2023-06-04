@@ -239,6 +239,16 @@ void Simulator::setMaxWindShadowAngle(const float t_maxWindShadowAngle)
 	m_simulationParameters.maxWindShadowAngle = glm::tan(glm::radians(t_maxWindShadowAngle));
 }
 
+void Simulator::setAbrasionStrength(const float t_abrasionStrength)
+{
+	m_simulationParameters.abrasionStrength = t_abrasionStrength;
+}
+
+void Simulator::setAbrasionThreshold(const float t_abrasionThreshold)
+{
+	m_simulationParameters.abrasionThreshold = t_abrasionThreshold;
+}
+
 void Simulator::setSaltationStrength(const float t_saltationStrength)
 {
 	m_simulationParameters.saltationStrength = t_saltationStrength;

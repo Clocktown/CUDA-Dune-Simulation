@@ -44,6 +44,8 @@ struct SimulationParameters
 	float minWindShadowAngle{ TAN10 };
 	float maxWindShadowAngle{ TAN15 };
 
+	float abrasionStrength{ 0.0f };
+	float abrasionThreshold{ 1.0f };
 	float saltationStrength{ 0.05f };
 	float reptationStrength{ 0.0f };
 

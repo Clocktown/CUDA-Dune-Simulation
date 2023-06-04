@@ -23,6 +23,8 @@ void UI::awake()
 	m_simulator->setWindShadowDistance(m_windShadowDistance);
 	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
 	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+	m_simulator->setAbrasionStrength(m_abrasionStrength);
+	m_simulator->setAbrasionThreshold(m_abrasionThreshold);
 	m_simulator->setSaltationStrength(m_saltationStrength);
 	m_simulator->setReptationStrength(m_reptationStrength);
 	m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
@@ -135,6 +137,16 @@ void UI::createSimulationNode()
 		if (ImGui::InputFloat("Max. Wind Shadow Angle", &m_maxWindShadowAngle))
 		{
 			m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+		}
+
+		if (ImGui::InputFloat("Abrasion Strength", &m_abrasionStrength))
+		{
+			m_simulator->setAbrasionStrength(m_abrasionStrength);
+		}
+
+		if (ImGui::InputFloat("Abrasion Threshold", &m_abrasionThreshold))
+		{
+			m_simulator->setAbrasionThreshold(m_abrasionThreshold);
 		}
 
 		if (ImGui::InputFloat("Saltation Strength", &m_saltationStrength))
