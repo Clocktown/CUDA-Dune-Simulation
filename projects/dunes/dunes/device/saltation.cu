@@ -36,7 +36,7 @@ __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<fl
 	const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 	const float abrasionResistance{ saltationResistance * (1.0f - resistance.z) };
 	
-	const float scale{ windSpeed * c_parameters.rGridScale * c_parameters.rGridScale * c_parameters.deltaTime };
+	const float scale{ windSpeed * c_parameters.deltaTime };
 	const float abrasion{ fminf(terrain.y < c_parameters.abrasionThreshold ? 
 								c_parameters.abrasionStrength * abrasionResistance *  
 								(1.0f - terrain.y / c_parameters.abrasionThreshold) * scale : 0.0f, terrain.x) };

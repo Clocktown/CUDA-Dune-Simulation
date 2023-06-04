@@ -26,7 +26,7 @@ public:
 	void onGUI();
 private:
 	// Static
-	static inline const char* avalancheModes[5] = { "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
+	static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
 	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 
 	// Functionality
