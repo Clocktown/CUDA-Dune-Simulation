@@ -15,7 +15,7 @@
 
 using namespace sthe;
 
-__global__ void gauss1D(const device::Buffer<float4> t_in, device::Buffer<float4> t_out)
+__global__ void gaussBuffer1D(const device::Buffer<float4> t_in, device::Buffer<float4> t_out)
 {
 	const int idx{ static_cast<int>(threadIdx.x + blockIdx.x * blockDim.x) };
 	const int x{ idx % WIDTH };
@@ -43,7 +43,34 @@ __global__ void gauss1D(const device::Buffer<float4> t_in, device::Buffer<float4
 	t_out[x + WIDTH * y] = sum;
 }
 
-__global__ void gauss2D(const device::Array2D<float4> t_in, device::Array2D<float4> t_out)
+__global__ void gaussBuffer2D(const device::Buffer<float4> t_in, device::Buffer<float4> t_out)
+{
+	const int x{ static_cast<int>(threadIdx.x + blockIdx.x * blockDim.x) };
+	const int y{ static_cast<int>(threadIdx.y + blockIdx.y * blockDim.y) };
+
+	float4 sum{ make_float4(0.0f) };
+
+	for (int i{ -1 }; i <= 1; ++i)
+	{
+		for (int j{ -1 }; j <= 1; ++j)
+		{
+			const int2 cell{ (x + j), (y + i) };
+
+			if (cell.x < 0 || cell.y < 0 || cell.x >= WIDTH || cell.y >= HEIGHT)
+			{
+				continue;
+			}
+
+			sum += t_in[cell.x + WIDTH * cell.y];
+		}
+	}
+
+	sum /= 9.0f;
+
+	t_out[x + WIDTH * y] = sum;
+}
+
+__global__ void gaussArray2D(const device::Array2D<float4> t_in, device::Array2D<float4> t_out)
 {
 	const int2 idx{ static_cast<int>(threadIdx.x + blockIdx.x * blockDim.x),
 	                static_cast<int>(threadIdx.y + blockIdx.y * blockDim.y) };
@@ -80,28 +107,36 @@ void main()
 	const dim3 blocks2D{ WIDTH / THREADS_2D, HEIGHT / THREADS_2D };
 
 	cu::Stopwatch sw;
-	float time1D{ 0.0f };
-	float time2D{ 0.0f };
+	float timeBuffer1D{ 0.0f };
+	float timeBuffer2D{ 0.0f };
+	float timeArray2D{ 0.0f };
 
 	for (int i{ 0 }; i < 100; ++i)
 	{
-		gauss1D<<<blocks1D, THREADS_1D>>> (buffer1.getData<float4>(), buffer2.getData<float4>());
-		gauss2D<<<blocks2D, dim3{ THREADS_2D, THREADS_2D }>>>(deviceArray1, deviceArray2);
+		gaussBuffer1D<<<blocks1D, THREADS_1D>>> (buffer1.getData<float4>(), buffer2.getData<float4>());
+		gaussBuffer2D<<<blocks2D, dim3{ THREADS_2D, THREADS_2D }>>>(buffer1.getData<float4>(), buffer2.getData<float4>());
+		gaussArray2D<<<blocks2D, dim3{ THREADS_2D, THREADS_2D }>>>(deviceArray1, deviceArray2);
 	}
 
 	for (int i{ 0 }; i < ITERS; ++i)
 	{
 		sw.start();
-		gauss1D<<<blocks1D, THREADS_1D>>>(buffer1.getData<float4>(), buffer2.getData<float4>());
+		gaussBuffer1D<<<blocks1D, THREADS_1D>>>(buffer1.getData<float4>(), buffer2.getData<float4>());
 		sw.stop();
-		time1D += sw.getTime();
+		timeBuffer1D += sw.getTime();
 
 		sw.start();
-		gauss2D<<<blocks2D, dim3{ THREADS_2D, THREADS_2D }>>>(a1, a2);
+		gaussBuffer2D<<<blocks2D, dim3{ THREADS_2D, THREADS_2D }>>>(buffer1.getData<float4>(), buffer2.getData<float4>());
 		sw.stop();
-		time2D += sw.getTime();
+		timeBuffer2D += sw.getTime();
+
+		sw.start();
+		gaussArray2D<<<blocks2D, dim3{ THREADS_2D, THREADS_2D }>>>(deviceArray1, deviceArray2);
+		sw.stop();
+		timeArray2D += sw.getTime();
 	}
 
-	printf("Time 1D: %f\n", time1D / ITERS);
-	printf("Time 2D: %f\n", time2D / ITERS);
+	printf("Time Buffer 1D: %f\n", timeBuffer1D / ITERS);
+	printf("Time Buffer 2D: %f\n", timeBuffer2D / ITERS);
+	printf("Time Array 2D:  %f\n", timeArray2D / ITERS);
 }
