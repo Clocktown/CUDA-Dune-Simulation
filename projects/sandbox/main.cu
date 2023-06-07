@@ -11,7 +11,7 @@
 #define WIDTH 4096
 #define HEIGHT 4096
 #define COUNT (WIDTH * HEIGHT)
-#define ITERS 2000
+#define ITERS 1000
 
 using namespace sthe;
 
@@ -84,6 +84,7 @@ __global__ void gaussArray2D(const device::Array2D<float4> t_in, device::Array2D
 			const int2 cell{ idx + make_int2(j, i) };
 
 			sum += t_in.read(cell, cudaBoundaryModeZero);
+			//sum += t_in.sample(make_float2(cell) + 0.5f);
 		}
 	}
 
@@ -94,13 +95,21 @@ __global__ void gaussArray2D(const device::Array2D<float4> t_in, device::Array2D
 
 void main()
 {
+	cudaTextureDesc tex{};
+	tex.filterMode = cudaFilterModePoint;
+	tex.addressMode[0] = cudaAddressModeBorder;
+	tex.addressMode[1] = cudaAddressModeBorder;
+	tex.normalizedCoords = 0;
+
 	cu::Buffer buffer1(COUNT, sizeof(float4));
 	cu::Buffer buffer2(COUNT, sizeof(float4));
 	cu::Array2D array1(WIDTH, HEIGHT, cudaCreateChannelDesc<float4>());
 	cu::Array2D array2(WIDTH, HEIGHT, cudaCreateChannelDesc<float4>());
 	device::Array2D<float4> deviceArray1;
 	device::Array2D<float4> deviceArray2;
+	deviceArray1.texture = array1.recreateTexture(tex);
 	deviceArray1.surface = array1.recreateSurface();
+	deviceArray2.texture = array2.recreateTexture(tex);
 	deviceArray2.surface = array2.recreateSurface();
 
 	const unsigned int blocks1D{ COUNT / THREADS_1D };
