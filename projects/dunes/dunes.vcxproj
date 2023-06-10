@@ -28,6 +28,8 @@
     <ClInclude Include="dunes\core\simulator.hpp" />
     <ClInclude Include="dunes\core\ui.hpp" />
     <ClInclude Include="dunes\device\constants.cuh" />
+    <ClInclude Include="dunes\device\continuous_reptation.cuh" />
+    <ClInclude Include="dunes\device\continuous_saltation.cuh" />
     <ClInclude Include="dunes\device\grid.cuh" />
     <ClInclude Include="dunes\device\kernels.cuh" />
     <ClInclude Include="dunes\device\multigrid.cuh" />
@@ -38,6 +40,8 @@
     <CudaCompile Include="dunes\core\simulation_parameters.cu" />
     <CudaCompile Include="dunes\device\avalanching.cu" />
     <CudaCompile Include="dunes\device\constants.cu" />
+    <CudaCompile Include="dunes\device\continuous_reptation.cu" />
+    <CudaCompile Include="dunes\device\continuous_saltation.cu" />
     <CudaCompile Include="dunes\device\initialization.cu" />
     <CudaCompile Include="dunes\device\multigrid.cu" />
     <CudaCompile Include="dunes\device\reptation.cu" />

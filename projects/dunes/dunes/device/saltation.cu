@@ -1,6 +1,7 @@
 #include "kernels.cuh"
 #include "constants.cuh"
 #include "grid.cuh"
+#include "continuous_saltation.cuh"
 #include <dunes/core/simulation_parameters.hpp>
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
@@ -96,11 +97,20 @@ __global__ void finishSaltationKernel(Array2D<float2> t_terrainArray, Buffer<flo
 
 void saltation(const LaunchParameters& t_launchParameters)
 {
-	setupSaltationKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.tmpBuffer);
-	saltationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
+	switch (t_launchParameters.saltationMode)
+	{
+	case SaltationMode::PerFrame:
+	    setupSaltationKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.tmpBuffer);
+	    saltationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
 	
-	// Now handled by reptation
-	//finishSaltationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+	    // Now handled by reptation
+	    //finishSaltationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+
+		break;
+	case SaltationMode::Continuous:
+	    continuousSaltation(t_launchParameters); 
+	    break;
+	}
 }
 
 }

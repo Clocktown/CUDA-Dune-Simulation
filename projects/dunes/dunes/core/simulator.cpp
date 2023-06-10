@@ -153,6 +153,9 @@ void Simulator::setupArrays()
 
 void Simulator::setupBuffers()
 {
+	m_slabBuffer.reinitialize(m_simulationParameters.cellCount, sizeof(float));
+	m_launchParameters.slabBuffer = m_slabBuffer.getData<float>();
+
 	m_tmpBuffer.reinitialize(4 * m_simulationParameters.cellCount, sizeof(float));
 	m_launchParameters.tmpBuffer = m_tmpBuffer.getData<float>();
 }
@@ -247,6 +250,11 @@ void Simulator::setAbrasionStrength(const float t_abrasionStrength)
 void Simulator::setAbrasionThreshold(const float t_abrasionThreshold)
 {
 	m_simulationParameters.abrasionThreshold = t_abrasionThreshold;
+}
+
+void Simulator::setSaltationMode(const SaltationMode t_saltationMode)
+{
+	m_launchParameters.saltationMode = t_saltationMode;
 }
 
 void Simulator::setSaltationStrength(const float t_saltationStrength)

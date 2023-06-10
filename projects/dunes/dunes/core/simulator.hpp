@@ -39,6 +39,7 @@ public:
 	void setMaxWindShadowAngle(const float t_maxWindShadowAngle);
 	void setAbrasionStrength(const float t_abrasionStrength);
 	void setAbrasionThreshold(const float t_abrasionThreshold);
+	void setSaltationMode(const SaltationMode t_saltationMode);
 	void setSaltationStrength(const float t_saltationStrength);
 	void setReptationStrength(const float t_reptationStrength);
 	void setAvalancheMode(const AvalancheMode t_avalancheMode);
@@ -83,6 +84,7 @@ private:
 	sthe::cu::Array2D m_terrainArray;
 	sthe::cu::Array2D m_windArray;
 	sthe::cu::Array2D m_resistanceArray;
+	sthe::cu::Buffer m_slabBuffer;
 	sthe::cu::Buffer m_tmpBuffer;
 	std::vector<sthe::cu::Buffer> m_multigrid;
 	cudaTextureDesc m_textureDescriptor;

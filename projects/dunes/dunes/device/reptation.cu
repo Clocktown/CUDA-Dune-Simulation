@@ -1,6 +1,7 @@
 #include "kernels.cuh"
 #include "constants.cuh"
 #include "grid.cuh"
+#include "continuous_reptation.cuh"
 #include <dunes/core/simulation_parameters.hpp>
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
@@ -79,9 +80,18 @@ void reptation(const LaunchParameters& t_launchParameters)
 {
 	Buffer<float> reptationBuffer{ t_launchParameters.tmpBuffer + t_launchParameters.multigrid[0].cellCount };
 
-	setupReptationKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(reptationBuffer);
-	reptationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer, reptationBuffer);
-	finishReptationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, reptationBuffer);
+	switch (t_launchParameters.saltationMode)
+	{
+	case SaltationMode::PerFrame:
+	    setupReptationKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(reptationBuffer);
+	    reptationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer, reptationBuffer);
+	    finishReptationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, reptationBuffer);
+
+		break;
+	case SaltationMode::Continuous:
+	    continuousReptation(t_launchParameters); 
+	    break;
+	}
 }
 
 }

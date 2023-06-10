@@ -12,6 +12,11 @@ enum class TimeMode : unsigned char
 	DeltaTime, FixedDeltaTime
 };
 
+enum class SaltationMode : unsigned char
+{
+	PerFrame, Continuous
+};
+
 enum class AvalancheMode : unsigned char
 {
 	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid
@@ -29,6 +34,7 @@ struct LaunchParameters
 	unsigned int optimalGridSize1D;
 	dim3 optimalGridSize2D;
 
+	SaltationMode saltationMode{ SaltationMode::PerFrame };
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	int avalancheIterations{ 50 };
 	int avalancheSoftIterationModulus{ 10 };
@@ -41,6 +47,7 @@ struct LaunchParameters
 	Array2D<float2> terrainArray;
 	Array2D<float2> windArray;
 	Array2D<float4> resistanceArray; // .x = wind shadow, .y = vegetation, .z = erosion
+	Buffer<float> slabBuffer;
 	Buffer<float> tmpBuffer; // 4 * gridSize.x * gridSize.y
 	std::vector<MultigridLevel> multigrid;
 };

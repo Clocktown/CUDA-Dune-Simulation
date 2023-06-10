@@ -26,6 +26,7 @@ public:
 	void onGUI();
 private:
 	// Static
+	static inline const char* saltationModes[2]{ "Per Frame", "Continuous" };
 	static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
 	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 
@@ -56,6 +57,7 @@ private:
 
 	float m_abrasionStrength{ 0.0f };
 	float m_abrasionThreshold{ 0.1f };
+	int m_saltationMode{ static_cast<int>(SaltationMode::PerFrame) };
 	float m_saltationStrength{ 0.1f };
 	float m_reptationStrength{ 0.0f };
 
