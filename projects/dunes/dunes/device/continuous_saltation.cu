@@ -108,15 +108,15 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			const float slab{ t_advectedSlabBuffer[cellIndex] };
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float bounce{ (1.0f - resistance.x) * 
-			                    (terrain.y > 0.0f ? 0.4f : 0.6f) *
-			                    (1.0f - resistance.y) * 
-			                     slab };
+			const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
+			const float depositionProbability = fmaxf(resistance.x,
+				(1.0f - vegetationFactor) + resistance.y * vegetationFactor);
 
-			terrain.y += slab - bounce;
+			terrain.y += slab * depositionProbability;
 
 			t_terrainArray.write(cell, terrain);
-			t_slabBuffer[cellIndex] = bounce;
+			t_slabBuffer[cellIndex] = slab * (1.f - depositionProbability);
+			//t_advectedSlabBuffer[cellIndex] = 1 * slab * (1.f - depositionProbability) + 3 * slab * depositionProbability;
 		}
 	}
 }
