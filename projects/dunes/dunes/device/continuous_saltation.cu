@@ -116,7 +116,7 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 
 			t_terrainArray.write(cell, terrain);
 			t_slabBuffer[cellIndex] = slab * (1.f - depositionProbability);
-			//t_advectedSlabBuffer[cellIndex] = 1 * slab * (1.f - depositionProbability) + 3 * slab * depositionProbability;
+			t_advectedSlabBuffer[cellIndex] = slab * (1.f - resistance.y);
 		}
 	}
 }
