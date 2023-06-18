@@ -27,6 +27,7 @@ public:
 private:
 	// Static
 	static inline const char* saltationModes[2]{ "Per Frame", "Continuous" };
+	static inline const char* windWarpingModes[2]{ "None", "Standard" };
 	static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
 	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 
@@ -51,6 +52,11 @@ private:
 
 	float m_venturiStrength{ 0.005f };
 
+	int m_windWarpingMode{ static_cast<int>(WindWarpingMode::None) };
+	int m_windWarpingCount{ 2 };
+	std::array<float, 4> m_windWarpingRadii{ 200.0f, 50.0f, 0.0f, 0.0f };
+	std::array<float, 4> m_windWarpingStrengths{ 0.8f, 0.2f, 0.0f, 0.0f };
+
 	float m_windShadowDistance{ 10.0f };
 	float m_minWindShadowAngle{ 10.0f };
 	float m_maxWindShadowAngle{ 15.0f };
@@ -73,7 +79,7 @@ private:
 	int m_multigridPostsweepCount{ 0 };
 
 	int m_timeMode{ static_cast<int>(TimeMode::DeltaTime) };
-	float m_timeScale{ 10.0f };
+	float m_timeScale{ 15.0f };
 	float m_fixedDeltaTime{ 0.02f };
 };
 

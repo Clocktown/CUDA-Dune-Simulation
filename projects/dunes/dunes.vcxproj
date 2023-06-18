@@ -42,12 +42,13 @@
     <CudaCompile Include="dunes\device\constants.cu" />
     <CudaCompile Include="dunes\device\continuous_reptation.cu" />
     <CudaCompile Include="dunes\device\continuous_saltation.cu" />
-    <CudaCompile Include="dunes\device\initialization.cu" />
+    <CudaCompile Include="dunes\device\initialize_terrain.cu" />
     <CudaCompile Include="dunes\device\multigrid.cu" />
     <CudaCompile Include="dunes\device\reptation.cu" />
     <CudaCompile Include="dunes\device\saltation.cu" />
     <CudaCompile Include="dunes\device\venturi.cu" />
     <CudaCompile Include="dunes\device\wind_shadow.cu" />
+    <CudaCompile Include="dunes\device\wind_warping.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6C426E5D-348C-472A-86DF-A29986670CC8}</ProjectGuid>

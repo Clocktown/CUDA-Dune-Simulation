@@ -2,6 +2,8 @@
 
 #include "simulation_parameters.hpp"
 #include <cuda_runtime.h>
+#include <cufft.h>
+#include <array>
 #include <vector>
 
 namespace dunes
@@ -15,6 +17,11 @@ enum class TimeMode : unsigned char
 enum class SaltationMode : unsigned char
 {
 	PerFrame, Continuous
+};
+
+enum class WindWarpingMode : unsigned char
+{
+	None, Standard
 };
 
 enum class AvalancheMode : unsigned char
@@ -35,6 +42,7 @@ struct LaunchParameters
 	dim3 optimalGridSize2D;
 
 	SaltationMode saltationMode{ SaltationMode::PerFrame };
+	WindWarpingMode windWarpingMode{ WindWarpingMode::None };
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	int avalancheIterations{ 50 };
 	int avalancheSoftIterationModulus{ 10 };
@@ -49,7 +57,10 @@ struct LaunchParameters
 	Array2D<float4> resistanceArray; // .x = wind shadow, .y = vegetation, .z = erosion
 	Buffer<float> slabBuffer;
 	Buffer<float> tmpBuffer; // 4 * gridSize.x * gridSize.y
+	WindWarping windWarping;
 	std::vector<MultigridLevel> multigrid;
+
+	cufftHandle fftPlan;
 };
 
 }

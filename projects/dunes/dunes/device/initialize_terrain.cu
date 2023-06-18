@@ -8,7 +8,7 @@
 namespace dunes
 {
 
-__global__ void initializationKernel(Array2D<float2> t_terrainArray, Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer)
+__global__ void initializeTerrainKernel(Array2D<float2> t_terrainArray, Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -33,9 +33,9 @@ __global__ void initializationKernel(Array2D<float2> t_terrainArray, Array2D<flo
 	t_slabBuffer[getCellIndex(cell)] = 0.0f;
 }
 
-void initialization(const LaunchParameters& t_launchParameters)
+void initializeTerrain(const LaunchParameters& t_launchParameters)
 {
-	initializationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer);
+	initializeTerrainKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer);
 }
 
 }

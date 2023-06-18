@@ -86,7 +86,8 @@ layout(std140, binding = 0) uniform PipelineBuffer
 layout(binding = 2) uniform sampler2D t_heightMap;
 layout(binding = 3) uniform sampler2D t_alphaMap;
 layout(binding = 4) uniform sampler2D t_diffuseMaps[4];
-layout(binding = 8) uniform sampler2D t_resistanceMap;
+layout(binding = 8) uniform sampler2D t_windMap;
+layout(binding = 9) uniform sampler2D t_resistanceMap;
 
 layout(early_fragment_tests) in;
 in Fragment fragment;
@@ -244,4 +245,6 @@ void main()
 
 	fragmentColor.rgb = clamp(fragmentColor.rgb, 0.0f, 1.0f);
 	fragmentColor.rgb = mix(t_environment.fogColor, fragmentColor.rgb, getFogIntensity(viewDistance));
+
+	fragmentColor.rgb = mix(fragmentColor.rgb, vec3(abs(normalize(texture2D(t_windMap, fragment.uv).rg)), 0.0f), 0.15f);
 }

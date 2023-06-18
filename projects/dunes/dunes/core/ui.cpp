@@ -20,6 +20,19 @@ void UI::awake()
 	m_simulator->setWindAngle(m_windAngle);
 	m_simulator->setWindSpeed(m_windSpeed);
 	m_simulator->setVenturiStrength(m_venturiStrength);
+	m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
+	m_simulator->setWindWarpingCount(m_windWarpingCount);
+	
+	for (int i{ 0 }; i < 4; ++i)
+	{
+		m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
+	}
+
+	for (int i{ 0 }; i < 4; ++i)
+	{
+		m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
+	}
+	
 	m_simulator->setWindShadowDistance(m_windShadowDistance);
 	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
 	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
@@ -123,6 +136,32 @@ void UI::createSimulationNode()
 		if (ImGui::InputFloat("Venturi Strength", &m_venturiStrength))
 		{
 			m_simulator->setVenturiStrength(m_venturiStrength);
+		}
+
+		if (ImGui::Combo("Wind Warping Mode", &m_windWarpingMode, windWarpingModes, IM_ARRAYSIZE(windWarpingModes)))
+		{
+			m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
+		}
+
+		if (ImGui::InputInt("Wind Warping Count", &m_windWarpingCount))
+		{
+			m_simulator->setWindWarpingCount(m_windWarpingCount);
+		}
+
+		if (ImGui::InputFloat4("Wind Warping Radii", m_windWarpingRadii.data()))
+		{
+			for (int i{ 0 }; i < 4; ++i)
+			{
+				m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
+			}
+		}
+
+		if (ImGui::InputFloat4("Wind Warping Strenghts", m_windWarpingStrengths.data()))
+		{
+			for (int i{ 0 }; i < 4; ++i)
+			{
+				m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
+			}
 		}
 
 		if (ImGui::InputFloat("Wind Shadow Distance", &m_windShadowDistance))

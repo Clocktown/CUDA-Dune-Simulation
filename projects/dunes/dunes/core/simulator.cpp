@@ -4,6 +4,7 @@
 #include <dunes/device/kernels.cuh>
 #include <dunes/util/io.hpp>
 #include <sthe/sthe.hpp>
+#include <cufft.h>
 #include <vector>
 
 namespace dunes
@@ -17,10 +18,12 @@ Simulator::Simulator() :
 	m_material{ std::make_shared<sthe::CustomMaterial>() },
 	m_program{ std::make_shared<sthe::gl::Program>() },
 	m_terrainMap{ std::make_shared<sthe::gl::Texture2D>() },
+	m_windMap{ std::make_shared<sthe::gl::Texture2D>() },
 	m_resistanceMap{ std::make_shared<sthe::gl::Texture2D>() },
 	m_textureDescriptor{},
 	m_isAwake{ false },
-	m_isPaused{ false }
+	m_isPaused{ false },
+	m_reinitializeWindWarping{ false }
 {
 	int device;
 	int smCount;
@@ -51,12 +54,19 @@ Simulator::Simulator() :
 	m_program->link();
 
 	m_material->setProgram(m_program);
-	m_material->setTexture(STHE_TEXTURE_UNIT_TERRAIN_CUSTOM0, m_resistanceMap);
-
+	m_material->setTexture(STHE_TEXTURE_UNIT_TERRAIN_CUSTOM0, m_windMap);
+	m_material->setTexture(STHE_TEXTURE_UNIT_TERRAIN_CUSTOM0 + 1, m_resistanceMap);
+	
 	m_textureDescriptor.addressMode[0] = cudaAddressModeWrap;
 	m_textureDescriptor.addressMode[1] = cudaAddressModeWrap;
 	m_textureDescriptor.filterMode = cudaFilterModeLinear;
 	m_textureDescriptor.normalizedCoords = 0;
+}
+
+// Destructor
+Simulator::~Simulator()
+{
+	CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlan));
 }
 
 // Functionality
@@ -72,6 +82,13 @@ void Simulator::reinitialize(const glm::ivec2& t_gridSize, const float t_gridSca
 	m_simulationParameters.gridScale = t_gridScale;
 	m_simulationParameters.rGridScale = 1.0f / t_gridScale;
 
+	if (m_launchParameters.fftPlan != 0)
+	{
+		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlan));
+	}
+
+	CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
+
 	if (m_isAwake)
 	{
 		awake();
@@ -84,11 +101,14 @@ void Simulator::awake()
 	setupTerrain();
 	setupArrays();
 	setupBuffers();
+	setupWindWarping();
 	setupMultigrid();
 	
 	map();
 
-	initialization(m_launchParameters);
+	initializeTerrain(m_launchParameters);
+	venturi(m_launchParameters);
+	initializeWindWarping(m_launchParameters);
 
 	unmap();
 
@@ -100,8 +120,15 @@ void Simulator::update()
 	if (!m_isPaused)
 	{
 		map();
+
+		if (m_reinitializeWindWarping)
+		{
+			initializeWindWarping(m_launchParameters);
+			m_reinitializeWindWarping = false;
+		}
 		
 		venturi(m_launchParameters);
+		windWarping(m_launchParameters);
 		windShadow(m_launchParameters);
 		saltation(m_launchParameters);
 		reptation(m_launchParameters);
@@ -138,16 +165,14 @@ void Simulator::setupTerrain()
 	m_terrain->setGridScale(m_simulationParameters.gridScale);
 
 	m_terrainMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RG32F, false);
+	m_windMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RG32F, false);
 	m_resistanceMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RGBA32F, false);
 }
 
 void Simulator::setupArrays()
 {
-	m_windArray.reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cudaCreateChannelDesc<float2>());
-	m_launchParameters.windArray.surface = m_windArray.recreateSurface();
-	m_launchParameters.windArray.texture = m_windArray.recreateTexture(m_textureDescriptor);
-
 	m_terrainArray.reinitialize(*m_terrainMap);
+	m_windArray.reinitialize(*m_windMap);
 	m_resistanceArray.reinitialize(*m_resistanceMap);
 }
 
@@ -158,6 +183,20 @@ void Simulator::setupBuffers()
 
 	m_tmpBuffer.reinitialize(4 * m_simulationParameters.cellCount, sizeof(float));
 	m_launchParameters.tmpBuffer = m_tmpBuffer.getData<float>();
+}
+
+void Simulator::setupWindWarping()
+{
+	CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
+
+	for (int i{ 0 }; i < 4; ++i)
+	{
+		sthe::cu::Buffer& buffer{ m_windWarpingBuffers[i] };
+		buffer.reinitialize(2 * m_simulationParameters.cellCount, sizeof(cuComplex));
+
+		m_launchParameters.windWarping.gaussKernels[i] = buffer.getData<cuComplex>();
+		m_launchParameters.windWarping.smoothedHeights[i] = m_launchParameters.windWarping.gaussKernels[i] + m_simulationParameters.cellCount;
+	}
 }
 
 void Simulator::setupMultigrid()
@@ -199,6 +238,10 @@ void Simulator::map()
 	m_launchParameters.terrainArray.surface = m_terrainArray.recreateSurface();
 	m_launchParameters.terrainArray.texture = m_terrainArray.recreateTexture(m_textureDescriptor);
 
+	m_windArray.map();
+	m_launchParameters.windArray.surface = m_windArray.recreateSurface();
+	m_launchParameters.windArray.texture = m_windArray.recreateTexture(m_textureDescriptor);
+
 	m_resistanceArray.map();
 	m_launchParameters.resistanceArray.surface = m_resistanceArray.recreateSurface();
 	m_launchParameters.resistanceArray.texture = m_resistanceArray.recreateTexture(m_textureDescriptor);
@@ -207,6 +250,7 @@ void Simulator::map()
 void Simulator::unmap()
 {
 	m_terrainArray.unmap();
+	m_windArray.unmap();
 	m_resistanceArray.unmap();
 }
 
@@ -225,6 +269,40 @@ void Simulator::setWindSpeed(const float t_windSpeed)
 void Simulator::setVenturiStrength(const float t_venturiStrength)
 {
 	m_simulationParameters.venturiStrength = t_venturiStrength;
+}
+
+void Simulator::setWindWarpingMode(const WindWarpingMode t_windWarpingMode)
+{
+	m_launchParameters.windWarpingMode = t_windWarpingMode;
+}
+
+void Simulator::setWindWarpingCount(const int t_windWarpingCount)
+{
+	STHE_ASSERT(t_windWarpingCount >= 0, "Wind warping count must greater than or equal to 0");
+	STHE_ASSERT(t_windWarpingCount <= 4, "Wind warping count must smaller than or equal to 4");
+
+	m_launchParameters.windWarping.count = t_windWarpingCount;
+}
+
+void Simulator::setWindWarpingRadius(const int t_index, const float t_windWarpingRadius)
+{
+	STHE_ASSERT(t_index >= 0, "Wind warping count must greater than or equal to 0");
+	STHE_ASSERT(t_index < 4, "Wind warping count must smaller than 4");
+
+	m_launchParameters.windWarping.radii[t_index] = t_windWarpingRadius;
+	
+	if (m_isAwake)
+	{
+		m_reinitializeWindWarping = true;
+	}
+}
+
+void Simulator::setWindWarpingStrength(const int t_index, const float t_windWarpingStrength)
+{
+	STHE_ASSERT(t_index >= 0, "Wind warping count must greater than or equal to 0");
+	STHE_ASSERT(t_index < 4, "Wind warping count must smaller than 4");
+
+	m_launchParameters.windWarping.strengths[t_index] = t_windWarpingStrength;
 }
 
 void Simulator::setWindShadowDistance(const float t_windShadowDistance)

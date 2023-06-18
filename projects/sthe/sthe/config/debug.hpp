@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <cuda_runtime.h>
 #include <curand.h>
+#include <cufft.h>
 
 #define STHE_FORCE_DEBUG
 
@@ -16,6 +17,7 @@
 #   define GL_CHECK_FRAMEBUFFER(t_framebuffer, t_target) static_cast<void>(0)
 #   define CU_CHECK_ERROR(t_function) t_function
 #   define CURAND_CHECK_ERROR(t_function) t_function
+#   define CUFFT_CHECK_ERROR(t_function) t_function
 #else
 #   include <iostream>
 #   include <string>
@@ -36,6 +38,7 @@
 #   define GL_CHECK_FRAMEBUFFER(t_framebuffer, t_target) sthe::detail::glCheckFramebuffer(t_framebuffer, t_target, __FILE__, __LINE__) 
 #   define CU_CHECK_ERROR(t_function) sthe::detail::cuCheckError(t_function, __FILE__, __LINE__)
 #   define CURAND_CHECK_ERROR(t_function) sthe::detail::curandCheckError(t_function, __FILE__, __LINE__)
+#   define CUFFT_CHECK_ERROR(t_function) sthe::detail::cufftCheckError(t_function, __FILE__, __LINE__)
 #endif
 
 namespace sthe
@@ -50,6 +53,7 @@ void glCheckShader(const GLuint t_shader, const char* const t_file, const int t_
 void glCheckFramebuffer(const GLuint t_framebuffer, const GLenum t_target, const char* const t_file, const int t_line);
 void cuCheckError(const cudaError_t t_error, const char* const t_file, const int t_line);
 void curandCheckError(const curandStatus_t t_error, const char* const t_file, const int t_line);
+void cufftCheckError(const cufftResult_t t_error, const char* const t_file, const int t_line);
 
 }
 }

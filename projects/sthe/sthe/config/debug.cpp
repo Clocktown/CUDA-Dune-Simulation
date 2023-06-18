@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <cuda_runtime.h>
 #include <curand.h>
+#include <cufft.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -111,6 +112,18 @@ void curandCheckError(const curandStatus_t t_error, const char* const t_file, co
 	if (t_error != cudaSuccess)
 	{
 		std::cerr << "CURAND Error : " + std::to_string(static_cast<int>(t_error))  + "\n"
+			      << "File: " + std::string{ t_file } + "\n"
+			      << "Line: " + std::to_string(t_line) + "\n";
+
+		std::exit(EXIT_FAILURE);
+	}
+}
+
+void cufftCheckError(const cufftResult_t t_error, const char* const t_file, const int t_line)
+{
+	if (t_error != cufftResult_t::CUFFT_SUCCESS)
+	{
+		std::cerr << "CUFFT Error : " + std::to_string(static_cast<int>(t_error))  + "\n"
 			      << "File: " + std::string{ t_file } + "\n"
 			      << "Line: " + std::to_string(t_line) + "\n";
 

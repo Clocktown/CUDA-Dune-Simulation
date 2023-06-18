@@ -6,8 +6,11 @@
 namespace dunes
 {
 
-void initialization(const LaunchParameters& t_launchParameters);
+void initializeTerrain(const LaunchParameters& t_launchParameters);
+void initializeWindWarping(const LaunchParameters& t_launchParameters);
+
 void venturi(const LaunchParameters& t_launchParameters);
+void windWarping(const LaunchParameters& t_launchParameters);
 void windShadow(const LaunchParameters& t_launchParameters);
 void saltation(const LaunchParameters& t_launchParameters);
 void reptation(const LaunchParameters& t_launchParameters);

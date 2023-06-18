@@ -2,6 +2,7 @@
 
 #include "simulation_parameters.hpp"
 #include "launch_parameters.hpp"
+#include <cufft.h>
 #include <sthe/sthe.hpp>
 #include <vector>
 
@@ -13,14 +14,14 @@ class Simulator : public sthe::Component
 public:
 	// Constructors
 	explicit Simulator();
-	Simulator(const Simulator& t_simulator) = default;
+	Simulator(const Simulator& t_simulator) = delete;
 	Simulator(Simulator&& t_simulator) = default;
 
 	// Destructor
-	~Simulator() = default;
+	~Simulator();
 
 	// Operators
-	Simulator& operator=(const Simulator& t_simulator) = default;
+	Simulator& operator=(const Simulator& t_simulator) = delete;
 	Simulator& operator=(Simulator&& t_simulator) = default;
 
 	// Functionality
@@ -34,6 +35,10 @@ public:
 	void setWindAngle(const float t_windAngle);
 	void setWindSpeed(const float t_windSpeed);
 	void setVenturiStrength(const float t_venturiStrength);
+	void setWindWarpingMode(const WindWarpingMode t_windWarpingMode);
+	void setWindWarpingCount(const int t_windWarpingCount);
+	void setWindWarpingRadius(const int t_index, const float t_windWarpingRadius);
+	void setWindWarpingStrength(const int t_index, const float t_windWarpingStrength);
 	void setWindShadowDistance(const float t_windShadowDistance);
 	void setMinWindShadowAngle(const float t_minWindShadowAngle);
 	void setMaxWindShadowAngle(const float t_maxWindShadowAngle);
@@ -64,6 +69,7 @@ private:
 	void setupTerrain();
 	void setupArrays();
 	void setupBuffers();
+	void setupWindWarping();
 	void setupMultigrid();
 	void map();
 	void unmap();
@@ -79,6 +85,7 @@ private:
 	std::shared_ptr<sthe::CustomMaterial> m_material;
 	std::shared_ptr<sthe::gl::Program> m_program;
 	std::shared_ptr<sthe::gl::Texture2D> m_terrainMap;
+	std::shared_ptr<sthe::gl::Texture2D> m_windMap;
 	std::shared_ptr<sthe::gl::Texture2D> m_resistanceMap;
 
 	sthe::cu::Array2D m_terrainArray;
@@ -86,11 +93,13 @@ private:
 	sthe::cu::Array2D m_resistanceArray;
 	sthe::cu::Buffer m_slabBuffer;
 	sthe::cu::Buffer m_tmpBuffer;
+	std::array<sthe::cu::Buffer, 4> m_windWarpingBuffers;
 	std::vector<sthe::cu::Buffer> m_multigrid;
 	cudaTextureDesc m_textureDescriptor;
 
 	bool m_isAwake;
 	bool m_isPaused;
+	bool m_reinitializeWindWarping;
 };
 
 }

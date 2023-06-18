@@ -32,7 +32,7 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 			const float abrasionResistance{ saltationResistance * (1.0f - resistance.z) };
 
-			const float scale{ windSpeed * c_parameters.deltaTime };
+			const float scale{ 1.0f };
 			const float abrasion{ fminf(terrain.y < c_parameters.abrasionThreshold ?
 										c_parameters.abrasionStrength * abrasionResistance *
 										(1.0f - terrain.y / c_parameters.abrasionThreshold) * scale : 0.0f, terrain.x) };
@@ -64,7 +64,7 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 	const int cellIndex{ getCellIndex(cell) };
 	const float slab{ t_slabBuffer[cellIndex] };
 
-	const float2 windVelocity{t_windArray.read(cell) };
+	const float2 windVelocity{ t_windArray.read(cell) };
 
 	const float2 position{ make_float2(cell) };
 

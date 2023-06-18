@@ -3,6 +3,7 @@
 #include <sthe/device/buffer.cuh>
 #include <sthe/device/array2d.cuh>
 #include <cuda_runtime.h>
+#include <cufft.h>
 
 #define TAN10 0.1763f
 #define TAN15 0.2679f
@@ -17,6 +18,15 @@ using Array2D = sthe::device::Array2D<T>;
 
 template<typename T>
 using Buffer = sthe::device::Buffer<T>;
+
+struct WindWarping
+{
+	int count{ 2 };
+	float radii[4]{ 200.0f, 50.0f, 0.0f, 0.0f };
+	float strengths[4]{ 0.8f, 0.2f, 0.0f, 0.0f };
+	Buffer<cuComplex> gaussKernels[4];
+	Buffer<cuComplex> smoothedHeights[4];
+};
 
 struct MultigridLevel
 {
@@ -39,7 +49,7 @@ struct SimulationParameters
 	float windSpeed{ 10.0f };
 
 	float venturiStrength{ 0.005f };
-	
+
 	float windShadowDistance{ 1.0f };
 	float minWindShadowAngle{ TAN10 };
 	float maxWindShadowAngle{ TAN15 };
