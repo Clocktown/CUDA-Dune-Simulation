@@ -60,7 +60,7 @@ CU_INLINE CU_HOST_DEVICE float clamp(const float a, const float x, const float y
 
 CU_INLINE CU_HOST_DEVICE float lerp(const float a, const float b, const float t)
 {
-	return a + t * (a - b);
+	return a + t * (b - a);
 }
 
 CU_INLINE CU_HOST_DEVICE float bilerp(const float a00, const float a10, const float a01, const float a11, const float u, const float v)
