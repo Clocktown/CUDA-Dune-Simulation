@@ -1653,6 +1653,32 @@ CU_INLINE CU_HOST_DEVICE float dot(const float2& a, const float2& b)
 	return a.x * b.x + a.y * b.y;
 }
 
+CU_INLINE CU_HOST_DEVICE float fract(const float a)
+{
+	return a - floorf(a);
+}
+
+CU_INLINE CU_HOST_DEVICE float smoothstep(const float e0, const float e1, const float x)
+{
+	float t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
+	return t * t * (3.0 - 2.0 * t);
+}
+
+CU_INLINE CU_HOST_DEVICE float mod(const float a, const float b)
+{
+	return a - b * floorf(a/b);
+}
+
+CU_INLINE CU_HOST_DEVICE float2 mod(const float2& a, const float b)
+{
+	return a - b * floorf(a/b);
+}
+
+CU_INLINE CU_HOST_DEVICE float2 cos(const float2& a)
+{
+	return float2{ cos(a.x), cos(a.y) };
+}
+
 CU_INLINE CU_HOST_DEVICE float length(const float2& a)
 {
 	return sqrtf(dot(a, a));
