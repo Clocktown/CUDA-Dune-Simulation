@@ -25,6 +25,9 @@ Trackball::Trackball(const glm::vec3 t_target) :
 void Trackball::lateUpdate()
 {
 	const ImGuiIO& io{ ImGui::GetIO() };
+	if (io.WantCaptureMouse) {
+		return;
+	}
 	const glm::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
 
 	Transform& transform{ getGameObject().getTransform() };
