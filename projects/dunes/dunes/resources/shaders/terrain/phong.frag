@@ -227,7 +227,8 @@ void main()
 
 	    for (int j = startLayer; j < t_terrain.layerCount; ++j) 
 	    {
-	        const vec3 diffuseColor = getDiffuseColor(j);
+	        const vec3 diffuseColor = mix(getDiffuseColor(j), vec3(0.6,0.1,0.1), 0.5*texture(t_resistanceMap, fragment.uv).x);
+			
 	        const vec3 specularColor = getSpecularColor(j);
 			const float cosPsiN = t_terrain.layers[j].shininess > 0.0f ? pow(cosPsi, t_terrain.layers[j].shininess) : 0.0f;
 		   
@@ -246,5 +247,7 @@ void main()
 	fragmentColor.rgb = clamp(fragmentColor.rgb, 0.0f, 1.0f);
 	fragmentColor.rgb = mix(t_environment.fogColor, fragmentColor.rgb, getFogIntensity(viewDistance));
 
-	fragmentColor.rgb = mix(fragmentColor.rgb, vec3(abs(normalize(texture2D(t_windMap, fragment.uv).rg)), 0.0f), 0.15f);
+	//fragmentColor.rgb = mix(fragmentColor.rgb, vec3(abs(normalize(texture2D(t_windMap, fragment.uv).rg)), 0.0f), 0.15f);
+
+	
 }
