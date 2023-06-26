@@ -107,17 +107,17 @@ void main()
 		fragment.position.y = height;
 
 		// TODO: This is bugged for non-square resolutions.
-		//const vec2 size = vec2(2.0f * t_terrain.gridScale,0.0f);
-        //const ivec3 offset = ivec3(-1, 0, 1);
+		const vec2 size = vec2(2.0f * t_terrain.gridScale,0.0f);
+        const ivec3 offset = ivec3(-1, 0, 1);
 
-		//const vec2 terrain01 = textureOffset(t_heightMap, fragment.uv, offset.xy).xy;
-        //const vec2 terrain21 = textureOffset(t_heightMap, fragment.uv, offset.zy).xy;
-        //const vec2 terrain10 = textureOffset(t_heightMap, fragment.uv, offset.yx).xy;
-        //const vec2 terrain12 = textureOffset(t_heightMap, fragment.uv, offset.yz).xy;
-		//const vec3 edge1 = normalize(vec3(size.x, t_terrain.heightScale * ((terrain21.x + terrain21.y) - (terrain01.x + terrain01.y)), size.y));
-		//const vec3 edge2 = normalize(vec3(size.y, t_terrain.heightScale * ((terrain12.x + terrain12.y) - (terrain10.x + terrain10.y)), size.x));
-		//fragment.normal = cross(edge2, edge1);
-		fragment.normal = vec3(0.0f, 0.0f, 0.0f);
+		const vec2 terrain01 = textureOffset(t_heightMap, fragment.uv, offset.xy).xy;
+        const vec2 terrain21 = textureOffset(t_heightMap, fragment.uv, offset.zy).xy;
+        const vec2 terrain10 = textureOffset(t_heightMap, fragment.uv, offset.yx).xy;
+        const vec2 terrain12 = textureOffset(t_heightMap, fragment.uv, offset.yz).xy;
+		const vec3 edge1 = normalize(vec3(size.x, t_terrain.heightScale * ((terrain21.x + terrain21.y) - (terrain01.x + terrain01.y)), size.y));
+		const vec3 edge2 = normalize(vec3(size.y, t_terrain.heightScale * ((terrain12.x + terrain12.y) - (terrain10.x + terrain10.y)), size.x));
+		fragment.normal = cross(edge2, edge1);
+		//fragment.normal = vec3(0.0f, 0.0f, 0.0f);
 
 	}
 	else 
