@@ -106,7 +106,7 @@ void Simulator::awake()
 	
 	map();
 
-	initializeTerrain(m_launchParameters);
+	initializeTerrain(m_launchParameters, m_initializationParameters);
 	venturi(m_launchParameters);
 	initializeWindWarping(m_launchParameters);
 
@@ -416,6 +416,11 @@ void Simulator::setFixedDeltaTime(const float t_fixedDeltaTime)
 {
 	m_fixedDeltaTime = t_fixedDeltaTime;
 }
+
+void Simulator::setInitializationParameters(const InitializationParameters& t_initializationParameters) {
+	m_initializationParameters = t_initializationParameters;
+}
+
 
 // Getters
 bool Simulator::isPaused() const

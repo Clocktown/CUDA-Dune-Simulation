@@ -30,6 +30,7 @@ private:
 	static inline const char* windWarpingModes[2]{ "None", "Standard" };
 	static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
 	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
+	static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };
 
 	// Functionality
 	void createApplicationNode();
@@ -81,6 +82,8 @@ private:
 	int m_timeMode{ static_cast<int>(TimeMode::DeltaTime) };
 	float m_timeScale{ 15.0f };
 	float m_fixedDeltaTime{ 0.02f };
+
+	InitializationParameters m_initializationParameters{};
 };
 
 }

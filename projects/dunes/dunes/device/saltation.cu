@@ -42,7 +42,7 @@ __global__ void saltationKernel(Array2D<float2> t_terrainArray, const Array2D<fl
 								c_parameters.abrasionStrength * abrasionResistance *  
 								(1.0f - terrain.y / c_parameters.abrasionThreshold) * scale : 0.0f, terrain.x) };
 
-	const float saltation{ fminf(c_parameters.saltationStrength * saltationResistance * scale, terrain.y) };
+	const float saltation{ fminf(c_parameters.saltationStrength * saltationResistance, terrain.y) };
 	const float slab{ saltation + abrasion };
 
 	const float2 position{ make_float2(cell) };

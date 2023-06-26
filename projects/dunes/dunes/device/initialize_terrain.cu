@@ -117,7 +117,7 @@ __device__ float seamless_pNoise(float2 off, float2 stretch, float2 uv, int res,
     return sample_a;
 }
 
-__global__ void initializeTerrainKernel(Array2D<float2> t_terrainArray, Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer)
+__global__ void initializeTerrainKernel(Array2D<float2> t_terrainArray, Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, InitializationParameters t_initializationParameters)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -127,28 +127,63 @@ __global__ void initializeTerrainKernel(Array2D<float2> t_terrainArray, Array2D<
 	}
 
     const float2 uv = (make_float2(cell) + 0.5f) / make_float2(c_parameters.gridSize);
-    const float2 offset = make_float2(0);
-    const float2 stretch = make_float2(1);
-    const float2 border = make_float2(0.1f);
-    const float scale = 500.f;
-    const float bias = 0.f;
-    const int iters = 6;
 
-	const float bedrockHeight{ bias + scale * seamless_pNoise(offset, stretch, uv, iters, border)};
-	const float sandHeight{ 100.f };
+    const float2 curr_terrain = t_terrainArray.read(cell);
+    const float4 curr_resistance = t_resistanceArray.read(cell);
+
+    auto bedrockParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::Bedrock];
+    auto sandParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::Sand];
+    auto vegetationParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::Vegetation];
+    auto abrasionParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::AbrasionResistance];
+
+    const float bedrockHeight{
+        bedrockParams.enabled ?
+            (bedrockParams.bias +
+            (bedrockParams.flat ?
+                0.0f :
+                bedrockParams.scale * seamless_pNoise(bedrockParams.offset, bedrockParams.stretch, uv, bedrockParams.iters, bedrockParams.border))) :
+            curr_terrain.x
+    };
+
+    const float sandHeight{
+        sandParams.enabled ?
+            (sandParams.bias +
+            (sandParams.flat ?
+                0.0f :
+                sandParams.scale * seamless_pNoise(sandParams.offset, sandParams.stretch, uv, sandParams.iters, sandParams.border))) :
+            curr_terrain.y
+    };
+
+    const float vegetationRes{
+        vegetationParams.enabled ?
+            (vegetationParams.bias +
+            (vegetationParams.flat ?
+                0.0f :
+                vegetationParams.scale * seamless_pNoise(vegetationParams.offset, vegetationParams.stretch, uv, vegetationParams.iters, vegetationParams.border))) :
+            curr_resistance.y
+    };
+
+    const float abrasionRes{
+        abrasionParams.enabled ?
+            (abrasionParams.bias +
+            (abrasionParams.flat ?
+                0.0f :
+                abrasionParams.scale * seamless_pNoise(abrasionParams.offset, abrasionParams.stretch, uv, abrasionParams.iters, abrasionParams.border))) :
+            curr_resistance.z
+    };
 	
-	const float2 terrain{ bedrockHeight, sandHeight };
+	const float2 terrain{ bedrockHeight, fmaxf(sandHeight, 0.f) };
 	t_terrainArray.write(cell, terrain);
 	
-	const float4 resistance{ 0.0f, 0.0f, 1.0f, 0.0f };
+	const float4 resistance{ 0.0f, clamp(vegetationRes, 0.f, 1.f), clamp(abrasionRes, 0.f, 1.f), 0.0f };
 	t_resistanceArray.write(cell, resistance);
 
 	t_slabBuffer[getCellIndex(cell)] = 0.0f;
 }
 
-void initializeTerrain(const LaunchParameters& t_launchParameters)
+void initializeTerrain(const LaunchParameters& t_launchParameters, const InitializationParameters& t_initializationParameters)
 {
-	initializeTerrainKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer);
+	initializeTerrainKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_initializationParameters);
 }
 
 }

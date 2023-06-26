@@ -63,4 +63,33 @@ struct LaunchParameters
 	cufftHandle fftPlan;
 };
 
+struct NoiseGenerationParameters 
+{
+	float2 offset{ 0.f, 0.f };
+	float2 stretch{ 1.f, 1.f };
+	float2 border{ 0.1f , 0.1f };
+    float scale = 100.f;
+    float bias = 0.f;
+    int iters = 0;
+	bool flat = false;
+	bool enabled = true;
+};
+
+constexpr int NumNoiseGenerationTargets = 4;
+
+enum class NoiseGenerationTarget : unsigned char
+{
+	Bedrock, Sand, Vegetation, AbrasionResistance
+};
+
+struct InitializationParameters
+{
+	NoiseGenerationParameters noiseGenerationParameters[NumNoiseGenerationTargets]{
+		{},
+		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 100.f, 10.f, 0, true, true},
+		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 1.f, 0.f, 0, true, true},
+		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 1.f, 0.f, 0, true, true}
+	};
+};
+
 }

@@ -60,6 +60,7 @@ public:
 	void setTimeMode(const TimeMode t_timeMode);
 	void setTimeScale(const float t_timeScale);
 	void setFixedDeltaTime(const float t_fixedDeltaTime);
+	void setInitializationParameters(const InitializationParameters& t_initializationParameters);
 
 	// Getters
 	bool isPaused() const;
@@ -77,6 +78,7 @@ private:
 	// Attributes
 	SimulationParameters m_simulationParameters;
 	LaunchParameters m_launchParameters;
+	InitializationParameters m_initializationParameters;
 	float m_timeScale;
 	float m_fixedDeltaTime;
 	
