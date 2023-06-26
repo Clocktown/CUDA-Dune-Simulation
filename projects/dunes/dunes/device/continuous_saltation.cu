@@ -30,21 +30,16 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
 			const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
-			const float abrasionResistance{ saltationResistance * (1.0f - resistance.z) };
 
 			const float scale{ 1.0f };
-			const float abrasion{ fminf(terrain.y < c_parameters.abrasionThreshold ?
-										c_parameters.abrasionStrength * abrasionResistance *
-										(1.0f - terrain.y / c_parameters.abrasionThreshold) * scale : 0.0f, terrain.x) };
 
 			const float saltation{ fminf(c_parameters.saltationStrength * saltationResistance * scale, terrain.y) };
 
-			terrain.x -= abrasion;
 			terrain.y -= saltation;
 			t_terrainArray.write(cell, terrain);
 
 			const int cellIndex{ getCellIndex(cell) };
-			const float slab{ saltation + abrasion };
+			const float slab{ saltation };
 
 			t_slabBuffer[cellIndex] += slab;
 			t_advectedSlabBuffer[cellIndex] = 0.0f;
@@ -108,12 +103,26 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			const float slab{ t_advectedSlabBuffer[cellIndex] };
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
+			const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
+			const float abrasionResistance{ saltationResistance * (1.0f - resistance.z) };
 			const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
 			const float depositionProbability = fmaxf(resistance.x,
 				(1.0f - vegetationFactor) + resistance.y * vegetationFactor);
 
-			terrain.y += slab * depositionProbability;
 
+			const float new_slab = slab * (1.f - depositionProbability);
+			//if (new_slab > 0.0f) {
+				const float scale{ slab + 0.0001 }; // 0.0001 is the amount of abrasion that happens with purely wind, no sand 
+				// TODO: add that as a parameter to the UI
+				// TODO: sand moving via avalanching should cause abrasion?
+				const float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
+				c_parameters.abrasionStrength * abrasionResistance *
+				clamp(1.0f - terrain.y / c_parameters.abrasionThreshold, 0.f, 1.f) * scale : 0.0f };
+
+				terrain.y += abrasion;
+				terrain.x -= abrasion;
+			//}
+			terrain.y += slab * depositionProbability;
 			t_terrainArray.write(cell, terrain);
 			t_slabBuffer[cellIndex] = slab * (1.f - depositionProbability);
 			t_advectedSlabBuffer[cellIndex] = slab * (1.f - resistance.y);

@@ -135,7 +135,7 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 				float2 orthogonalDirection{ -gradientDirection.y, gradientDirection.x };
 				orthogonalDirection *= sign(dot(windDirection, orthogonalDirection));
 				
-				float alpha{ fminf(gradientLength / 20.0f, 1.0f) };
+				float alpha{ fminf(gradientLength / 20.0f, 1.0f) }; // TODO: expose this parameter
 			
 				warpDirection += t_windWarping.strengths[i] * lerp(windDirection, orthogonalDirection, alpha);
 				weight += t_windWarping.strengths[i];
