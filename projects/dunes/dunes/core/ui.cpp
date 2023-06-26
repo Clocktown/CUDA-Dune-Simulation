@@ -103,11 +103,11 @@ void UI::createSceneNode()
 				auto& params = m_initializationParameters.noiseGenerationParameters[i];
 				ImGui::Checkbox("Flat (Bias only)", &params.flat);
 				ImGui::Checkbox("Enable", &params.enabled);
-				ImGui::DragInt("Noise Iterations", &params.iters, 0.1f, 0, 0);
-				ImGui::DragFloat2("Noise Stretch", &params.stretch.x, 1.f, 0.f);
+				ImGui::DragInt("Noise Iterations", &params.iters, 0.1f, 0, 50);
+				ImGui::DragFloat2("Noise Stretch", &params.stretch.x, 1.f, 0.f, 100.f);
 				ImGui::DragFloat2("Noise Offset", &params.offset.x, 1.f);
 				ImGui::DragFloat2("Seamless Border", &params.border.x, 0.01f, 0.f, 1.f);
-				ImGui::DragFloat("Height Scale", &params.scale, 1.f, 0.f);
+				ImGui::DragFloat("Height Scale", &params.scale, 1.f, 0.f, 10000.f);
 				ImGui::DragFloat("Height Bias", &params.bias, 0.1f);
 				ImGui::TreePop();
 			}
