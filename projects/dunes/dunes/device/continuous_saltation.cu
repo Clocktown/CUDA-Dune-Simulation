@@ -71,23 +71,23 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 	if (slab > 0.0f)
 	{
 		const float2 nextPosition{ position + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
-		const int2 nextCell{ make_int2(nextPosition) };
+		const int2 nextCell{ getNearestCell(nextPosition) };
+		
+		//for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
+		//{
+		//	const float u{ 1.0f - abs(static_cast<float>(x) - nextPosition.x) };
 
-		for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
-		{
-			const float u{ 1.0f - abs(static_cast<float>(x) - nextPosition.x) };
+		//	for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
+		//	{
+		//		const float v{ 1.0f - abs(static_cast<float>(y) - nextPosition.y) };
+		//		const float weight{ u * v };
 
-			for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
-			{
-				const float v{ 1.0f - abs(static_cast<float>(y) - nextPosition.y) };
-				const float weight{ u * v };
-
-				if (weight > 0.0f)
-				{
-					atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(int2{ x, y })), weight * slab);
-				}
-			}
-		}
+		//		if (weight > 0.0f)
+		//		{
+					atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), slab);
+		//		}
+		//	}
+		//}
 	}
 }
 
