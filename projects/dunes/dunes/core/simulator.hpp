@@ -2,8 +2,10 @@
 
 #include "simulation_parameters.hpp"
 #include "launch_parameters.hpp"
+#include "render_parameters.hpp"
 #include <cufft.h>
 #include <sthe/sthe.hpp>
+#include <sthe/gl/buffer.hpp>
 #include <vector>
 
 namespace dunes
@@ -61,6 +63,7 @@ public:
 	void setTimeScale(const float t_timeScale);
 	void setFixedDeltaTime(const float t_fixedDeltaTime);
 	void setInitializationParameters(const InitializationParameters& t_initializationParameters);
+	void setRenderParameters(const RenderParameters& t_renderParameters);
 
 	// Getters
 	bool isPaused() const;
@@ -79,6 +82,7 @@ private:
 	SimulationParameters m_simulationParameters;
 	LaunchParameters m_launchParameters;
 	InitializationParameters m_initializationParameters;
+	RenderParameters m_renderParameters;
 	float m_timeScale;
 	float m_fixedDeltaTime;
 	
@@ -89,6 +93,7 @@ private:
 	std::shared_ptr<sthe::gl::Texture2D> m_terrainMap;
 	std::shared_ptr<sthe::gl::Texture2D> m_windMap;
 	std::shared_ptr<sthe::gl::Texture2D> m_resistanceMap;
+	std::shared_ptr<sthe::gl::Buffer> m_renderParameterBuffer;
 
 	sthe::cu::Array2D m_terrainArray;
 	sthe::cu::Array2D m_windArray;

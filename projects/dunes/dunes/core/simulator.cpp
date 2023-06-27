@@ -1,5 +1,6 @@
 #include "simulator.hpp"
 #include "simulation_parameters.hpp"
+#include "render_parameters.hpp"
 #include "launch_parameters.hpp"
 #include <dunes/device/kernels.cuh>
 #include <dunes/util/io.hpp>
@@ -23,7 +24,8 @@ Simulator::Simulator() :
 	m_textureDescriptor{},
 	m_isAwake{ false },
 	m_isPaused{ false },
-	m_reinitializeWindWarping{ false }
+	m_reinitializeWindWarping{ false },
+	m_renderParameterBuffer{ std::make_shared<sthe::gl::Buffer>(static_cast<int>(sizeof(RenderParameters)), 1) }
 {
 	int device;
 	int smCount;
@@ -61,6 +63,9 @@ Simulator::Simulator() :
 	m_textureDescriptor.addressMode[1] = cudaAddressModeWrap;
 	m_textureDescriptor.filterMode = cudaFilterModeLinear;
 	m_textureDescriptor.normalizedCoords = 0;
+
+	m_renderParameterBuffer->bind(GL_UNIFORM_BUFFER, STHE_UNIFORM_BUFFER_CUSTOM0);
+	m_renderParameterBuffer->upload(reinterpret_cast<char*>(&m_renderParameters), sizeof(RenderParameters));
 }
 
 // Destructor
@@ -419,6 +424,11 @@ void Simulator::setFixedDeltaTime(const float t_fixedDeltaTime)
 
 void Simulator::setInitializationParameters(const InitializationParameters& t_initializationParameters) {
 	m_initializationParameters = t_initializationParameters;
+}
+
+void Simulator::setRenderParameters(const RenderParameters& t_renderParameters) {
+	m_renderParameters = t_renderParameters;
+	m_renderParameterBuffer->upload(reinterpret_cast<char*>(&m_renderParameters), sizeof(RenderParameters));
 }
 
 

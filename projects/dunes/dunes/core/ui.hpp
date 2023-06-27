@@ -34,6 +34,7 @@ private:
 
 	// Functionality
 	void createApplicationNode();
+	void createRenderingNode();
 	void createSceneNode();
 	void createSimulationNode();
 
@@ -84,6 +85,7 @@ private:
 	float m_fixedDeltaTime{ 0.02f };
 
 	InitializationParameters m_initializationParameters{};
+	RenderParameters m_renderParameters{};
 };
 
 }

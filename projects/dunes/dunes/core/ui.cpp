@@ -1,6 +1,7 @@
 #include "ui.hpp"
 #include "simulator.hpp"
 #include <sthe/sthe.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace dunes
 {
@@ -61,6 +62,7 @@ void UI::onGUI()
 	ImGui::Begin("Settings");
 
 	createApplicationNode();
+	createRenderingNode();
 	createSceneNode();
 	createSimulationNode();
 
@@ -83,6 +85,20 @@ void UI::createApplicationNode()
 			application.setTargetFrameRate(m_targetFrameRate);
 		}
 
+		ImGui::TreePop();
+	}
+}
+
+void UI::createRenderingNode()
+{
+	if (ImGui::TreeNode("Rendering")) 
+	{
+		bool dirty = false;
+		dirty |= ImGui::ColorEdit3("Sand Color", glm::value_ptr(m_renderParameters.sandColor));
+
+		if (dirty) {
+			m_simulator->setRenderParameters(m_renderParameters);
+		}
 		ImGui::TreePop();
 	}
 }

@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dunes\core\launch_parameters.hpp" />
+    <ClInclude Include="dunes\core\render_parameters.hpp" />
     <ClInclude Include="dunes\core\simulation_parameters.hpp" />
     <ClInclude Include="dunes\core\simulator.hpp" />
     <ClInclude Include="dunes\core\ui.hpp" />
