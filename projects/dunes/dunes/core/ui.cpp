@@ -95,6 +95,8 @@ void UI::createRenderingNode()
 	{
 		bool dirty = false;
 		dirty |= ImGui::ColorEdit3("Sand Color", glm::value_ptr(m_renderParameters.sandColor));
+		dirty |= ImGui::ColorEdit3("Vegetation Color", glm::value_ptr(m_renderParameters.vegetationColor));
+
 
 		if (dirty) {
 			m_simulator->setRenderParameters(m_renderParameters);
