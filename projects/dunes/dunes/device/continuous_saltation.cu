@@ -86,7 +86,7 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 	}
 }
 
-__global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, const Buffer<float> t_advectedSlabBuffer)
+__global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, const Array2D<float2> t_windArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, const Buffer<float> t_advectedSlabBuffer)
 {
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
@@ -102,6 +102,8 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			float2 terrain{ t_terrainArray.read(cell) };
 			const float slab{ t_advectedSlabBuffer[cellIndex] };
 
+			const float windSpeed{ length(t_windArray.read(cell)) };
+			
 			const float4 resistance{ t_resistanceArray.read(cell) };
 			const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 			const float abrasionResistance{ saltationResistance * (1.0f - resistance.z) };
@@ -116,7 +118,7 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 				// TODO: add that as a parameter to the UI
 				// TODO: sand moving via avalanching should cause abrasion?
 				const float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
-				c_parameters.abrasionStrength * abrasionResistance *
+				c_parameters.abrasionStrength * abrasionResistance * windSpeed * c_parameters.deltaTime *
 				clamp(1.0f - terrain.y / c_parameters.abrasionThreshold, 0.f, 1.f) * scale : 0.0f };
 
 				terrain.y += abrasion;
@@ -134,7 +136,7 @@ void continuousSaltation(const LaunchParameters& t_launchParameters)
 {
 	setupContinuousSaltationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_launchParameters.tmpBuffer);
 	continuousSaltationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.slabBuffer, t_launchParameters.tmpBuffer);
-	finishContinuousSaltationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_launchParameters.tmpBuffer);
+	finishContinuousSaltationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_launchParameters.tmpBuffer);
 }
 
 }
