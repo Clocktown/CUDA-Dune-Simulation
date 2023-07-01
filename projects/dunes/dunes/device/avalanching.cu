@@ -20,7 +20,7 @@ __global__ void setupAtomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buf
 }
 
 template <bool TUseAvalancheStrength>
-__global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buffer<float> t_avalancheBuffer)
+__global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_avalancheBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -33,6 +33,7 @@ __global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buffer<f
 
 	const float2 terrain{ t_terrainArray.read(cell) };
 	const float height{ terrain.x + terrain.y };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -48,7 +49,7 @@ __global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, Buffer<f
 		const float nextHeight{ nextTerrain.x + nextTerrain.y };
 
 		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - c_parameters.avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
+		avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
 		avalancheSum += avalanches[i];
 		maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
 	}
@@ -108,7 +109,7 @@ __global__ void setupAtomicInPlaceAvalanchingKernel(Array2D<float2> t_terrainArr
 }
 
 template <bool TUseAvalancheStrength>
-__global__ void atomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuffer)
+__global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -121,6 +122,7 @@ __global__ void atomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuffer)
 
 	const float2 terrain{ t_terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -134,7 +136,7 @@ __global__ void atomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuffer)
 		const float nextHeight{ nextTerrain.x + nextTerrain.y };
 
 		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - c_parameters.avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
+		avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
 		avalancheSum += avalanches[i];
 		maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
 	}
@@ -163,7 +165,7 @@ __global__ void atomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuffer)
 __device__ __inline__ int linear_block_10x10(int x, int y) { return (y + 1) * 10 + (x + 1); }
 
 template <bool TUseAvalancheStrength>
-__global__ void sharedAtomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuffer)
+__global__ void sharedAtomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 	const int2 baseID = int2{ int(blockIdx.x * blockDim.x), int(blockIdx.y * blockDim.y) };
@@ -185,6 +187,7 @@ __global__ void sharedAtomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuf
 	const int              idx = cellIndex;
 	const int              idx_shared = linear_block_10x10(threadIdx.x, threadIdx.y);
 	const float2           terrain = t_terrainBuffer[idx];
+	const float avalancheAngle = lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y);
 
 	// Load into Shared memory
 	s[idx_shared] = terrain.x + terrain.y;
@@ -230,7 +233,7 @@ __global__ void sharedAtomicInPlaceAvalanchingKernel(Buffer<float2> t_terrainBuf
 		const float nextHeight{ s[linear_block_10x10(b.x, b.y)] };
 
 		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - c_parameters.avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
+		avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
 		avalancheSum += avalanches[i];
 		maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
 	}
@@ -301,10 +304,10 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 || 
 				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations) 
 			{
-				atomicAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+				atomicAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
 			}
 			else {
-				atomicAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
+				atomicAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
 			}
 			finishAtomicAvalanchingKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
 	    } 
@@ -318,11 +321,11 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
 				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations) 
 			{
-				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
+				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
 			}
 			else
 			{
-				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(terrainBuffer);
+				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
 			}
 		}
 
@@ -337,11 +340,11 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
 				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations)
 			{
-				sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+				sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer);
 			}
 			else
 			{
-				sharedAtomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+				sharedAtomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer);
 			}
 		}
 
@@ -356,11 +359,11 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
 				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations)
 			{
-				sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+				sharedAtomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer);
 			}
 			else
 			{
-				atomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (terrainBuffer);
+				atomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer);
 			}
 		}
 

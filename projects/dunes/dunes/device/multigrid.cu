@@ -34,7 +34,7 @@ __global__ void setupMultigridAvalanchingKernel(const Array2D<float2> t_terrainA
 	}
 }
 
-__global__ void multigridAvalanchingKernel(const MultigridLevel t_level)
+__global__ void multigridAvalanchingKernel(const MultigridLevel t_level, const Array2D<float4> t_resistanceArray)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -46,6 +46,7 @@ __global__ void multigridAvalanchingKernel(const MultigridLevel t_level)
 	const int cellIndex{ getCellIndex(cell, t_level.gridSize) };
 	const float2 terrain{ t_level.terrainBuffer[cellIndex] + make_float2(0.0f, t_level.fluxBuffer[cellIndex]) };
 	const float height{ terrain.x + terrain.y };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -62,7 +63,7 @@ __global__ void multigridAvalanchingKernel(const MultigridLevel t_level)
 		const float nextHeight{ nextTerrain.x + nextTerrain.y + nextFlux };
 
 		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - c_parameters.avalancheAngle * c_distances[i] * t_level.gridScale, 0.0f);
+		avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * t_level.gridScale, 0.0f);
 		avalancheSum += avalanches[i];
 		maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
 	}
@@ -87,7 +88,7 @@ __global__ void multigridAvalanchingKernel(const MultigridLevel t_level)
 	}
 }
 
-__global__ void multigridCorrectionKernel(const MultigridLevel t_level)
+__global__ void multigridCorrectionKernel(const MultigridLevel t_level, const Array2D<float4> t_resistanceArray)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -106,6 +107,7 @@ __global__ void multigridCorrectionKernel(const MultigridLevel t_level)
 
 	const float2 terrain{ t_level.terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y + flux };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
 
 	int nextCellIndices[8];
 	float corrections[8];
@@ -122,7 +124,7 @@ __global__ void multigridCorrectionKernel(const MultigridLevel t_level)
 		const float nextHeight{ nextTerrain.x + nextTerrain.y + nextFlux };
 
 		const float heightDifference{ nextHeight - height };
-		corrections[i] = fmaxf(c_parameters.avalancheAngle * c_distances[i] * t_level.gridScale - heightDifference, 0.0f);
+		corrections[i] = fmaxf(avalancheAngle * c_distances[i] * t_level.gridScale - heightDifference, 0.0f);
 		correctionSum += corrections[i];
 		maxCorrection = fmaxf(maxCorrection, corrections[i]);
 	}
@@ -268,7 +270,7 @@ void multigrid(const LaunchParameters& t_launchParameters)
 	{
 		for (int j{ 0 }; j < t_launchParameters.multigridPresweepCount; ++j)
 	    {
-		    multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i]);
+		    multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i], t_launchParameters.resistanceArray);
 		    applyMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.multigrid[i]);
 	    }
 
@@ -281,7 +283,7 @@ void multigrid(const LaunchParameters& t_launchParameters)
 	{
 		for (int j{ 0 }; j < iterations * (i + 1); ++j)
 	    {
-		    multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i]);
+		    multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i], t_launchParameters.resistanceArray);
 		    applyMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.multigrid[i]);
 	    }
 
@@ -289,14 +291,14 @@ void multigrid(const LaunchParameters& t_launchParameters)
 
 		for (int j{ 0 }; j < t_launchParameters.multigridPostsweepCount; ++j)
 	    {
-			multigridCorrectionKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i - 1]);
+			multigridCorrectionKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[i - 1], t_launchParameters.resistanceArray);
 			applyMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.multigrid[i - 1]);
 		}
 	}
 
 	for (int i{ 0 }; i < iterations; ++i)
 	{
-		multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[0]);
+		multigridAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.multigrid[0], t_launchParameters.resistanceArray);
 		applyMultigridAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.multigrid[0]);
 	}
 	
