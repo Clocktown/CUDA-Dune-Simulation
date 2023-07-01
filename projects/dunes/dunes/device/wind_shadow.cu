@@ -8,6 +8,7 @@
 namespace dunes
 {
 
+template<WindShadowMode Mode>
 __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray)
 {
 	const int2 cell{ getGlobalIndex2D() };
@@ -18,8 +19,13 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 	}
 
 	const float2 terrain{ t_terrainArray.read(cell) };
-	const float2 windDirection{ normalize(t_windArray.read(cell)) };
 	float4 resistance{ t_resistanceArray.read(cell) };
+	float2 windDirection;
+
+	if constexpr (Mode == WindShadowMode::Linear)
+	{
+		windDirection = normalize(t_windArray.read(cell));
+	}
 
 	const float height{ terrain.x + terrain.y };
 	float2 nextPosition{ make_float2(cell) + 0.5f };
@@ -27,6 +33,11 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 
 	for (float distance = c_parameters.gridScale; distance <= c_parameters.windShadowDistance; distance += c_parameters.gridScale)
 	{
+		if constexpr (Mode == WindShadowMode::Curved)
+		{
+			windDirection = normalize(t_windArray.sample(nextPosition));
+		}
+
 		nextPosition -= windDirection;
 		
 		const float2 nextTerrain{ t_terrainArray.sample(nextPosition) };
@@ -50,7 +61,14 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 
 void windShadow(const LaunchParameters& t_launchParameters)
 {
-	windShadowKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray);
+	if (t_launchParameters.windShadowMode == WindShadowMode::Linear)
+	{
+		windShadowKernel<WindShadowMode::Linear><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray);
+	}
+	else
+	{
+		windShadowKernel<WindShadowMode::Curved><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray);
+	}
 }
 
 }

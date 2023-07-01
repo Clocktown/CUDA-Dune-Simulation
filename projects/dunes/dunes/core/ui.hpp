@@ -28,6 +28,7 @@ private:
 	// Static
 	static inline const char* saltationModes[2]{ "Per Frame", "Continuous" };
 	static inline const char* windWarpingModes[2]{ "None", "Standard" };
+	static inline const char* windShadowModes[2]{ "Linear", "Curved" };
 	static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
 	static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 	static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };
@@ -60,6 +61,7 @@ private:
 	std::array<float, 4> m_windWarpingRadii{ 200.0f, 50.0f, 0.0f, 0.0f };
 	std::array<float, 4> m_windWarpingStrengths{ 0.8f, 0.2f, 0.0f, 0.0f };
 
+	int m_windShadowMode{ static_cast<int>(WindShadowMode::Linear) };
 	float m_windShadowDistance{ 10.0f };
 	float m_minWindShadowAngle{ 10.0f };
 	float m_maxWindShadowAngle{ 15.0f };
@@ -67,7 +69,7 @@ private:
 	float m_abrasionStrength{ 0.0f };
 	float m_abrasionThreshold{ 0.1f };
 	int m_saltationMode{ static_cast<int>(SaltationMode::PerFrame) };
-	float m_saltationStrength{ 0.1f };
+	float m_saltationStrength{ 0.5f };
 	float m_reptationStrength{ 0.0f };
 
 	int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };

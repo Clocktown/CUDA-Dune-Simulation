@@ -315,6 +315,11 @@ void Simulator::setWindWarpingStrength(const int t_index, const float t_windWarp
 	m_launchParameters.windWarping.strengths[t_index] = t_windWarpingStrength;
 }
 
+void Simulator::setWindShadowMode(const WindShadowMode t_windShadowMode)
+{
+	m_launchParameters.windShadowMode = t_windShadowMode;
+}
+
 void Simulator::setWindShadowDistance(const float t_windShadowDistance)
 {
 	m_simulationParameters.windShadowDistance = t_windShadowDistance;

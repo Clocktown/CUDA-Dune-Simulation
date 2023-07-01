@@ -24,6 +24,11 @@ enum class WindWarpingMode : unsigned char
 	None, Standard
 };
 
+enum class WindShadowMode : unsigned char
+{
+	Linear, Curved
+};
+
 enum class AvalancheMode : unsigned char
 {
 	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid
@@ -43,6 +48,7 @@ struct LaunchParameters
 
 	SaltationMode saltationMode{ SaltationMode::PerFrame };
 	WindWarpingMode windWarpingMode{ WindWarpingMode::None };
+	WindShadowMode windShadowMode{ WindShadowMode::Linear };
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	int avalancheIterations{ 50 };
 	int avalancheSoftIterationModulus{ 10 };

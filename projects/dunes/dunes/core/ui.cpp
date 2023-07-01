@@ -35,6 +35,7 @@ void UI::awake()
 		m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
 	}
 	
+	m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
 	m_simulator->setWindShadowDistance(m_windShadowDistance);
 	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
 	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
@@ -206,6 +207,11 @@ void UI::createSimulationNode()
 			}
 		}
 
+		if (ImGui::Combo("Wind Shadow Mode", &m_windShadowMode, windShadowModes, IM_ARRAYSIZE(windShadowModes)))
+		{
+			m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
+		}
+
 		if (ImGui::DragFloat("Wind Shadow Distance", &m_windShadowDistance))
 		{
 			m_simulator->setWindShadowDistance(m_windShadowDistance);
@@ -236,7 +242,7 @@ void UI::createSimulationNode()
 			m_simulator->setSaltationMode(static_cast<SaltationMode>(m_saltationMode));
 		}
 
-		if (ImGui::DragFloat("Saltation Strength", &m_saltationStrength, 0.1f))
+		if (ImGui::DragFloat("Saltation Strength", &m_saltationStrength, 0.05f))
 		{
 			m_simulator->setSaltationStrength(m_saltationStrength);
 		}
