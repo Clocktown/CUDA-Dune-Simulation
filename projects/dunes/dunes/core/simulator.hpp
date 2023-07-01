@@ -39,6 +39,7 @@ public:
 	void setVenturiStrength(const float t_venturiStrength);
 	void setWindWarpingMode(const WindWarpingMode t_windWarpingMode);
 	void setWindWarpingCount(const int t_windWarpingCount);
+	void setWindWarpingDivisor(const int t_windWarpingDivisor);
 	void setWindWarpingRadius(const int t_index, const float t_windWarpingRadius);
 	void setWindWarpingStrength(const int t_index, const float t_windWarpingStrength);
 	void setWindShadowDistance(const float t_windShadowDistance);

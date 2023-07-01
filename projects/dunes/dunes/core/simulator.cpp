@@ -289,6 +289,11 @@ void Simulator::setWindWarpingCount(const int t_windWarpingCount)
 	m_launchParameters.windWarping.count = t_windWarpingCount;
 }
 
+void Simulator::setWindWarpingDivisor(const int t_windWarpingDivisor)
+{
+	m_launchParameters.windWarping.divisor = t_windWarpingDivisor;
+}
+
 void Simulator::setWindWarpingRadius(const int t_index, const float t_windWarpingRadius)
 {
 	STHE_ASSERT(t_index >= 0, "Wind warping count must greater than or equal to 0");

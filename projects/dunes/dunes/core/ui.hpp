@@ -56,6 +56,7 @@ private:
 
 	int m_windWarpingMode{ static_cast<int>(WindWarpingMode::None) };
 	int m_windWarpingCount{ 2 };
+	float m_windWarpingDivisor{ 20.0f };
 	std::array<float, 4> m_windWarpingRadii{ 200.0f, 50.0f, 0.0f, 0.0f };
 	std::array<float, 4> m_windWarpingStrengths{ 0.8f, 0.2f, 0.0f, 0.0f };
 

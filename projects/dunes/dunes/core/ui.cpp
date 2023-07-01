@@ -23,6 +23,7 @@ void UI::awake()
 	m_simulator->setVenturiStrength(m_venturiStrength);
 	m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
 	m_simulator->setWindWarpingCount(m_windWarpingCount);
+	m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
 	
 	for (int i{ 0 }; i < 4; ++i)
 	{
@@ -182,6 +183,11 @@ void UI::createSimulationNode()
 		if (ImGui::InputInt("Wind Warping Count", &m_windWarpingCount))
 		{
 			m_simulator->setWindWarpingCount(m_windWarpingCount);
+		}
+
+		if (ImGui::InputFloat("Wind Warping Divisor", &m_windWarpingDivisor))
+		{
+			m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
 		}
 
 		if (ImGui::InputFloat4("Wind Warping Radii", m_windWarpingRadii.data()))
