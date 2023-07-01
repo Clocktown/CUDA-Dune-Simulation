@@ -283,8 +283,8 @@ void Simulator::setWindWarpingMode(const WindWarpingMode t_windWarpingMode)
 
 void Simulator::setWindWarpingCount(const int t_windWarpingCount)
 {
-	STHE_ASSERT(t_windWarpingCount >= 0, "Wind warping count must greater than or equal to 0");
-	STHE_ASSERT(t_windWarpingCount <= 4, "Wind warping count must smaller than or equal to 4");
+	STHE_ASSERT(t_windWarpingCount >= 0, "Wind warping count must be greater than or equal to 0");
+	STHE_ASSERT(t_windWarpingCount <= 4, "Wind warping count must be smaller than or equal to 4");
 
 	m_launchParameters.windWarping.count = t_windWarpingCount;
 }
@@ -296,8 +296,8 @@ void Simulator::setWindWarpingDivisor(const int t_windWarpingDivisor)
 
 void Simulator::setWindWarpingRadius(const int t_index, const float t_windWarpingRadius)
 {
-	STHE_ASSERT(t_index >= 0, "Wind warping count must greater than or equal to 0");
-	STHE_ASSERT(t_index < 4, "Wind warping count must smaller than 4");
+	STHE_ASSERT(t_index >= 0, "Index must be greater than or equal to 0");
+	STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
 
 	m_launchParameters.windWarping.radii[t_index] = t_windWarpingRadius;
 	
@@ -309,8 +309,8 @@ void Simulator::setWindWarpingRadius(const int t_index, const float t_windWarpin
 
 void Simulator::setWindWarpingStrength(const int t_index, const float t_windWarpingStrength)
 {
-	STHE_ASSERT(t_index >= 0, "Wind warping count must greater than or equal to 0");
-	STHE_ASSERT(t_index < 4, "Wind warping count must smaller than 4");
+	STHE_ASSERT(t_index >= 0, "Index must be greater than or equal to 0");
+	STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
 
 	m_launchParameters.windWarping.strengths[t_index] = t_windWarpingStrength;
 }
