@@ -84,10 +84,10 @@ public:
 	bool isActive() const;
 
 	template<typename TComponent, typename... TOthers, typename... TExcludes>
-	entt::view<entt::get_t<const TComponent, const TOthers...>, entt::exclude_t<TExcludes...>> getComponents(entt::exclude_t<TExcludes...> t_excludes = {}) const;
+	entt::view<entt::get_t<const TComponent, const TOthers...>, entt::exclude_t<TExcludes...>> getComponents(entt::exclude_t<TExcludes...> t_excludes = entt::exclude_t{}) const;
 
 	template<typename TComponent, typename... TOthers, typename... TExcludes>
-	entt::view<entt::get_t<TComponent, TOthers...>, entt::exclude_t<TExcludes...>> getComponents(entt::exclude_t<TExcludes...> t_excludes = {});
+	entt::view<entt::get_t<TComponent, TOthers...>, entt::exclude_t<TExcludes...>> getComponents(entt::exclude_t<TExcludes...> t_excludes = entt::exclude_t{});
 private:
 	// Attributes
 	std::string m_name;

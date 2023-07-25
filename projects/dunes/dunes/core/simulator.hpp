@@ -15,7 +15,7 @@ class Simulator : public sthe::Component
 {
 public:
 	// Constructors
-	explicit Simulator();
+	Simulator();
 	Simulator(const Simulator& t_simulator) = delete;
 	Simulator(Simulator&& t_simulator) = default;
 

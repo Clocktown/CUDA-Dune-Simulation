@@ -20,11 +20,15 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 
 	const float2 terrain{ t_terrainArray.read(cell) };
 	float4 resistance{ t_resistanceArray.read(cell) };
+	float2 windVelocity;
+	float windSpeed;
 	float2 windDirection;
 
 	if constexpr (Mode == WindShadowMode::Linear)
 	{
-		windDirection = normalize(t_windArray.read(cell));
+		windVelocity = t_windArray.read(cell);
+		windSpeed = length(windVelocity);
+		windDirection = windVelocity / (windSpeed + 1e-06f);
 	}
 
 	const float height{ terrain.x + terrain.y };
@@ -35,7 +39,9 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 	{
 		if constexpr (Mode == WindShadowMode::Curved)
 		{
-			windDirection = normalize(t_windArray.sample(nextPosition));
+			windVelocity = t_windArray.sample(nextPosition);
+			windSpeed = length(windVelocity);
+			windDirection = windVelocity / (windSpeed + 1e-06f);
 		}
 
 		nextPosition -= windDirection;
