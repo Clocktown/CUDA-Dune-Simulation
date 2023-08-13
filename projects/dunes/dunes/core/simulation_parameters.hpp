@@ -9,6 +9,7 @@
 #define TAN15 0.2679f
 #define TAN33 0.6494f
 #define TAN45 1.0f
+#define TAN55 1.4281f
 
 namespace dunes
 {
@@ -55,6 +56,11 @@ struct SimulationParameters
 	float minWindShadowAngle{ TAN10 };
 	float maxWindShadowAngle{ TAN15 };
 
+	float stickyStrength{ 1.0f };
+	float stickyAngle{ TAN55 };
+	float2 stickyRange{ 0.4f, 2.0f };
+	float maxStickyHeight{ 30.0f };
+
 	float abrasionStrength{ 0.0f };
 	float abrasionThreshold{ 0.1f };
 	float saltationStrength{ 0.05f };
@@ -75,3 +81,4 @@ void upload(const SimulationParameters& t_simulationParameters);
 #undef TAN15
 #undef TAN33
 #undef TAN45
+#undef TAN55

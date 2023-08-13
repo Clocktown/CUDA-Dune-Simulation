@@ -72,6 +72,8 @@ struct RenderParameters
 	vec4 bedrockColor;
 	vec4 windShadowColor;
 	vec4 vegetationColor;
+	vec4 erosionColor;
+	vec4 stickyColor;
 };
 
 layout(std140, binding = 0) uniform PipelineBuffer
@@ -181,7 +183,19 @@ void main()
 		   
 		fragmentColor.rgb += ambientColor * diffuseColor;
 		const vec3 illuminatedColor = lightColor * (cosPhi * diffuseColor + cosPsiN * specularColor);
-		fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.windShadowColor.rgb, 0.5*resistances.x);
+
+		if (resistances.w < 0.0f) 
+		{
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.erosionColor.rgb, 0.5f);
+		}
+		else if (resistances.w > 0.0f) 
+		{
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.stickyColor.rgb, 0.5f * resistances.w);
+		}
+		else 
+		{
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.windShadowColor.rgb, 0.5f * resistances.x);
+		}
 	}
 
 	fragmentColor.rgb = clamp(fragmentColor.rgb, 0.0f, 1.0f);

@@ -135,6 +135,7 @@ void Simulator::update()
 		venturi(m_launchParameters);
 		windWarping(m_launchParameters);
 		windShadow(m_launchParameters);
+		sticky(m_launchParameters, m_simulationParameters);
 		saltation(m_launchParameters);
 		reptation(m_launchParameters);
 		avalanching(m_launchParameters);
@@ -333,6 +334,26 @@ void Simulator::setMinWindShadowAngle(const float t_minWindShadowAngle)
 void Simulator::setMaxWindShadowAngle(const float t_maxWindShadowAngle)
 {
 	m_simulationParameters.maxWindShadowAngle = glm::tan(glm::radians(t_maxWindShadowAngle));
+}
+
+void Simulator::setStickyStrength(const float t_stickyStrength)
+{
+	m_simulationParameters.stickyStrength = t_stickyStrength;
+}
+
+void Simulator::setStickyAngle(const float t_stickyAngle)
+{
+	m_simulationParameters.stickyAngle = glm::tan(glm::radians(t_stickyAngle));
+}
+
+void Simulator::setStickyRange(const float2 t_stickyRange)
+{
+	m_simulationParameters.stickyRange = t_stickyRange;
+}
+
+void Simulator::setMaxStickyHeight(const float t_maxStickyHeight)
+{
+	m_simulationParameters.maxStickyHeight = t_maxStickyHeight;
 }
 
 void Simulator::setAbrasionStrength(const float t_abrasionStrength)

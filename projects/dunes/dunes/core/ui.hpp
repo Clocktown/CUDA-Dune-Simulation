@@ -66,6 +66,11 @@ private:
 	float m_minWindShadowAngle{ 10.0f };
 	float m_maxWindShadowAngle{ 15.0f };
 
+	float m_stickyStrength{ 1.0f };
+	float m_stickyAngle{ 55.0f };
+	float2 m_stickyRange{ 0.4f, 2.0f };
+	float m_maxStickyHeight{ 30.0f };
+
 	float m_abrasionStrength{ 0.0f };
 	float m_abrasionThreshold{ 0.1f };
 	int m_saltationMode{ static_cast<int>(SaltationMode::PerFrame) };

@@ -29,11 +29,11 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float windSpeed{ length(windVelocity) };
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
+			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 
 			const float scale{ 1.0f };
 
-			const float saltation{ fminf(c_parameters.saltationStrength * saltationResistance * scale, terrain.y) };
+			const float saltation{ fminf(c_parameters.saltationStrength * saltationScale * scale, terrain.y) };
 
 			terrain.y -= saltation;
 			t_terrainArray.write(cell, terrain);
@@ -105,8 +105,8 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			const float windSpeed{ length(t_windArray.read(cell)) };
 			
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float saltationResistance{ (1.0f - resistance.x) * (1.0f - resistance.y) };
-			const float abrasionResistance{ saltationResistance * (1.0f - resistance.z) };
+			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) };
+			const float abrasionScale{ saltationScale * (1.0f - resistance.z) };
 			const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
 			const float depositionProbability = fmaxf(resistance.x,
 				(1.0f - vegetationFactor) + resistance.y * vegetationFactor);
@@ -118,7 +118,7 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 				// TODO: add that as a parameter to the UI
 				// TODO: sand moving via avalanching should cause abrasion?
 				const float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
-				c_parameters.abrasionStrength * abrasionResistance * windSpeed * c_parameters.deltaTime *
+				c_parameters.abrasionStrength * abrasionScale * windSpeed * c_parameters.deltaTime *
 				clamp(1.0f - terrain.y / c_parameters.abrasionThreshold, 0.f, 1.f) * scale : 0.0f };
 
 				terrain.y += abrasion;

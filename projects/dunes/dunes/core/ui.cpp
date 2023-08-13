@@ -39,6 +39,10 @@ void UI::awake()
 	m_simulator->setWindShadowDistance(m_windShadowDistance);
 	m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
 	m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+	m_simulator->setStickyStrength(m_stickyStrength);
+	m_simulator->setStickyAngle(m_stickyAngle);
+	m_simulator->setStickyRange(m_stickyRange);
+	m_simulator->setMaxStickyHeight(m_maxStickyHeight);
 	m_simulator->setAbrasionStrength(m_abrasionStrength);
 	m_simulator->setAbrasionThreshold(m_abrasionThreshold);
 	m_simulator->setSaltationMode(static_cast<SaltationMode>(m_saltationMode));
@@ -225,6 +229,26 @@ void UI::createSimulationNode()
 		if (ImGui::DragFloat("Max. Wind Shadow Angle", &m_maxWindShadowAngle))
 		{
 			m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+		}
+
+		if (ImGui::DragFloat("Sticky Strength", &m_stickyStrength, 0.01f))
+		{
+			m_simulator->setStickyStrength(m_stickyStrength);
+		}
+
+		if (ImGui::DragFloat("Sticky Angle", &m_stickyAngle))
+		{
+			m_simulator->setStickyAngle(m_stickyAngle);
+		}
+
+		if (ImGui::DragFloat2("Sticky Range", &m_stickyRange.x, 0.05f))
+		{
+			m_simulator->setStickyRange(m_stickyRange);
+		}
+
+		if (ImGui::DragFloat("Max. Sticky Height", &m_maxStickyHeight, 0.05f))
+		{
+			m_simulator->setMaxStickyHeight(m_maxStickyHeight);
 		}
 
 		if (ImGui::DragFloat("Abrasion Strength", &m_abrasionStrength, 0.05f))

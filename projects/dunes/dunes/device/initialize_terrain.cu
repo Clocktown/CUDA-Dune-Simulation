@@ -171,9 +171,17 @@ __global__ void initializeTerrainKernel(Array2D<float2> t_terrainArray, Array2D<
                 abrasionParams.scale * seamless_pNoise(abrasionParams.offset, abrasionParams.stretch, uv, abrasionParams.iters, abrasionParams.border))) :
             curr_resistance.z
     };
-	
-	const float2 terrain{ bedrockHeight, fmaxf(sandHeight, 0.f) };
-	t_terrainArray.write(cell, terrain);
+
+    if (cell.x > 1000 && cell.x < 1200 && cell.y > 1000 && cell.y < 1200)
+    {
+        const float2 terrain{ 100.0f, 0.0f };
+        t_terrainArray.write(cell, terrain);
+    }
+    else
+    {
+        const float2 terrain{ bedrockHeight, fmaxf(sandHeight, 0.f) };
+        t_terrainArray.write(cell, terrain);
+    }
 	
 	const float4 resistance{ 0.0f, clamp(vegetationRes, 0.f, 1.f), clamp(abrasionRes, 0.f, 1.f), 0.0f };
 	t_resistanceArray.write(cell, resistance);
