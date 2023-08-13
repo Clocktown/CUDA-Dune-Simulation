@@ -107,7 +107,7 @@ void Transform::update() const
 		m_modelMatrix = glm::scale(glm::mat4_cast(m_localRotation), m_localScale);
 		m_modelMatrix[3] = glm::vec4{ m_localPosition, 1.0f };
 
-		m_inverseModelMatrix = glm::translate(glm::mat4_cast(glm::conjugate(m_localRotation)), -m_localPosition);
+		m_inverseModelMatrix = glm::mat4{ 1.0f };
 
 		for (int i{ 0 }; i < 3; ++i)
 		{
@@ -115,6 +115,8 @@ void Transform::update() const
 			m_inverseModelMatrix[i].y /= m_localScale.y;
 			m_inverseModelMatrix[i].z /= m_localScale.z;
 		}
+
+		m_inverseModelMatrix = glm::translate(m_inverseModelMatrix * glm::mat4_cast(glm::conjugate(m_localRotation)), -m_localPosition);
 		
 		if (hasParent())
 		{
