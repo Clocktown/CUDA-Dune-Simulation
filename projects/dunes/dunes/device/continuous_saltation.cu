@@ -29,7 +29,7 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float windSpeed{ length(windVelocity) };
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) };
+			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) * (1.0f - resistance.w) };
 
 			const float scale{ 1.0f };
 
@@ -108,8 +108,8 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 			const float abrasionScale{ saltationScale * (1.0f - resistance.z) };
 			const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
-			const float depositionProbability = fmaxf(resistance.x,
-				(1.0f - vegetationFactor) + resistance.y * vegetationFactor);
+			const float depositionProbability = fmaxf(fmaxf(resistance.x,
+				(1.0f - vegetationFactor) + resistance.y * vegetationFactor), resistance.w);
 
 
 			const float new_slab = slab * (1.f - depositionProbability);

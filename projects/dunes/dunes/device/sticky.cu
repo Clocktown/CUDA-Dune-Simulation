@@ -74,7 +74,7 @@ __global__ void stickyKernel(const Array2D<float2> t_terrainArray, const Array2D
 	if (angle >= c_parameters.stickyAngle)
 	{
 		const float maxDistance = fminf(cliffHeight, c_parameters.maxStickyHeight);
-		const float erosionResistance{ -1.0f };
+		const float erosionResistance{ -c_parameters.stickyStrength };
 
 		int cellCount{ static_cast<int>(c_parameters.stickyRange.x * maxDistance / c_parameters.gridScale) };
 
