@@ -33,6 +33,10 @@ public:
 	void resume();
 	void pause();
 
+	void setupCoverageCalculation();
+	void calculateCoverage();
+	void cleanupCoverageCalculation();
+
 	// Setters
 	void setWindAngle(const float t_windAngle);
 	void setWindSpeed(const float t_windSpeed);
@@ -70,6 +74,8 @@ public:
 	void setFixedDeltaTime(const float t_fixedDeltaTime);
 	void setInitializationParameters(const InitializationParameters& t_initializationParameters);
 	void setRenderParameters(const RenderParameters& t_renderParameters);
+	void setCoverageThreshold(const float t_threshold);
+	float getCoverage();
 
 	// Getters
 	bool isPaused() const;
@@ -91,6 +97,8 @@ private:
 	RenderParameters m_renderParameters;
 	float m_timeScale;
 	float m_fixedDeltaTime;
+	float m_coverage;
+	float m_coverageThreshold;
 	
 	sthe::TerrainRenderer* m_terrainRenderer;
 	std::shared_ptr<sthe::Terrain> m_terrain;
@@ -108,6 +116,7 @@ private:
 	sthe::cu::Buffer m_tmpBuffer;
 	std::array<sthe::cu::Buffer, 4> m_windWarpingBuffers;
 	std::vector<sthe::cu::Buffer> m_multigrid;
+	std::unique_ptr<sthe::cu::Buffer> m_coverageMap;
 	cudaTextureDesc m_textureDescriptor;
 
 	bool m_isAwake;

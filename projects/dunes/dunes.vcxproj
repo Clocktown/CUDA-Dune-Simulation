@@ -43,6 +43,7 @@
     <CudaCompile Include="dunes\device\constants.cu" />
     <CudaCompile Include="dunes\device\continuous_reptation.cu" />
     <CudaCompile Include="dunes\device\continuous_saltation.cu" />
+    <CudaCompile Include="dunes\device\coverage.cu" />
     <CudaCompile Include="dunes\device\initialize_terrain.cu" />
     <CudaCompile Include="dunes\device\multigrid.cu" />
     <CudaCompile Include="dunes\device\reptation.cu" />

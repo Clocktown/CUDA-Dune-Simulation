@@ -165,6 +165,21 @@ void UI::createSimulationNode()
 			}
 		}
 
+		if (ImGui::TreeNode("Coverage")) {
+			if (ImGui::Checkbox("Calculate Coverage", &m_calcCoverage)) {
+				if (m_calcCoverage) {
+					m_simulator->setupCoverageCalculation();
+				}
+				else {
+					m_simulator->cleanupCoverageCalculation();
+				}
+			}
+			ImGui::DragFloat("Threshold: ", &m_coverageThreshold, 0.0001f, 0.f, 1.f, "%.6f");
+			m_simulator->setCoverageThreshold(m_coverageThreshold);
+			ImGui::Text("Coverage: %f%", m_simulator->getCoverage() * 100.f);
+			ImGui::TreePop();
+		}
+
 		if (ImGui::DragFloat("Wind Angle", &m_windAngle))
 		{
 			m_simulator->setWindAngle(m_windAngle);

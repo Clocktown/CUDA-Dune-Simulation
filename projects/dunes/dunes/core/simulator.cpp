@@ -25,7 +25,10 @@ Simulator::Simulator() :
 	m_isAwake{ false },
 	m_isPaused{ false },
 	m_reinitializeWindWarping{ false },
-	m_renderParameterBuffer{ std::make_shared<sthe::gl::Buffer>(static_cast<int>(sizeof(RenderParameters)), 1) }
+	m_renderParameterBuffer{ std::make_shared<sthe::gl::Buffer>(static_cast<int>(sizeof(RenderParameters)), 1) },
+	m_coverageMap{nullptr},
+	m_coverage{std::numeric_limits<float>::quiet_NaN()},
+	m_coverageThreshold{0.001f}
 {
 	int device;
 	int smCount;
@@ -140,6 +143,10 @@ void Simulator::update()
 		reptation(m_launchParameters);
 		avalanching(m_launchParameters);
 
+		if (m_coverageMap) {
+			calculateCoverage();
+		}
+
 		unmap();
 	}
 }
@@ -231,6 +238,24 @@ void Simulator::setupMultigrid()
 		gridScale *= 2.0f;
 		cellCount /= 4;
 	}
+}
+
+void Simulator::setupCoverageCalculation() {
+	m_coverageMap = std::make_unique<sthe::cu::Buffer>(int(m_simulationParameters.cellCount), int(sizeof(unsigned int)));
+	m_coverage = 0.f;
+}
+
+void Simulator::calculateCoverage() {
+	m_coverage = coverage(m_launchParameters, m_coverageMap->getData<unsigned int>(), m_simulationParameters.cellCount, m_coverageThreshold);
+}
+
+void Simulator::cleanupCoverageCalculation() {
+	m_coverageMap = nullptr;
+	m_coverage = std::numeric_limits<float>::quiet_NaN();
+}
+
+float Simulator::getCoverage() {
+	return m_coverage;
 }
 
 void Simulator::map()
@@ -460,6 +485,10 @@ void Simulator::setInitializationParameters(const InitializationParameters& t_in
 void Simulator::setRenderParameters(const RenderParameters& t_renderParameters) {
 	m_renderParameters = t_renderParameters;
 	m_renderParameterBuffer->upload(reinterpret_cast<char*>(&m_renderParameters), sizeof(RenderParameters));
+}
+
+void Simulator::setCoverageThreshold(const float t_threshold) {
+	m_coverageThreshold = t_threshold;
 }
 
 

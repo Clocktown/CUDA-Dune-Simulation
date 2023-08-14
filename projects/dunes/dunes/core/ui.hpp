@@ -44,6 +44,8 @@ private:
 
 	// Application
 	bool m_vSync{ false };
+	bool m_calcCoverage{false};
+	float m_coverageThreshold{ 0.001f };
 	int m_targetFrameRate{ 0 };
 
 	// Simulation
