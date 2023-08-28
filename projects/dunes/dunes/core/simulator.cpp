@@ -80,6 +80,7 @@ Simulator::~Simulator()
 // Functionality
 void Simulator::reinitialize(const glm::ivec2& t_gridSize, const float t_gridScale)
 {
+	m_time = 0.f;
 	STHE_ASSERT(t_gridSize.x > 0 && (t_gridSize.x & (t_gridSize.x - 1)) == 0, "Grid size x must be a power of 2");
 	STHE_ASSERT(t_gridSize.y > 0 && (t_gridSize.y & (t_gridSize.y - 1)) == 0, "Grid size y must be a power of 2");
 	STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be 0");
@@ -127,6 +128,13 @@ void Simulator::update()
 {
 	if (!m_isPaused)
 	{
+		if (m_enableBidirectional) {
+			float time = m_time / m_windBidirectionalBaseTime;
+			time = fmod(time, m_windBidirectionalR + 1.f);
+			float angle = time >= 1.f ? m_firstWindAngle : m_secondWindAngle;
+			setWindDirection(angle);
+		}
+
 		map();
 
 		if (m_reinitializeWindWarping)
@@ -134,6 +142,8 @@ void Simulator::update()
 			initializeWindWarping(m_launchParameters);
 			m_reinitializeWindWarping = false;
 		}
+
+
 		
 		venturi(m_launchParameters);
 		windWarping(m_launchParameters);
@@ -146,6 +156,8 @@ void Simulator::update()
 		if (m_coverageMap) {
 			calculateCoverage();
 		}
+
+		m_time += m_simulationParameters.deltaTime;
 
 		unmap();
 	}
@@ -286,8 +298,30 @@ void Simulator::unmap()
 }
 
 // Setters
+
+void Simulator::setSecondWindAngle(const float t_windAngle){
+	m_secondWindAngle = t_windAngle;
+}
+
+void Simulator::enableBidirectional(const bool t_enable){
+	m_enableBidirectional = t_enable;
+}
+
+void Simulator::setBidirectionalBaseTime(const float t_time){
+	m_windBidirectionalBaseTime = t_time;
+}
+
+void Simulator::setBidirectionalR(const float t_R){
+	m_windBidirectionalR = t_R;
+}
+
 void Simulator::setWindAngle(const float t_windAngle)
 {
+	m_firstWindAngle = t_windAngle;
+	setWindDirection(t_windAngle);
+}
+
+void Simulator::setWindDirection(const float t_windAngle) {
 	const float windAngle{ glm::radians(t_windAngle) };
 	m_simulationParameters.windDirection = float2{ glm::cos(windAngle), glm::sin(windAngle) };
 }
