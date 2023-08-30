@@ -62,6 +62,7 @@ __global__ void stickyKernel(const Array2D<float2> t_windArray, Array2D<float4> 
 
 	float2 nextPosition{ make_float2(cell) };
 	const float erosionResistance{ -c_parameters.stickyStrength };
+	float4 resistance{ t_resistanceArray.read(cell) };
 
 	for (float distance = c_parameters.gridScale; distance <= c_parameters.maxStickyHeight; distance += c_parameters.gridScale)
 	{
@@ -73,7 +74,6 @@ __global__ void stickyKernel(const Array2D<float2> t_windArray, Array2D<float4> 
 
 		if (cliffHeight > 0.0f)
 		{
-			float4 resistance{ t_resistanceArray.read(nextCell) };
 			const float maxDistance{ fminf(cliffHeight, c_parameters.maxStickyHeight) };
 			const float erosionDistance{ c_parameters.stickyRange.x * maxDistance };
 			const float stickyDistance{ c_parameters.stickyRange.y * maxDistance };
@@ -89,9 +89,12 @@ __global__ void stickyKernel(const Array2D<float2> t_windArray, Array2D<float4> 
 				t_resistanceArray.write(cell, resistance);
 			}
 
-			break;
+			return;
 		}
 	}
+
+	resistance.w = 0.0f;
+	t_resistanceArray.write(cell, resistance);
 }
 
 void sticky(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters)

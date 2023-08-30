@@ -79,7 +79,7 @@ namespace dunes
 
 		float m_abrasionStrength{ 0.0f };
 		float m_abrasionThreshold{ 0.1f };
-		int m_saltationMode{ static_cast<int>(SaltationMode::PerFrame) };
+		int m_saltationMode{ static_cast<int>(SaltationMode::Continuous) };
 		float m_saltationStrength{ 0.5f };
 		float m_reptationStrength{ 0.0f };
 
