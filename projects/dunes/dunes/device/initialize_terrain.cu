@@ -189,9 +189,30 @@ __global__ void initializeTerrainKernel(Array2D<float2> t_terrainArray, Array2D<
 	t_slabBuffer[getCellIndex(cell)] = 0.0f;
 }
 
+__global__ void addSandForCoverageKernel(Array2D<float2> t_terrainArray, float amount)
+{
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell))
+	{
+		return;
+	}
+
+    float2 curr_terrain = t_terrainArray.read(cell);
+
+    curr_terrain.y += amount;
+    curr_terrain.y = fmaxf(curr_terrain.y, 0.f);
+
+    t_terrainArray.write(cell, curr_terrain);
+}
+
 void initializeTerrain(const LaunchParameters& t_launchParameters, const InitializationParameters& t_initializationParameters)
 {
 	initializeTerrainKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_initializationParameters);
+}
+
+void addSandForCoverage(const LaunchParameters& t_launchParameters, float amount) {
+    addSandForCoverageKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, amount);
 }
 
 }

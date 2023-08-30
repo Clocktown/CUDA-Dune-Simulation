@@ -76,6 +76,12 @@ namespace dunes
 		void setRenderParameters(const RenderParameters& t_renderParameters);
 		void setCoverageThreshold(const float t_threshold);
 		float getCoverage();
+		void setTargetCoverage(const float t_targetCoverage);
+		void setCoverageSpawnAmount(const float t_amount);
+		void setSpawnSteps(const int t_steps);
+		void setConstantCoverage(const bool t_constantCoverage);
+		void setConstantCoverageAllowRemove(const bool t_constantCoverageAllowRemove);
+
 
 		void setSecondWindAngle(const float t_windAngle);
 		void enableBidirectional(const bool t_enable);
@@ -107,6 +113,12 @@ namespace dunes
 		float m_fixedDeltaTime;
 		float m_coverage;
 		float m_coverageThreshold;
+		bool m_constantCoverage{ false };
+		bool m_constantCoverageAllowRemove{ false };
+		float m_targetCoverage{ 0.5f };
+		float m_coverageSpawnAmount{ 0.01f };
+		int m_spawnSteps{ 10 };
+		int m_timeStep = 0;
 
 		float m_time{ 0.f };
 		float m_firstWindAngle{ 0.0f };

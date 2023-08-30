@@ -61,6 +61,18 @@ namespace dunes
 		m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
 		m_simulator->setTimeScale(m_timeScale);
 		m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
+
+		m_simulator->setCoverageThreshold(m_coverageThreshold);
+		m_simulator->setTargetCoverage(m_targetCoverage);
+		m_simulator->setCoverageSpawnAmount(m_coverageSpawnAmount);
+		m_simulator->setSpawnSteps(m_spawnSteps);
+		m_simulator->setConstantCoverage(m_constantCoverage);
+		m_simulator->setConstantCoverageAllowRemove(m_constantCoverageAllowRemove);
+
+		m_simulator->setSecondWindAngle(m_secondWindAngle);
+		m_simulator->enableBidirectional(m_enableBidirectional);
+		m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
+		m_simulator->setBidirectionalR(m_windBidirectionalR);
 	}
 
 	void UI::onGUI()
@@ -172,6 +184,23 @@ namespace dunes
 					}
 					else {
 						m_simulator->cleanupCoverageCalculation();
+					}
+				}
+				if (m_calcCoverage) {
+					if (ImGui::Checkbox("Constant Coverage", &m_constantCoverage)) {
+						m_simulator->setConstantCoverage(m_constantCoverage);
+					}
+					if (ImGui::Checkbox("Allow Removal", &m_constantCoverageAllowRemove)) {
+						m_simulator->setConstantCoverageAllowRemove(m_constantCoverageAllowRemove);
+					}
+					if (ImGui::DragFloat("Target Coverage", &m_targetCoverage)) {
+						m_simulator->setTargetCoverage(m_targetCoverage);
+					}
+					if (ImGui::DragFloat("Spawn Amount", &m_coverageSpawnAmount)) {
+						m_simulator->setCoverageSpawnAmount(m_coverageSpawnAmount);
+					}
+					if (ImGui::DragInt("Spawn every n steps", &m_spawnSteps)) {
+						m_simulator->setSpawnSteps(m_spawnSteps);
 					}
 				}
 				ImGui::DragFloat("Threshold: ", &m_coverageThreshold, 0.0001f, 0.f, 1.f, "%.6f");

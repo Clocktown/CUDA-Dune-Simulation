@@ -45,17 +45,22 @@ namespace dunes
 		// Application
 		bool m_vSync{ false };
 		bool m_calcCoverage{ false };
-		float m_coverageThreshold{ 0.001f };
+		float m_coverageThreshold{ 0.1f };
 		int m_targetFrameRate{ 0 };
+		bool m_constantCoverage{ false };
+		bool m_constantCoverageAllowRemove{ false };
+		float m_targetCoverage{ 1.0f };
+		float m_coverageSpawnAmount{ 1.f };
+		int m_spawnSteps{ 10 };
 
 		// Simulation
 		glm::ivec2 m_gridSize{ 2048, 2048 };
 		float m_gridScale{ 1.0f };
 
 		float m_windAngle{ 0.0f };
-		float m_secondWindAngle{ 0.0f };
-		float m_windBidirectionalR{ 1.f };
-		float m_windBidirectionalBaseTime{ 1.f };
+		float m_secondWindAngle{ 45.0f };
+		float m_windBidirectionalR{ 2.f };
+		float m_windBidirectionalBaseTime{ 15.f };
 		bool m_enableBidirectional{ false };
 		float m_windSpeed{ 30.0f };
 
