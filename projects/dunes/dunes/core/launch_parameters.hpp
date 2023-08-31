@@ -34,6 +34,11 @@ enum class AvalancheMode : unsigned char
 	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid
 };
 
+enum class BedrockAvalancheMode : unsigned char
+{
+	ToSand, ToBedrock
+};
+
 struct LaunchParameters
 {
 	unsigned int blockSize1D;
@@ -50,7 +55,9 @@ struct LaunchParameters
 	WindWarpingMode windWarpingMode{ WindWarpingMode::None };
 	WindShadowMode windShadowMode{ WindShadowMode::Linear };
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
+	BedrockAvalancheMode bedrockAvalancheMode{ BedrockAvalancheMode::ToSand };
 	int avalancheIterations{ 50 };
+	int bedrockAvalancheIterations{ 2 };
 	int avalancheSoftIterationModulus{ 10 };
 	int avalancheFinalSoftIterations{ 5 };
 	int multigridLevelCount{ 3 };

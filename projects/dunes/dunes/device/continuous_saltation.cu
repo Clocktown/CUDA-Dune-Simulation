@@ -117,9 +117,10 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 				const float scale{ slab + 0.0001 }; // 0.0001 is the amount of abrasion that happens with purely wind, no sand 
 				// TODO: add that as a parameter to the UI
 				// TODO: sand moving via avalanching should cause abrasion?
-				const float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
+				float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
 				c_parameters.abrasionStrength * abrasionScale * windSpeed * c_parameters.deltaTime *
 				clamp(1.0f - terrain.y / c_parameters.abrasionThreshold, 0.f, 1.f) * scale : 0.0f };
+				//abrasion = fminf(abrasion, terrain.x);
 
 				terrain.y += abrasion;
 				terrain.x -= abrasion;

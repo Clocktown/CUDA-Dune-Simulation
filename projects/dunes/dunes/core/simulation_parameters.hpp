@@ -10,6 +10,7 @@
 #define TAN33 0.6494f
 #define TAN45 1.0f
 #define TAN55 1.4281f
+#define TAN68 2.5f
 
 namespace dunes
 {
@@ -68,6 +69,7 @@ struct SimulationParameters
 
 	float avalancheStrength{ 0.5f };
 	float avalancheAngle{ TAN33 };
+	float bedrockAngle{ TAN68 };
 	float vegetationAngle{ TAN45 };
 
 	float deltaTime{ 1.0f };
@@ -82,3 +84,4 @@ void upload(const SimulationParameters& t_simulationParameters);
 #undef TAN33
 #undef TAN45
 #undef TAN55
+#undef TAN68

@@ -49,11 +49,14 @@ namespace dunes
 		m_simulator->setSaltationStrength(m_saltationStrength);
 		m_simulator->setReptationStrength(m_reptationStrength);
 		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
+		m_simulator->setBedrockAvalancheMode(static_cast<BedrockAvalancheMode>(m_bedrockAvalancheMode));
 		m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
 		m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 		m_simulator->setAvalancheIterations(m_avalancheIterations);
+		m_simulator->setBedrockAvalancheIterations(m_bedrockAvalancheIterations);
 		m_simulator->setAvalancheStrength(m_avalancheStrength);
 		m_simulator->setAvalancheAngle(m_avalancheAngle);
+		m_simulator->setBedrockAngle(m_bedrockAngle);
 		m_simulator->setVegetationAngle(m_vegetationAngle);
 		m_simulator->setMultigridLevelCount(m_multigridLevelCount);
 		m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
@@ -203,220 +206,274 @@ namespace dunes
 						m_simulator->setSpawnSteps(m_spawnSteps);
 					}
 				}
-				ImGui::DragFloat("Threshold: ", &m_coverageThreshold, 0.0001f, 0.f, 1.f, "%.6f");
+				ImGui::DragFloat("Threshold", &m_coverageThreshold, 0.0001f, 0.f, 1.f, "%.6f");
 				m_simulator->setCoverageThreshold(m_coverageThreshold);
 				ImGui::Text("Coverage: %f%", m_simulator->getCoverage() * 100.f);
 				ImGui::TreePop();
 			}
 
 			if (ImGui::TreeNode("Wind")) {
-				if (ImGui::DragFloat("Wind Angle", &m_windAngle))
+				if (ImGui::DragFloat("Speed", &m_windSpeed))
+				{
+					m_simulator->setWindSpeed(m_windSpeed);
+				}
+				if (ImGui::DragFloat("Angle", &m_windAngle))
 				{
 					m_simulator->setWindAngle(m_windAngle);
 				}
 
-				if (ImGui::DragFloat("Wind Speed", &m_windSpeed))
+				if (ImGui::DragFloat("Venturi", &m_venturiStrength, 0.005f))
 				{
-					m_simulator->setWindSpeed(m_windSpeed);
-				}
-				if (ImGui::TreeNode("Venturi & Warping")) {
-					if (ImGui::DragFloat("Venturi Strength", &m_venturiStrength, 0.005f))
-					{
-						m_simulator->setVenturiStrength(m_venturiStrength);
-					}
-
-					if (ImGui::Combo("Wind Warping Mode", &m_windWarpingMode, windWarpingModes, IM_ARRAYSIZE(windWarpingModes)))
-					{
-						m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
-					}
-
-					if (ImGui::DragInt("Wind Warping Count", &m_windWarpingCount))
-					{
-						m_simulator->setWindWarpingCount(m_windWarpingCount);
-					}
-
-					if (ImGui::DragFloat("Wind Warping Divisor", &m_windWarpingDivisor))
-					{
-						m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
-					}
-
-					if (ImGui::DragFloat4("Wind Warping Radii", m_windWarpingRadii.data()))
-					{
-						for (int i{ 0 }; i < 4; ++i)
-						{
-							m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
-						}
-					}
-
-					if (ImGui::DragFloat4("Wind Warping Strenghts", m_windWarpingStrengths.data(), 0.05f))
-					{
-						for (int i{ 0 }; i < 4; ++i)
-						{
-							m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
-						}
-					}
-					ImGui::TreePop();
-				}
-				if (ImGui::TreeNode("Shadow")) {
-					if (ImGui::Combo("Wind Shadow Mode", &m_windShadowMode, windShadowModes, IM_ARRAYSIZE(windShadowModes)))
-					{
-						m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
-					}
-
-					if (ImGui::DragFloat("Wind Shadow Distance", &m_windShadowDistance))
-					{
-						m_simulator->setWindShadowDistance(m_windShadowDistance);
-					}
-
-					if (ImGui::DragFloat("Min. Wind Shadow Angle", &m_minWindShadowAngle))
-					{
-						m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
-					}
-
-					if (ImGui::DragFloat("Max. Wind Shadow Angle", &m_maxWindShadowAngle))
-					{
-						m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
-					}
-					ImGui::TreePop();
-				}
-
-				if (ImGui::TreeNode("Bidirectional")) {
-					if (ImGui::Checkbox("Enable", &m_enableBidirectional)) {
-						m_simulator->enableBidirectional(m_enableBidirectional);
-					}
-					if (m_enableBidirectional) {
-						if (ImGui::DragFloat("Second Angle", &m_secondWindAngle))
-						{
-							m_simulator->setSecondWindAngle(m_secondWindAngle);
-						}
-						if (ImGui::DragFloat("R", &m_windBidirectionalR))
-						{
-							m_simulator->setBidirectionalR(m_windBidirectionalR);
-						}
-						if (ImGui::DragFloat("Base Time", &m_windBidirectionalBaseTime))
-						{
-							m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
-						}
-					}
-					ImGui::TreePop();
+					m_simulator->setVenturiStrength(m_venturiStrength);
 				}
 
 				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Sticky Strength", &m_stickyStrength, 0.01f))
+			if (ImGui::TreeNode("Bidirectional Wind Scheme"))
 			{
-				m_simulator->setStickyStrength(m_stickyStrength);
+				if (ImGui::Checkbox("Enable", &m_enableBidirectional))
+				{
+					m_simulator->enableBidirectional(m_enableBidirectional);
+				}
+				if (ImGui::DragFloat("Second Angle", &m_secondWindAngle))
+				{
+					m_simulator->setSecondWindAngle(m_secondWindAngle);
+				}
+				if (ImGui::DragFloat("Ratio", &m_windBidirectionalR))
+				{
+					m_simulator->setBidirectionalR(m_windBidirectionalR);
+				}
+				if (ImGui::DragFloat("Period", &m_windBidirectionalBaseTime))
+				{
+					m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Sticky Angle", &m_stickyAngle))
+			if (ImGui::TreeNode("Wind Warping"))
 			{
-				m_simulator->setStickyAngle(m_stickyAngle);
+
+				if (ImGui::Combo("Mode", &m_windWarpingMode, windWarpingModes, IM_ARRAYSIZE(windWarpingModes)))
+				{
+					m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
+				}
+
+				if (ImGui::DragInt("Count", &m_windWarpingCount))
+				{
+					m_simulator->setWindWarpingCount(m_windWarpingCount);
+				}
+
+				if (ImGui::DragFloat("Divisor", &m_windWarpingDivisor))
+				{
+					m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
+				}
+
+				if (ImGui::DragFloat4("Strenghts", m_windWarpingStrengths.data(), 0.05f))
+				{
+					for (int i{ 0 }; i < 4; ++i)
+					{
+						m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
+					}
+				}
+
+				if (ImGui::DragFloat4("Radii", m_windWarpingRadii.data()))
+				{
+					for (int i{ 0 }; i < 4; ++i)
+					{
+						m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
+					}
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat2("Sticky Range", &m_stickyRange.x, 0.05f))
+			if (ImGui::TreeNode("Wind Shadow"))
 			{
-				m_simulator->setStickyRange(m_stickyRange);
+				if (ImGui::Combo("Mode", &m_windShadowMode, windShadowModes, IM_ARRAYSIZE(windShadowModes)))
+				{
+					m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
+				}
+
+				if (ImGui::DragFloat("Distance", &m_windShadowDistance))
+				{
+					m_simulator->setWindShadowDistance(m_windShadowDistance);
+				}
+
+				if (ImGui::DragFloat("Min. Angle", &m_minWindShadowAngle))
+				{
+					m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
+				}
+
+				if (ImGui::DragFloat("Max. Angle", &m_maxWindShadowAngle))
+				{
+					m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+				}
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Max. Sticky Height", &m_maxStickyHeight, 0.05f))
+			if (ImGui::TreeNode("Echo Dunes"))
 			{
-				m_simulator->setMaxStickyHeight(m_maxStickyHeight);
+				if (ImGui::DragFloat("Strength", &m_stickyStrength, 0.01f))
+				{
+					m_simulator->setStickyStrength(m_stickyStrength);
+				}
+
+				if (ImGui::DragFloat2("Range", &m_stickyRange.x, 0.05f))
+				{
+					m_simulator->setStickyRange(m_stickyRange);
+				}
+
+				if (ImGui::DragFloat("Max. Height", &m_maxStickyHeight, 0.05f))
+				{
+					m_simulator->setMaxStickyHeight(m_maxStickyHeight);
+				}
+				if (ImGui::DragFloat("Angle", &m_stickyAngle))
+				{
+					m_simulator->setStickyAngle(m_stickyAngle);
+				}
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Abrasion Strength", &m_abrasionStrength, 0.05f))
+			if (ImGui::TreeNode("Saltation"))
 			{
-				m_simulator->setAbrasionStrength(m_abrasionStrength);
+				if (ImGui::Combo("Mode", &m_saltationMode, saltationModes, IM_ARRAYSIZE(saltationModes)))
+				{
+					m_simulator->setSaltationMode(static_cast<SaltationMode>(m_saltationMode));
+				}
+
+				if (ImGui::DragFloat("Strength", &m_saltationStrength, 0.05f))
+				{
+					m_simulator->setSaltationStrength(m_saltationStrength);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Abrasion Threshold", &m_abrasionThreshold, 0.05f))
+			if (ImGui::TreeNode("Abrasion"))
 			{
-				m_simulator->setAbrasionThreshold(m_abrasionThreshold);
+				if (ImGui::DragFloat("Strength", &m_abrasionStrength, 0.05f))
+				{
+					m_simulator->setAbrasionStrength(m_abrasionStrength);
+				}
+
+				if (ImGui::DragFloat("Threshold", &m_abrasionThreshold, 0.05f))
+				{
+					m_simulator->setAbrasionThreshold(m_abrasionThreshold);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::Combo("Saltation Mode", &m_saltationMode, saltationModes, IM_ARRAYSIZE(saltationModes)))
+			if (ImGui::TreeNode("Reptation"))
 			{
-				m_simulator->setSaltationMode(static_cast<SaltationMode>(m_saltationMode));
+				if (ImGui::DragFloat("Strength", &m_reptationStrength, 0.05f))
+				{
+					m_simulator->setReptationStrength(m_reptationStrength);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Saltation Strength", &m_saltationStrength, 0.05f))
+			if (ImGui::TreeNode("Avalanching"))
 			{
-				m_simulator->setSaltationStrength(m_saltationStrength);
+				if (ImGui::Combo("Mode", &m_avalancheMode, avalancheModes, IM_ARRAYSIZE(avalancheModes)))
+				{
+					m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
+				}
+
+				if (ImGui::DragInt("Iterations", &m_avalancheIterations))
+				{
+					m_simulator->setAvalancheIterations(m_avalancheIterations);
+				}
+
+				if (ImGui::DragInt("Soft Iterations", &m_avalancheFinalSoftIterations))
+				{
+					m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
+				}
+
+				if (ImGui::DragInt("Soft Iteration Modulus", &m_avalancheSoftIterationModulus))
+				{
+					m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
+				}
+
+				if (ImGui::DragFloat("Strength", &m_avalancheStrength, 0.05f))
+				{
+					m_simulator->setAvalancheStrength(m_avalancheStrength);
+				}
+
+				if (ImGui::DragFloat("Sand Angle", &m_avalancheAngle))
+				{
+					m_simulator->setAvalancheAngle(m_avalancheAngle);
+				}
+
+				if (ImGui::DragFloat("Vegetation Angle", &m_vegetationAngle))
+				{
+					m_simulator->setVegetationAngle(m_vegetationAngle);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragFloat("Reptation Strength", &m_reptationStrength, 0.05f))
+			if (ImGui::TreeNode("Multigrid Avalanching"))
 			{
-				m_simulator->setReptationStrength(m_reptationStrength);
+				if (ImGui::DragInt("Level Count", &m_multigridLevelCount))
+				{
+					m_simulator->setMultigridLevelCount(m_multigridLevelCount);
+				}
+
+				if (ImGui::DragInt("Presweep Count", &m_multigridPresweepCount))
+				{
+					m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
+				}
+
+				if (ImGui::DragInt("Postsweep Count", &m_multigridPostsweepCount))
+				{
+					m_simulator->setMultigridPostsweepCount(m_multigridPostsweepCount);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::Combo("Avalanche Mode", &m_avalancheMode, avalancheModes, IM_ARRAYSIZE(avalancheModes)))
+			if (ImGui::TreeNode("Bedrock Avalanching"))
 			{
-				m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
+				if (ImGui::Combo("Mode", &m_bedrockAvalancheMode, bedrockAvalancheModes, IM_ARRAYSIZE(bedrockAvalancheModes)))
+				{
+					m_simulator->setBedrockAvalancheMode(static_cast<BedrockAvalancheMode>(m_bedrockAvalancheMode));
+				}
+
+				if (ImGui::DragInt("Iterations", &m_bedrockAvalancheIterations))
+				{
+					m_simulator->setBedrockAvalancheIterations(m_bedrockAvalancheIterations);
+				}
+
+				if (ImGui::DragFloat("Angle", &m_bedrockAngle))
+				{
+					m_simulator->setBedrockAngle(m_bedrockAngle);
+				}
+
+				ImGui::TreePop();
 			}
 
-			if (ImGui::DragInt("Avalanche Iterations", &m_avalancheIterations))
+			if (ImGui::TreeNode("Time"))
 			{
-				m_simulator->setAvalancheIterations(m_avalancheIterations);
-			}
+				if (ImGui::Combo("Mode", &m_timeMode, timeModes, IM_ARRAYSIZE(timeModes)))
+				{
+					m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
+				}
 
-			if (ImGui::DragInt("Avalanche Soft Iterations", &m_avalancheFinalSoftIterations))
-			{
-				m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
-			}
+				if (ImGui::DragFloat("Scale", &m_timeScale))
+				{
+					m_simulator->setTimeScale(m_timeScale);
+				}
 
-			if (ImGui::DragInt("Avalanche Soft Iteration Modulus", &m_avalancheSoftIterationModulus))
-			{
-				m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
-			}
+				if (ImGui::DragFloat("Fixed Delta Time", &m_fixedDeltaTime, 0.05f))
+				{
+					m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
+				}
 
-			if (ImGui::DragFloat("Avalanche Strength", &m_avalancheStrength, 0.05f))
-			{
-				m_simulator->setAvalancheStrength(m_avalancheStrength);
-			}
-
-			if (ImGui::DragFloat("Avalanche Angle", &m_avalancheAngle))
-			{
-				m_simulator->setAvalancheAngle(m_avalancheAngle);
-			}
-
-			if (ImGui::DragFloat("Vegetation Angle", &m_vegetationAngle))
-			{
-				m_simulator->setVegetationAngle(m_vegetationAngle);
-			}
-
-			if (ImGui::DragInt("Multigrid Level Count", &m_multigridLevelCount))
-			{
-				m_simulator->setMultigridLevelCount(m_multigridLevelCount);
-			}
-
-			if (ImGui::DragInt("Multigrid Presweep Count", &m_multigridPresweepCount))
-			{
-				m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
-			}
-
-			if (ImGui::DragInt("Multigrid Postsweep Count", &m_multigridPostsweepCount))
-			{
-				m_simulator->setMultigridPostsweepCount(m_multigridPostsweepCount);
-			}
-
-			if (ImGui::DragInt("Avalanche Soft Iteration Modulus", &m_avalancheSoftIterationModulus))
-			{
-				m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
-			}
-
-			if (ImGui::Combo("Time Mode", &m_timeMode, timeModes, IM_ARRAYSIZE(timeModes)))
-			{
-				m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
-			}
-
-			if (ImGui::DragFloat("Time Scale", &m_timeScale))
-			{
-				m_simulator->setTimeScale(m_timeScale);
-			}
-
-			if (ImGui::DragFloat("Fixed Delta Time", &m_fixedDeltaTime, 0.05f))
-			{
-				m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
+				ImGui::TreePop();
 			}
 
 			ImGui::TreePop();

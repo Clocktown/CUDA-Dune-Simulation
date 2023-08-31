@@ -60,11 +60,14 @@ namespace dunes
 		void setSaltationStrength(const float t_saltationStrength);
 		void setReptationStrength(const float t_reptationStrength);
 		void setAvalancheMode(const AvalancheMode t_avalancheMode);
+		void setBedrockAvalancheMode(const BedrockAvalancheMode t_bedrockAvalancheMode);
 		void setAvalancheIterations(const int t_avalancheIterations);
 		void setAvalancheFinalSoftIterations(const int t_avalancheFinalSoftIterations);
 		void setAvalancheSoftIterationModulus(const int t_avalancheSoftIterationModulus);
+		void setBedrockAvalancheIterations(const int t_bedrockAvalancheIterations);
 		void setAvalancheStrength(const float t_avalancheStrength);
 		void setAvalancheAngle(const float t_avalancheAngle);
+		void setBedrockAngle(const float t_bedrockAngle);
 		void setVegetationAngle(const float t_vegetationAngle);
 		void setMultigridLevelCount(const int t_multigridLevelCount);
 		void setMultigridPresweepCount(const int t_multigridPresweepCount);

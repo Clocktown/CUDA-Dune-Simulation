@@ -40,6 +40,7 @@
   <ItemGroup>
     <CudaCompile Include="dunes\core\simulation_parameters.cu" />
     <CudaCompile Include="dunes\device\avalanching.cu" />
+    <CudaCompile Include="dunes\device\bedrock_avalancing.cu" />
     <CudaCompile Include="dunes\device\constants.cu" />
     <CudaCompile Include="dunes\device\continuous_reptation.cu" />
     <CudaCompile Include="dunes\device\continuous_saltation.cu" />

@@ -30,6 +30,7 @@ namespace dunes
 		static inline const char* windWarpingModes[2]{ "None", "Standard" };
 		static inline const char* windShadowModes[2]{ "Linear", "Curved" };
 		static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
+		static inline const char* bedrockAvalancheModes[3]{ "To Sand", "To Bedrock" };
 		static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 		static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };
 
@@ -62,7 +63,7 @@ namespace dunes
 		float m_windBidirectionalR{ 2.f };
 		float m_windBidirectionalBaseTime{ 15.f };
 		bool m_enableBidirectional{ false };
-		float m_windSpeed{ 30.0f };
+		float m_windSpeed{ 10.0f };
 
 		float m_venturiStrength{ 0.005f };
 
@@ -89,17 +90,20 @@ namespace dunes
 		float m_reptationStrength{ 0.0f };
 
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
+		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };
 		int m_avalancheIterations{ 50 };
+		int m_bedrockAvalancheIterations{ 50 };
 		int m_avalancheSoftIterationModulus{ 10 };
 		int m_avalancheFinalSoftIterations{ 5 };
 		float m_avalancheStrength{ 0.5f };
 		float m_avalancheAngle{ 33.0f };
+		float m_bedrockAngle{ 68.0f };
 		float m_vegetationAngle{ 45.0f };
 		int m_multigridLevelCount{ 3 };
 		int m_multigridPresweepCount{ 0 };
 		int m_multigridPostsweepCount{ 0 };
 
-		int m_timeMode{ static_cast<int>(TimeMode::DeltaTime) };
+		int m_timeMode{ static_cast<int>(TimeMode::FixedDeltaTime) };
 		float m_timeScale{ 15.0f };
 		float m_fixedDeltaTime{ 0.02f };
 

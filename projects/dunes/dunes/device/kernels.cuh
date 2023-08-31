@@ -17,6 +17,7 @@ void sticky(const LaunchParameters& t_launchParameters, const SimulationParamete
 void saltation(const LaunchParameters& t_launchParameters);
 void reptation(const LaunchParameters& t_launchParameters);
 void avalanching(const LaunchParameters& t_launchParameters);
+void bedrockAvalanching(const LaunchParameters& t_launchParameters);
 
 float coverage(const LaunchParameters& t_launchParameters, unsigned int* coverageMap, int num_cells, float threshold);
 
