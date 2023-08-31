@@ -68,6 +68,14 @@ CU_INLINE CU_HOST_DEVICE float bilerp(const float a00, const float a10, const fl
 	return lerp(lerp(a00, a10, u), lerp(a01, a11, u), v);
 }
 
+CU_INLINE CU_HOST_DEVICE float2 abs(const float2& v) {
+	return float2{ fabs(v.x), fabs(v.y) };
+}
+
+CU_INLINE CU_HOST_DEVICE float2 max(const float2& a, const float2& b) {
+	return float2{ fmaxf(a.x, b.x), fmaxf(a.y, b.y) };
+}
+
 CU_INLINE CU_HOST_DEVICE int2 make_int2(const uint2& a)
 {
 	return int2{ static_cast<int>(a.x), static_cast<int>(a.y) };
