@@ -168,6 +168,10 @@ void Simulator::update()
 		m_timeStep++;
 
 		unmap();
+
+		if (m_stopIterations != 0 && m_timeStep % m_stopIterations == 0) {
+			m_isPaused = true;
+		}
 	}
 }
 
@@ -578,7 +582,15 @@ void Simulator::setCoverageThreshold(const float t_threshold)
 	m_coverageThreshold = t_threshold;
 }
 
+void Simulator::setStopIterations(const int t_stopIterations) {
+	m_stopIterations = t_stopIterations;
+}
+
 // Getters
+int Simulator::getTimeStep() const {
+	return m_timeStep;
+}
+
 bool Simulator::isPaused() const
 {
 	return m_isPaused;

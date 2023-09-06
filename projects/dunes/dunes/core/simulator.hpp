@@ -91,8 +91,11 @@ namespace dunes
 		void setBidirectionalBaseTime(const float t_time);
 		void setBidirectionalR(const float t_R);
 
+		void setStopIterations(const int t_stopIterations);
+
 
 		// Getters
+		int getTimeStep() const;
 		bool isPaused() const;
 	private:
 		// Functionality
@@ -122,6 +125,7 @@ namespace dunes
 		float m_coverageSpawnAmount{ 0.01f };
 		int m_spawnSteps{ 10 };
 		int m_timeStep = 0;
+		int m_stopIterations = 0;
 
 		float m_time{ 0.f };
 		float m_firstWindAngle{ 0.0f };

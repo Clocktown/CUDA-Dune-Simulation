@@ -134,7 +134,7 @@ namespace dunes
 
 		if (cell.x > 1000 && cell.x < 1200 && cell.y > 1000 && cell.y < 1200)
 		{
-			const float2 terrain{ 100.0f, 0.0f };
+			const float2 terrain{ 0.0f, 500.0f };
 			t_terrainArray.write(cell, terrain);
 		}
 		else

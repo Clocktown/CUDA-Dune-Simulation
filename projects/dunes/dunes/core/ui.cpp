@@ -76,6 +76,7 @@ namespace dunes
 		m_simulator->enableBidirectional(m_enableBidirectional);
 		m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
 		m_simulator->setBidirectionalR(m_windBidirectionalR);
+		m_simulator->setStopIterations(m_stopIterations);
 	}
 
 	void UI::onGUI()
@@ -179,6 +180,11 @@ namespace dunes
 					m_simulator->pause();
 				}
 			}
+
+			if (ImGui::DragInt("Stop after", &m_stopIterations, 0.1f, 0, 10000)) {
+				m_simulator->setStopIterations(m_stopIterations);
+			}
+			ImGui::Text("Iterations: %i", m_simulator->getTimeStep());
 
 			if (ImGui::TreeNode("Coverage")) {
 				if (ImGui::Checkbox("Calculate Coverage", &m_calcCoverage)) {

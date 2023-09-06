@@ -53,6 +53,7 @@ namespace dunes
 		float m_targetCoverage{ 1.0f };
 		float m_coverageSpawnAmount{ 1.f };
 		int m_spawnSteps{ 10 };
+		int m_stopIterations{ 0 };
 
 		// Simulation
 		glm::ivec2 m_gridSize{ 2048, 2048 };
@@ -86,7 +87,7 @@ namespace dunes
 		float m_abrasionStrength{ 0.0f };
 		float m_abrasionThreshold{ 0.1f };
 		int m_saltationMode{ static_cast<int>(SaltationMode::Continuous) };
-		float m_saltationStrength{ 0.5f };
+		float m_saltationStrength{ 1.f };
 		float m_reptationStrength{ 0.0f };
 
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
