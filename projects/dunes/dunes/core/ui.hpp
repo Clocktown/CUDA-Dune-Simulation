@@ -29,7 +29,7 @@ namespace dunes
 		static inline const char* saltationModes[2]{ "Per Frame", "Continuous" };
 		static inline const char* windWarpingModes[2]{ "None", "Standard" };
 		static inline const char* windShadowModes[2]{ "Linear", "Curved" };
-		static inline const char* avalancheModes[5]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid" };
+		static inline const char* avalancheModes[6]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid", "Taylor"};
 		static inline const char* bedrockAvalancheModes[2]{ "To Sand", "To Bedrock" };
 		static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 		static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };

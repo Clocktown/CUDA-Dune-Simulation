@@ -31,7 +31,7 @@ enum class WindShadowMode : unsigned char
 
 enum class AvalancheMode : unsigned char
 {
-	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid
+	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid, Taylor
 };
 
 enum class BedrockAvalancheMode : unsigned char

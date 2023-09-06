@@ -162,6 +162,69 @@ __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanc
 	}
 }
 
+__global__ void atomicInPlaceTaylorKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
+{
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell))
+	{
+		return;
+	}
+
+	const int cellIndex{ getCellIndex(cell) };
+
+	const float2 terrain{ t_terrainBuffer[cellIndex] };
+	const float height{ terrain.x + terrain.y };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
+
+	int nextCellIndices[8];
+	float avalanches[8];
+	float avalancheSum{ 0.0f };
+	float maxTan{ 0.0f };
+	float Bmax{ 0.0f };
+
+	for (int i{ 0 }; i < 8; ++i)
+	{
+		nextCellIndices[i] = getCellIndex(getWrappedCell(cell + c_offsets[i]));
+		const float2 nextTerrain{ t_terrainBuffer[nextCellIndices[i]] };
+		const float nextHeight{ nextTerrain.x + nextTerrain.y };
+
+		const float heightDifference{ height - nextHeight };
+		const float tanToNeighbor{ heightDifference * c_rDistances[i] * c_parameters.rGridScale };
+		if (tanToNeighbor > avalancheAngle) {
+			avalanches[i] = tanToNeighbor;
+			avalancheSum += avalanches[i];
+		}
+		else {
+			avalanches[i] = 0.f;
+		}
+		
+		if (avalanches[i] > maxTan) {
+			maxTan = avalanches[i];
+			Bmax = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.f);
+		}
+	}
+
+	if (avalancheSum > 0.0f)
+	{
+		const float k_c = c_parameters.avalancheStrength;
+		const float rAvalancheSum{ 1.0f / avalancheSum };
+
+
+		const float scale{ k_c * Bmax * rAvalancheSum };
+
+		for (int i{ 0 }; i < 8; ++i)
+		{
+			if (avalanches[i] > 0.0f)
+			{
+				atomicAdd(&t_terrainBuffer[nextCellIndices[i]].y, scale * avalanches[i]);
+			}
+		}
+
+		atomicAdd(&t_terrainBuffer[cellIndex].y, -k_c * Bmax);
+	}
+}
+
 __device__ __inline__ int linear_block_10x10(int x, int y) { return (y + 1) * 10 + (x + 1); }
 
 template <bool TUseAvalancheStrength>
@@ -374,6 +437,15 @@ void avalanching(const LaunchParameters& t_launchParameters)
 	    multigrid(t_launchParameters);
 
 	    break;
+	case AvalancheMode::Taylor:
+		setupAtomicInPlaceAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
+		for (int i = 0; i < t_launchParameters.avalancheIterations; ++i)
+		{
+			atomicInPlaceTaylorKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
+		}
+
+		finishAtomicInPlaceAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
+
 	}
 }
 

@@ -398,7 +398,7 @@ namespace dunes
 					m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 				}
 
-				if (ImGui::DragFloat("Strength", &m_avalancheStrength, 0.05f))
+				if (ImGui::DragFloat("Soft Iteration Strength", &m_avalancheStrength, 0.001f, 0.f, 1.f))
 				{
 					m_simulator->setAvalancheStrength(m_avalancheStrength);
 				}
