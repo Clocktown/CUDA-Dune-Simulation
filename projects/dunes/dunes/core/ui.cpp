@@ -3,6 +3,9 @@
 #include <sthe/sthe.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <tinyfiledialogs/tinyfiledialogs.h>
+#include <tinyexr.h>
+
 namespace dunes
 {
 
@@ -127,6 +130,95 @@ namespace dunes
 		}
 	}
 
+	bool SaveEXR(const float* rgba, int width, int height, const char* outfilename, int tinyexr_pixeltype) {
+
+		EXRHeader header;
+		InitEXRHeader(&header);
+
+		EXRImage image;
+		InitEXRImage(&image);
+
+		image.num_channels = 4;
+
+		std::vector<float> images[4];
+		images[0].resize(width * height);
+		images[1].resize(width * height);
+		images[2].resize(width * height);
+		images[3].resize(width * height);
+
+		// Split RGBRGBRGB... into R, G, B and A layer
+		for (int i = 0; i < width * height; i++) {
+			images[0][i] = rgba[4 * i + 0];
+			images[1][i] = rgba[4 * i + 1];
+			images[2][i] = rgba[4 * i + 2];
+			images[3][i] = rgba[4 * i + 3];
+		}
+
+		float* image_ptr[4];
+		image_ptr[0] = &(images[3].at(0)); // A
+		image_ptr[1] = &(images[2].at(0)); // B
+		image_ptr[2] = &(images[1].at(0)); // G
+		image_ptr[3] = &(images[0].at(0)); // R
+
+		image.images = (unsigned char**)image_ptr;
+		image.width = width;
+		image.height = height;
+
+		header.num_channels = 4;
+		header.channels = (EXRChannelInfo*)malloc(sizeof(EXRChannelInfo) * header.num_channels);
+		// Must be (A)BGR order, since most of EXR viewers expect this channel order.
+		strncpy(header.channels[0].name, "A", 255); header.channels[0].name[strlen("A")] = '\0';
+		strncpy(header.channels[1].name, "B", 255); header.channels[1].name[strlen("B")] = '\0';
+		strncpy(header.channels[2].name, "G", 255); header.channels[2].name[strlen("G")] = '\0';
+		strncpy(header.channels[3].name, "R", 255); header.channels[3].name[strlen("R")] = '\0';
+
+		header.pixel_types = (int*)malloc(sizeof(int) * header.num_channels);
+		header.requested_pixel_types = (int*)malloc(sizeof(int) * header.num_channels);
+		for (int i = 0; i < header.num_channels; i++) {
+			header.pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of input image
+			header.requested_pixel_types[i] = tinyexr_pixeltype; // pixel type of output image to be stored in .EXR
+		}
+
+		const char* err = nullptr; // or nullptr in C++11 or later.
+		int ret = SaveEXRImageToFile(&image, &header, outfilename, &err);
+		free(header.channels);
+		free(header.pixel_types);
+		free(header.requested_pixel_types);
+		if (ret != TINYEXR_SUCCESS) {
+			std::string errorMsg = std::string("Could not save file:\n") + outfilename + "\nReason: " + err;
+			tinyfd_messageBox("Error", errorMsg.c_str(), "ok", "error", 1);
+			FreeEXRErrorMessage(err); // free's buffer for an error message
+			return ret;
+		}
+	}
+
+	bool UI::loadEXR(std::shared_ptr<sthe::gl::Texture2D> map, const std::string& input) {
+		float* out; // width * height * RGBA
+		int width;
+		int height;
+		const char* err = nullptr; // or nullptr in C++11
+
+		int ret = LoadEXR(&out, &width, &height, input.c_str(), &err);
+		if (ret != TINYEXR_SUCCESS) {
+			if (err) {
+				std::string errorMsg = std::string("Could not load file:\n") + input + "\nReason: " + err;
+				tinyfd_messageBox("Error", errorMsg.c_str(), "ok", "error", 1);
+				FreeEXRErrorMessage(err); // release memory of error message.
+			}
+		}
+		else {
+			if (width != m_gridSize.x || height != m_gridSize.y) {
+				m_gridSize = { width, height };
+				m_simulator->setInitializationParameters(m_initializationParameters);
+				m_simulator->reinitialize(m_gridSize, m_gridScale);
+			}
+			map->upload(out, width, height, GL_RGBA, GL_FLOAT);
+			free(out); // release memory of image data
+			return true;
+		}
+		return false;
+	}
+
 	void UI::createSceneNode()
 	{
 		if (ImGui::TreeNode("Scene"))
@@ -135,6 +227,81 @@ namespace dunes
 			{
 				m_simulator->setInitializationParameters(m_initializationParameters);
 				m_simulator->reinitialize(m_gridSize, m_gridScale);
+				if (!m_heightMapPath.empty()) {
+					loadEXR(m_simulator->getTerrainMap(), m_heightMapPath);
+				}
+				if (!m_resistanceMapPath.empty()) {
+					loadEXR(m_simulator->getResistanceMap(), m_resistanceMapPath);
+				}
+			}
+
+			char const* filterPatterns[1] = { "*.exr" };
+			if (ImGui::Button("Load Heights from EXR")) {
+				auto input = tinyfd_openFileDialog("Load Heightmap", "./", 1, filterPatterns, "OpenEXR (.exr)", 0);
+
+				if (input != nullptr) {
+					m_heightMapPath = input;
+					if (!loadEXR(m_simulator->getTerrainMap(), m_heightMapPath)) {
+						m_heightMapPath = "";
+					}
+				}
+				else {
+					m_heightMapPath = "";
+				}
+			}
+			ImGui::LabelText("Selected File##height", m_heightMapPath.empty() ? "None" : m_heightMapPath.c_str());
+			ImGui::SameLine();
+			if (ImGui::Button("Clear##height")) {
+				m_heightMapPath = "";
+			}
+			if (ImGui::Button("Load Resistances from EXR")) {
+				auto input = tinyfd_openFileDialog("Load Resistancemap", "./", 1, filterPatterns, "OpenEXR (.exr)", 0);
+
+				if (input != nullptr) {
+					m_resistanceMapPath = input;
+					if (!loadEXR(m_simulator->getResistanceMap(), m_resistanceMapPath)) {
+						m_resistanceMapPath = "";
+					}
+				}
+				else {
+					m_resistanceMapPath = "";
+				}
+			}
+			ImGui::LabelText("Selected File##resistance", m_resistanceMapPath.empty() ? "None" : m_resistanceMapPath.c_str());
+			ImGui::SameLine();
+			if (ImGui::Button("Clear##resistance")) {
+				m_resistanceMapPath = "";
+			}
+
+			if (ImGui::Button("Save Heights to EXR")) {
+				auto output = tinyfd_saveFileDialog("Save Heightmap", "./heights.exr", 1, filterPatterns, "OpenEXR (.exr)");
+				if (output != nullptr) {
+					const int width = m_simulator->getTerrainMap()->getWidth();
+					const int height = m_simulator->getTerrainMap()->getHeight();
+					std::vector<float> data(width * height * 4);
+					m_simulator->getTerrainMap()->download(data,
+						width,
+						height,
+						GL_RGBA,
+						GL_FLOAT,
+						0);
+					SaveEXR(data.data(), width, height, output, TINYEXR_PIXELTYPE_FLOAT);
+				}
+			}
+			if (ImGui::Button("Save Resistances to EXR")) {
+				auto output = tinyfd_saveFileDialog("Save Resistancemap", "./resistances.exr", 1, filterPatterns, "OpenEXR (.exr)");
+				if (output != nullptr) {
+					const int width = m_simulator->getResistanceMap()->getWidth();
+					const int height = m_simulator->getResistanceMap()->getHeight();
+					std::vector<float> data(width * height * 4);
+					m_simulator->getResistanceMap()->download(data,
+						width,
+						height,
+						GL_RGBA,
+						GL_FLOAT,
+						0);
+					SaveEXR(data.data(), width, height, output, TINYEXR_PIXELTYPE_HALF); // Half Precision should be enough here since all values are [0,1]
+				}
 			}
 
 			for (int i = 0; i < NumNoiseGenerationTargets; ++i) {

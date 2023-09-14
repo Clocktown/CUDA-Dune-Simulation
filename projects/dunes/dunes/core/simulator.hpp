@@ -97,6 +97,8 @@ namespace dunes
 		// Getters
 		int getTimeStep() const;
 		bool isPaused() const;
+		std::shared_ptr<sthe::gl::Texture2D> getTerrainMap() const;
+		std::shared_ptr<sthe::gl::Texture2D> getResistanceMap() const;
 	private:
 		// Functionality
 		void setupLaunchParameters();

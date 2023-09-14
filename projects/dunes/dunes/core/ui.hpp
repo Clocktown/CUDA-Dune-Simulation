@@ -43,6 +43,11 @@ namespace dunes
 		// Attributes
 		Simulator* m_simulator{ nullptr };
 
+		// Files
+		bool loadEXR(std::shared_ptr<sthe::gl::Texture2D> map, const std::string& input);
+		std::string m_heightMapPath{};
+		std::string m_resistanceMapPath{};
+
 		// Application
 		bool m_vSync{ false };
 		bool m_calcCoverage{ false };
