@@ -6,6 +6,10 @@
 #include <tinyfiledialogs/tinyfiledialogs.h>
 #include <tinyexr.h>
 
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include <filesystem>
+
 namespace dunes
 {
 
@@ -219,6 +223,136 @@ namespace dunes
 		return false;
 	}
 
+	bool UI::fromJson(const std::string& path) {
+
+	}
+
+	bool UI::toJson(const std::string& path) {
+		nlohmann::json json;
+
+		// Application
+		json["vSync"] = m_vSync;
+		json["calcCoverage"] = m_calcCoverage;
+		json["coverageThreshold"] = m_coverageThreshold;
+		json["targetFrameRate"] = m_targetFrameRate;
+		json["constantCoverage"] = m_constantCoverage;
+		json["constantCoverageAllowRemove"] = m_constantCoverageAllowRemove;
+		json["targetCoverage"] = m_targetCoverage;
+		json["coverageSpawnAmount"] = m_coverageSpawnAmount;
+		json["spawnSteps"] = m_spawnSteps;
+		json["stopIterations"] = m_stopIterations;
+
+		// Simulation
+		json["gridSize"] = { m_gridSize.x, m_gridSize.y };
+		json["gridScale"] = m_gridScale;
+		json["windAngle"] = m_windAngle;
+		json["secondWindAngle"] = m_secondWindAngle;
+		json["windBidirectionalR"] = m_windBidirectionalR;
+		json["windBidirectionalBaseTime"] = m_windBidirectionalBaseTime;
+		json["enableBidirectional"] = m_enableBidirectional;
+		json["windSpeed"] = m_windSpeed;
+		json["venturiStrength"] = m_venturiStrength;
+
+		json["windWarpingMode"] = windWarpingModes[m_windWarpingMode];
+		json["windWarpingCount"] = m_windWarpingCount;
+		json["windWarpingDivisor"] = m_windWarpingDivisor;
+		json["windWarpingRadii"] = m_windWarpingRadii;
+		json["windWarpingStrengths"] = m_windWarpingStrengths;
+
+		json["windShadowMode"] = windShadowModes[m_windShadowMode];
+		json["windShadowDistance"] = m_windShadowDistance;
+		json["minWindShadowAngle"] = m_minWindShadowAngle;
+		json["maxWindShadowAngle"] = m_maxWindShadowAngle;
+
+		json["stickyStrength"] = m_stickyStrength;
+		json["stickyAngle"] = m_stickyAngle;
+		json["stickyRange"] = { m_stickyRange.x, m_stickyRange.y };
+		json["maxStickyHeight"] = m_maxStickyHeight;
+
+		json["abrasionStrength"] = m_abrasionStrength;
+		json["abrasionThreshold"] = m_abrasionThreshold;
+		json["saltationMode"] = saltationModes[m_saltationMode];
+		json["saltationStrength"] = m_saltationStrength;
+		json["reptationStrength"] = m_reptationStrength;
+
+		json["avalancheMode"] = avalancheModes[m_avalancheMode];
+		json["bedrockAvalancheMode"] = bedrockAvalancheModes[m_bedrockAvalancheMode];
+		json["avalancheIterations"] = m_avalancheIterations;
+		json["bedrockAvalancheIterations"] = m_bedrockAvalancheIterations;
+		json["avalancheSoftIterationModulus"] = m_avalancheSoftIterationModulus;
+		json["avalancheFinalSoftIterations"] = m_avalancheFinalSoftIterations;
+		json["avalancheStrength"] = m_avalancheStrength;
+		json["avalancheAngle"] = m_avalancheAngle;
+		json["bedrockAngle"] = m_bedrockAngle;
+		json["vegetationAngle"] = m_vegetationAngle;
+		json["multigridLevelCount"] = m_multigridLevelCount;
+		json["multigridPresweepCount"] = m_multigridPresweepCount;
+		json["multigridPostsweepCount"] = m_multigridPostsweepCount;
+
+		int m_timeMode{ static_cast<int>(TimeMode::FixedDeltaTime) };
+		float m_timeScale{ 15.0f };
+		float m_fixedDeltaTime{ 0.02f };
+
+		json["timeMode"] = timeModes[m_timeMode];
+		json["timeScale"] = m_timeScale;
+		json["fixedDeltaTime"] = m_fixedDeltaTime;
+
+		json["initializationParameters"] = nlohmann::json::object();
+		for (int i = 0; i < NumNoiseGenerationTargets; ++i) {
+				auto& params = m_initializationParameters.noiseGenerationParameters[i];
+				auto obj = nlohmann::json::object();
+				obj["flat"] = params.flat;
+				obj["enable"] = params.enabled;
+				obj["iterations"] = params.iters;
+				obj["stretch"] = { params.stretch.x, params.stretch.y };
+				obj["offset"] = { params.offset.x, params.offset.y };
+				obj["border"] = { params.border.x, params.border.y };
+				obj["scale"] = params.scale;
+				obj["bias"] = params.bias;
+				json["initializationParameters"][initializationTargets[i]] = obj;
+		}
+
+		json["sandColor"] = { m_renderParameters.sandColor.x,
+			m_renderParameters.sandColor.y,
+			m_renderParameters.sandColor.z,
+			m_renderParameters.sandColor.w
+		};
+
+		json["bedrockColor"] = { m_renderParameters.bedrockColor.x,
+			m_renderParameters.bedrockColor.y,
+			m_renderParameters.bedrockColor.z,
+			m_renderParameters.bedrockColor.w
+		};
+
+		if (m_exportMaps) {
+			std::string terrainMapPath = path + ".terrain.exr";
+			std::string resistanceMapPath = path + ".resistance.exr";
+			const int width = m_simulator->getTerrainMap()->getWidth();
+			const int height = m_simulator->getTerrainMap()->getHeight();
+			std::vector<float> data(width * height * 4);
+			m_simulator->getTerrainMap()->download(data,
+				width,
+				height,
+				GL_RGBA,
+				GL_FLOAT,
+				0);
+			SaveEXR(data.data(), width, height, terrainMapPath.c_str(), TINYEXR_PIXELTYPE_FLOAT);
+			m_simulator->getResistanceMap()->download(data,
+				width,
+				height,
+				GL_RGBA,
+				GL_FLOAT,
+				0);
+			SaveEXR(data.data(), width, height, resistanceMapPath.c_str(), TINYEXR_PIXELTYPE_HALF);
+		}
+
+		auto str = json.dump(1);
+		std::ofstream o(path);
+		o << str;
+		o.close();
+		return o.good();
+	}
+
 	void UI::createSceneNode()
 	{
 		if (ImGui::TreeNode("Scene"))
@@ -326,7 +460,17 @@ namespace dunes
 
 			ImGui::TreePop();
 		}
-
+		if (ImGui::TreeNode("Save/Load JSON")) {
+			ImGui::Checkbox("Export Maps to EXR", &m_exportMaps);
+			if (ImGui::Button("Save")) {
+				char const* filterPatterns[1] = { "*.json" };
+				auto output = tinyfd_saveFileDialog("Save JSON", "./scene.json", 1, filterPatterns, "JSON (.json)");
+				if (output != nullptr) {
+					toJson(output);
+				}
+			}
+			ImGui::TreePop();
+		}
 	}
 
 	void UI::createSimulationNode()

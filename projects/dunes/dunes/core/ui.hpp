@@ -44,6 +44,9 @@ namespace dunes
 		Simulator* m_simulator{ nullptr };
 
 		// Files
+		bool toJson(const std::string& path);
+		bool fromJson(const std::string& path);
+		bool m_exportMaps = false;
 		bool loadEXR(std::shared_ptr<sthe::gl::Texture2D> map, const std::string& input);
 		std::string m_heightMapPath{};
 		std::string m_resistanceMapPath{};
@@ -98,7 +101,7 @@ namespace dunes
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };
 		int m_avalancheIterations{ 50 };
-		int m_bedrockAvalancheIterations{ 50 };
+		int m_bedrockAvalancheIterations{ 1 };
 		int m_avalancheSoftIterationModulus{ 10 };
 		int m_avalancheFinalSoftIterations{ 5 };
 		float m_avalancheStrength{ 0.5f };
