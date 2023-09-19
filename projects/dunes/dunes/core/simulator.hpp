@@ -93,6 +93,9 @@ namespace dunes
 
 		void setStopIterations(const int t_stopIterations);
 
+		void updateWindShadow();
+		void updateStickyCells();
+
 
 		// Getters
 		int getTimeStep() const;

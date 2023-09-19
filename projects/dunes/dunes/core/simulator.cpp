@@ -125,6 +125,18 @@ namespace dunes
 		m_isAwake = true;
 	}
 
+	void Simulator::updateStickyCells() {
+		map();
+		sticky(m_launchParameters, m_simulationParameters);
+		unmap();
+	}
+
+	void Simulator::updateWindShadow() {
+		map();
+		windShadow(m_launchParameters);
+		unmap();
+	}
+
 	void Simulator::update()
 	{
 		if (!m_isPaused)

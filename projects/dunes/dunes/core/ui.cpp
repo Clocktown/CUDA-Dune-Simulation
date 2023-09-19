@@ -464,6 +464,9 @@ namespace dunes
 
 			if (ImGui::TreeNode("Wind Shadow"))
 			{
+				if (m_simulator->isPaused() && ImGui::Button("Update##windshadow")) {
+					m_simulator->updateWindShadow();
+				}
 				if (ImGui::Combo("Mode", &m_windShadowMode, windShadowModes, IM_ARRAYSIZE(windShadowModes)))
 				{
 					m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
@@ -488,6 +491,9 @@ namespace dunes
 
 			if (ImGui::TreeNode("Echo Dunes"))
 			{
+				if (m_simulator->isPaused() && ImGui::Button("Update##sticky")) {
+					m_simulator->updateStickyCells();
+				}
 				if (ImGui::DragFloat("Strength", &m_stickyStrength, 0.01f))
 				{
 					m_simulator->setStickyStrength(m_stickyStrength);
