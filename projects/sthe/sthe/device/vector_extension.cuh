@@ -1566,8 +1566,9 @@ CU_INLINE CU_HOST_DEVICE float2 operator*(const float2& a, const float2& b)
 
 CU_INLINE CU_HOST_DEVICE void operator/=(float2& a, const float b)
 {
-	a.x /= b;
-	a.y /= b;
+	const float v = 1.f / b;
+	a.x *= v;
+	a.y *= v;
 }
 
 CU_INLINE CU_HOST_DEVICE void operator/=(float2& a, const float2& b)
@@ -1578,7 +1579,8 @@ CU_INLINE CU_HOST_DEVICE void operator/=(float2& a, const float2& b)
 
 CU_INLINE CU_HOST_DEVICE float2 operator/(const float2& a, const float b)
 {
-	return float2{ a.x / b, a.y / b };
+	const float v = 1.f / b;
+	return float2{ a.x * v, a.y * v };
 }
 
 CU_INLINE CU_HOST_DEVICE float2 operator/(const float a, const float2& b)
