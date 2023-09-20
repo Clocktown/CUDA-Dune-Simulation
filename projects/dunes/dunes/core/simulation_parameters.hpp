@@ -63,6 +63,7 @@ struct SimulationParameters
 	float maxStickyHeight{ 30.0f };
 
 	float abrasionStrength{ 0.0f };
+	float windOnlyAbrasionAmount{ 0.0001 };
 	float abrasionThreshold{ 0.1f };
 	float saltationStrength{ 0.05f };
 	float reptationStrength{ 0.0f };

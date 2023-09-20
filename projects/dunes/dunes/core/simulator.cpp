@@ -41,6 +41,7 @@ namespace dunes
 		m_launchParameters.blockSize1D = 512;
 		m_launchParameters.blockSize2D = dim3{ 8, 8 };
 
+		// https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
 		m_launchParameters.optimalBlockSize1D = 256;
 		m_launchParameters.optimalBlockSize2D = dim3{ 16, 16 };
 		m_launchParameters.optimalGridSize1D = static_cast<unsigned int>(threadCount / static_cast<float>(m_launchParameters.optimalBlockSize1D));
@@ -474,6 +475,10 @@ namespace dunes
 	void Simulator::setAbrasionThreshold(const float t_abrasionThreshold)
 	{
 		m_simulationParameters.abrasionThreshold = t_abrasionThreshold;
+	}
+
+	void Simulator::setWindOnlyAbrasionAmount(const float t_V) {
+		m_simulationParameters.windOnlyAbrasionAmount = t_V;
 	}
 
 	void Simulator::setSaltationMode(const SaltationMode t_saltationMode)

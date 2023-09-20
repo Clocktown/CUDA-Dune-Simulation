@@ -31,7 +31,7 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float4 resistance{ t_resistanceArray.read(cell) };
 			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) * (1.0f - resistance.w) };
 
-			const float scale{ 1.0f };
+			const float scale{ c_parameters.deltaTime };
 
 			const float saltation{ fminf(c_parameters.saltationStrength * saltationScale * scale, terrain.y) };
 
@@ -68,21 +68,7 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 		const float2 nextPosition{ position + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
 		const int2 nextCell{ getNearestCell(nextPosition) };
 		
-		//for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
-		//{
-		//	const float u{ 1.0f - abs(static_cast<float>(x) - nextPosition.x) };
-
-		//	for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
-		//	{
-		//		const float v{ 1.0f - abs(static_cast<float>(y) - nextPosition.y) };
-		//		const float weight{ u * v };
-
-		//		if (weight > 0.0f)
-		//		{
-					atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), slab);
-		//		}
-		//	}
-		//}
+		atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), slab);
 	}
 }
 
@@ -114,9 +100,7 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 
 			const float new_slab = slab * (1.f - depositionProbability);
 			//if (new_slab > 0.0f) {
-				const float scale{ slab + 0.0001 }; // 0.0001 is the amount of abrasion that happens with purely wind, no sand 
-				// TODO: add that as a parameter to the UI
-				// TODO: sand moving via avalanching should cause abrasion?
+				const float scale{ slab + c_parameters.windOnlyAbrasionAmount }; // 0.0001 is the amount of abrasion that happens with purely wind, no sand 
 				float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
 				c_parameters.abrasionStrength * abrasionScale * windSpeed * c_parameters.deltaTime *
 				clamp(1.0f - terrain.y / c_parameters.abrasionThreshold, 0.f, 1.f) * scale : 0.0f };

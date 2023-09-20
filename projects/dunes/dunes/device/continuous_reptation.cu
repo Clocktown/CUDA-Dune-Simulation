@@ -50,7 +50,7 @@ __global__ void continuousReptationKernel(const Array2D<float2> t_terrainArray, 
 		const float heightDifference{ (nextHeight - height) * c_parameters.rGridScale * c_rDistances[i]};
 		const float heightScale = 1.f;// fmaxf(c_parameters.avalancheAngle - abs(heightDifference), 0.f) / c_parameters.avalancheAngle;
 
-
+		// Enforce symmetric additive and subtractive changes, avoiding any atomics
 		float step = fmaxf(0.5f * heightScale * (slab + nextSlab) * c_parameters.reptationStrength, 0.f);
         change += signbit(heightDifference) ? -fminf(step, terrain.y) : fminf(step, nextTerrain.y);
 	}
@@ -81,11 +81,13 @@ __global__ void finishContinuousReptationKernel(Array2D<float2> t_terrainArray, 
 
 void continuousReptation(const LaunchParameters& t_launchParameters)
 {
-	Buffer<float> reptationBuffer{ t_launchParameters.tmpBuffer + t_launchParameters.multigrid[0].cellCount };
+	if (c_parameters.reptationStrength > 0.f) {
+		Buffer<float> reptationBuffer{ t_launchParameters.tmpBuffer + t_launchParameters.multigrid[0].cellCount };
 
-	setupContinuousReptationKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(reptationBuffer);
-	continuousReptationKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer, reptationBuffer);
-	finishContinuousReptationKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, reptationBuffer);
+		setupContinuousReptationKernel << <t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D >> > (reptationBuffer);
+		continuousReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer, reptationBuffer);
+		finishContinuousReptationKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.terrainArray, reptationBuffer);
+	}
 }
 
 }

@@ -13,6 +13,83 @@
 namespace dunes
 {
 
+	void UI::initializeAll() {
+		sthe::getApplication().setVSyncCount(m_vSync);
+		sthe::getApplication().setTargetFrameRate(m_targetFrameRate);
+
+		m_simulator->pause();
+		m_simulator->setInitializationParameters(m_initializationParameters);
+		m_simulator->setRenderParameters(m_renderParameters);
+		m_simulator->reinitialize(m_gridSize, m_gridScale);
+
+		m_simulator->setStopIterations(m_stopIterations);
+		m_simulator->setConstantCoverage(m_constantCoverage);
+		m_simulator->setConstantCoverageAllowRemove(m_constantCoverageAllowRemove);
+		m_simulator->setTargetCoverage(m_targetCoverage);
+		m_simulator->setCoverageSpawnAmount(m_coverageSpawnAmount);
+		m_simulator->setSpawnSteps(m_spawnSteps);
+		m_simulator->setCoverageThreshold(m_coverageThreshold);
+
+		m_simulator->setWindSpeed(m_windSpeed);
+		m_simulator->setWindAngle(m_windAngle);
+		m_simulator->setVenturiStrength(m_venturiStrength);
+		m_simulator->enableBidirectional(m_enableBidirectional);
+		m_simulator->setSecondWindAngle(m_secondWindAngle);
+		m_simulator->setBidirectionalR(m_windBidirectionalR);
+		m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
+
+		m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
+		m_simulator->setWindWarpingCount(m_windWarpingCount);
+		m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
+		for (int i{ 0 }; i < 4; ++i)
+		{
+			m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
+		}
+		for (int i{ 0 }; i < 4; ++i)
+		{
+			m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
+		}
+
+		m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
+		m_simulator->setWindShadowDistance(m_windShadowDistance);
+		m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
+		m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
+
+		m_simulator->setStickyStrength(m_stickyStrength);
+		m_simulator->setStickyRange(m_stickyRange);
+		m_simulator->setMaxStickyHeight(m_maxStickyHeight);
+		m_simulator->setStickyAngle(m_stickyAngle);
+
+		m_simulator->setSaltationMode(static_cast<SaltationMode>(m_saltationMode));
+		m_simulator->setSaltationStrength(m_saltationStrength);
+		m_simulator->setAbrasionStrength(m_abrasionStrength);
+		m_simulator->setAbrasionThreshold(m_abrasionThreshold);
+		m_simulator->setWindOnlyAbrasionAmount(m_windOnlyAbrasionAmount);
+		m_simulator->setReptationStrength(m_reptationStrength);
+
+		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
+		m_simulator->setAvalancheIterations(m_avalancheIterations);
+		m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
+		m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
+		m_simulator->setAvalancheStrength(m_avalancheStrength);
+		m_simulator->setAvalancheAngle(m_avalancheAngle);
+		m_simulator->setVegetationAngle(m_vegetationAngle);
+		m_simulator->setMultigridLevelCount(m_multigridLevelCount);
+		m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
+		m_simulator->setMultigridPostsweepCount(m_multigridPostsweepCount);
+		m_simulator->setBedrockAvalancheMode(static_cast<BedrockAvalancheMode>(m_bedrockAvalancheMode));
+		m_simulator->setBedrockAvalancheIterations(m_bedrockAvalancheIterations);
+		m_simulator->setBedrockAngle(m_bedrockAngle);
+
+		m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
+		m_simulator->setTimeScale(m_timeScale);
+		m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
+
+		if (m_calcCoverage) {
+			m_simulator->setupCoverageCalculation();
+		}
+	}
+
 	// Functionality
 	void UI::awake()
 	{
@@ -20,70 +97,7 @@ namespace dunes
 
 		STHE_ASSERT(m_simulator != nullptr, "Simulator cannot be nullptr");
 
-		sthe::Application& application{ sthe::getApplication() };
-		application.setVSyncCount(m_vSync);
-		application.setTargetFrameRate(m_targetFrameRate);
-
-		m_simulator->pause();
-		m_simulator->setWindAngle(m_windAngle);
-		m_simulator->setWindSpeed(m_windSpeed);
-		m_simulator->setVenturiStrength(m_venturiStrength);
-		m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
-		m_simulator->setWindWarpingCount(m_windWarpingCount);
-		m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
-
-		for (int i{ 0 }; i < 4; ++i)
-		{
-			m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
-		}
-
-		for (int i{ 0 }; i < 4; ++i)
-		{
-			m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
-		}
-
-		m_simulator->setWindShadowMode(static_cast<WindShadowMode>(m_windShadowMode));
-		m_simulator->setWindShadowDistance(m_windShadowDistance);
-		m_simulator->setMinWindShadowAngle(m_minWindShadowAngle);
-		m_simulator->setMaxWindShadowAngle(m_maxWindShadowAngle);
-		m_simulator->setStickyStrength(m_stickyStrength);
-		m_simulator->setStickyAngle(m_stickyAngle);
-		m_simulator->setStickyRange(m_stickyRange);
-		m_simulator->setMaxStickyHeight(m_maxStickyHeight);
-		m_simulator->setAbrasionStrength(m_abrasionStrength);
-		m_simulator->setAbrasionThreshold(m_abrasionThreshold);
-		m_simulator->setSaltationMode(static_cast<SaltationMode>(m_saltationMode));
-		m_simulator->setSaltationStrength(m_saltationStrength);
-		m_simulator->setReptationStrength(m_reptationStrength);
-		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
-		m_simulator->setBedrockAvalancheMode(static_cast<BedrockAvalancheMode>(m_bedrockAvalancheMode));
-		m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
-		m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
-		m_simulator->setAvalancheIterations(m_avalancheIterations);
-		m_simulator->setBedrockAvalancheIterations(m_bedrockAvalancheIterations);
-		m_simulator->setAvalancheStrength(m_avalancheStrength);
-		m_simulator->setAvalancheAngle(m_avalancheAngle);
-		m_simulator->setBedrockAngle(m_bedrockAngle);
-		m_simulator->setVegetationAngle(m_vegetationAngle);
-		m_simulator->setMultigridLevelCount(m_multigridLevelCount);
-		m_simulator->setMultigridPresweepCount(m_multigridPresweepCount);
-		m_simulator->setMultigridPostsweepCount(m_multigridPostsweepCount);
-		m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
-		m_simulator->setTimeScale(m_timeScale);
-		m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
-
-		m_simulator->setCoverageThreshold(m_coverageThreshold);
-		m_simulator->setTargetCoverage(m_targetCoverage);
-		m_simulator->setCoverageSpawnAmount(m_coverageSpawnAmount);
-		m_simulator->setSpawnSteps(m_spawnSteps);
-		m_simulator->setConstantCoverage(m_constantCoverage);
-		m_simulator->setConstantCoverageAllowRemove(m_constantCoverageAllowRemove);
-
-		m_simulator->setSecondWindAngle(m_secondWindAngle);
-		m_simulator->enableBidirectional(m_enableBidirectional);
-		m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
-		m_simulator->setBidirectionalR(m_windBidirectionalR);
-		m_simulator->setStopIterations(m_stopIterations);
+		initializeAll();
 	}
 
 	void UI::onGUI()
@@ -223,8 +237,136 @@ namespace dunes
 		return false;
 	}
 
-	bool UI::fromJson(const std::string& path) {
+	int getIndexFromNamedArray(const char** arr, int length, const std::string& val, int default_index) {
+		int idx = std::find(&arr[0], &arr[length], val) - &arr[0];
+		return idx == length ? default_index : idx;
+	}
 
+	bool UI::fromJson(const std::string& path) {
+		nlohmann::json json;
+		{
+			std::ifstream in(path);
+			json = nlohmann::json::parse(in);
+		}
+
+		m_simulator->pause();
+
+		if (m_calcCoverage) {
+			m_simulator->cleanupCoverageCalculation();
+		}
+
+		// Application
+		m_vSync = json["vSync"]; //
+		m_calcCoverage = json["calcCoverage"]; //
+		m_coverageThreshold = json["coverageThreshold"]; //
+		m_targetFrameRate = json["targetFrameRate"]; //
+		m_constantCoverage = json["constantCoverage"]; //
+		m_constantCoverageAllowRemove = json["constantCoverageAllowRemove"]; //
+		m_targetCoverage = json["targetCoverage"]; //
+		m_coverageSpawnAmount = json["coverageSpawnAmount"]; //
+		m_spawnSteps = json["spawnSteps"]; //
+		m_stopIterations = json["stopIterations"]; //
+
+		// Simulation
+		m_gridSize = { json["gridSize"][0], json["gridSize"][1] }; //
+		m_gridScale = json["gridScale"]; //
+		m_windAngle = json["windAngle"]; //
+		m_secondWindAngle = json["secondWindAngle"]; //
+		m_windBidirectionalR = json["windBidirectionalR"]; //
+		m_windBidirectionalBaseTime = json["windBidirectionalBaseTime"]; //
+		m_enableBidirectional = json["enableBidirectional"]; //
+		m_windSpeed = json["windSpeed"]; //
+		m_venturiStrength = json["venturiStrength"]; //
+
+		m_windWarpingMode = getIndexFromNamedArray(windWarpingModes, IM_ARRAYSIZE(windWarpingModes), json["windWarpingMode"], 0); //
+		m_windWarpingCount = json["windWarpingCount"]; //
+		m_windWarpingDivisor = json["windWarpingDivisor"]; //
+		m_windWarpingRadii = json["windWarpingRadii"]; //
+		m_windWarpingStrengths = json["windWarpingStrengths"]; //
+
+		m_windShadowMode = getIndexFromNamedArray(windShadowModes, IM_ARRAYSIZE(windShadowModes), json["windShadowMode"], 0); //
+		m_windShadowDistance = json["windShadowDistance"]; //
+		m_minWindShadowAngle = json["minWindShadowAngle"]; //
+		m_maxWindShadowAngle = json["maxWindShadowAngle"]; //
+
+		m_stickyStrength = json["stickyStrength"]; //
+		m_stickyAngle = json["stickyAngle"]; //
+		m_stickyRange = { json["stickyRange"][0], json["stickyRange"][1] }; //
+		m_maxStickyHeight = json["maxStickyHeight"]; //
+
+		m_abrasionStrength = json["abrasionStrength"]; //
+		m_abrasionThreshold = json["abrasionThreshold"]; //
+		m_windOnlyAbrasionAmount = json["windOnlyAbrasionAmount"]; //
+		m_saltationMode = getIndexFromNamedArray(saltationModes, IM_ARRAYSIZE(saltationModes), json["saltationMode"], 0); //
+		m_saltationStrength = json["saltationStrength"]; //
+		m_reptationStrength = json["reptationStrength"]; //
+
+		m_avalancheMode = getIndexFromNamedArray(avalancheModes, IM_ARRAYSIZE(avalancheModes), json["avalancheMode"], 1); //
+		m_bedrockAvalancheMode = getIndexFromNamedArray(bedrockAvalancheModes, IM_ARRAYSIZE(bedrockAvalancheModes), json["bedrockAvalancheMode"], 0); //
+		m_avalancheIterations = json["avalancheIterations"]; //
+		m_bedrockAvalancheIterations = json["bedrockAvalancheIterations"]; //
+		m_avalancheSoftIterationModulus = json["avalancheSoftIterationModulus"]; //
+		m_avalancheFinalSoftIterations = json["avalancheFinalSoftIterations"]; //
+		m_avalancheStrength = json["avalancheStrength"]; //
+		m_avalancheAngle = json["avalancheAngle"]; //
+		m_bedrockAngle = json["bedrockAngle"]; //
+		m_vegetationAngle = json["vegetationAngle"]; //
+		m_multigridLevelCount = json["multigridLevelCount"]; //
+		m_multigridPresweepCount = json["multigridPresweepCount"]; //
+		m_multigridPostsweepCount = json["multigridPostsweepCount"]; //
+
+		m_timeMode = getIndexFromNamedArray(timeModes, IM_ARRAYSIZE(timeModes), json["timeMode"], 1); //
+		m_timeScale = json["timeScale"]; //
+		m_fixedDeltaTime = json["fixedDeltaTime"]; //
+
+
+		const nlohmann::json& initP = json["initializationParameters"];
+		for (auto& el : initP.items()) {
+			int idx = getIndexFromNamedArray(initializationTargets, IM_ARRAYSIZE(initializationTargets), el.key(), -1);
+			if (idx >= 0 && idx < NumNoiseGenerationTargets) {
+				auto& obj = el.value();
+				auto& params = m_initializationParameters.noiseGenerationParameters[idx];
+				params.flat = obj["flat"];
+				params.enabled = obj["enable"];
+				params.iters = obj["iterations"];
+				params.stretch = { obj["stretch"][0], obj["stretch"][1] };
+				params.offset = { obj["offset"][0], obj["offset"][1] };
+				params.border = { obj["border"][0], obj["border"][1] };
+				params.scale = obj["scale"];
+				params.bias = obj["bias"];
+			}
+		} //
+
+		m_renderParameters.sandColor = { json["sandColor"][0], json["sandColor"][1], json["sandColor"][2], json["sandColor"][3] };
+		m_renderParameters.bedrockColor = { json["bedrockColor"][0], json["bedrockColor"][1], json["bedrockColor"][2], json["bedrockColor"][3] };
+
+
+		initializeAll();
+
+
+		bool exportMaps = json["exportMaps"];
+
+		if (exportMaps) {
+			std::string terrainMapPath = path + ".terrain.exr";
+			std::string resistanceMapPath = path + ".resistance.exr";
+
+			if (std::filesystem::exists(terrainMapPath)) {
+				if (loadEXR(m_simulator->getTerrainMap(), terrainMapPath)) {
+					m_heightMapPath = terrainMapPath;
+				}
+			}
+			if (std::filesystem::exists(resistanceMapPath)) {
+				if (loadEXR(m_simulator->getResistanceMap(), resistanceMapPath)) {
+					m_resistanceMapPath = resistanceMapPath;
+				}
+			}
+		}
+
+		if (m_calcCoverage) {
+			m_simulator->setupCoverageCalculation();
+		}
+
+		return true;
 	}
 
 	bool UI::toJson(const std::string& path) {
@@ -271,6 +413,7 @@ namespace dunes
 
 		json["abrasionStrength"] = m_abrasionStrength;
 		json["abrasionThreshold"] = m_abrasionThreshold;
+		json["windOnlyAbrasionAmount"] = m_windOnlyAbrasionAmount;
 		json["saltationMode"] = saltationModes[m_saltationMode];
 		json["saltationStrength"] = m_saltationStrength;
 		json["reptationStrength"] = m_reptationStrength;
@@ -289,27 +432,23 @@ namespace dunes
 		json["multigridPresweepCount"] = m_multigridPresweepCount;
 		json["multigridPostsweepCount"] = m_multigridPostsweepCount;
 
-		int m_timeMode{ static_cast<int>(TimeMode::FixedDeltaTime) };
-		float m_timeScale{ 15.0f };
-		float m_fixedDeltaTime{ 0.02f };
-
 		json["timeMode"] = timeModes[m_timeMode];
 		json["timeScale"] = m_timeScale;
 		json["fixedDeltaTime"] = m_fixedDeltaTime;
 
 		json["initializationParameters"] = nlohmann::json::object();
 		for (int i = 0; i < NumNoiseGenerationTargets; ++i) {
-				auto& params = m_initializationParameters.noiseGenerationParameters[i];
-				auto obj = nlohmann::json::object();
-				obj["flat"] = params.flat;
-				obj["enable"] = params.enabled;
-				obj["iterations"] = params.iters;
-				obj["stretch"] = { params.stretch.x, params.stretch.y };
-				obj["offset"] = { params.offset.x, params.offset.y };
-				obj["border"] = { params.border.x, params.border.y };
-				obj["scale"] = params.scale;
-				obj["bias"] = params.bias;
-				json["initializationParameters"][initializationTargets[i]] = obj;
+			auto& params = m_initializationParameters.noiseGenerationParameters[i];
+			auto obj = nlohmann::json::object();
+			obj["flat"] = params.flat;
+			obj["enable"] = params.enabled;
+			obj["iterations"] = params.iters;
+			obj["stretch"] = { params.stretch.x, params.stretch.y };
+			obj["offset"] = { params.offset.x, params.offset.y };
+			obj["border"] = { params.border.x, params.border.y };
+			obj["scale"] = params.scale;
+			obj["bias"] = params.bias;
+			json["initializationParameters"][initializationTargets[i]] = obj;
 		}
 
 		json["sandColor"] = { m_renderParameters.sandColor.x,
@@ -325,6 +464,7 @@ namespace dunes
 		};
 
 		if (m_exportMaps) {
+			json["exportMaps"] = true;
 			std::string terrainMapPath = path + ".terrain.exr";
 			std::string resistanceMapPath = path + ".resistance.exr";
 			const int width = m_simulator->getTerrainMap()->getWidth();
@@ -469,6 +609,13 @@ namespace dunes
 					toJson(output);
 				}
 			}
+			if (ImGui::Button("Load")) {
+				char const* filterPatterns[1] = { "*.json" };
+				auto input = tinyfd_openFileDialog("Save JSON", "./scene.json", 1, filterPatterns, "JSON (.json)", 0);
+				if (input != nullptr) {
+					std::cout << fromJson(input) << std::endl;
+				}
+			}
 			ImGui::TreePop();
 		}
 	}
@@ -523,8 +670,9 @@ namespace dunes
 						m_simulator->setSpawnSteps(m_spawnSteps);
 					}
 				}
-				ImGui::DragFloat("Threshold", &m_coverageThreshold, 0.0001f, 0.f, 1.f, "%.6f");
-				m_simulator->setCoverageThreshold(m_coverageThreshold);
+				if (ImGui::DragFloat("Threshold", &m_coverageThreshold, 0.0001f, 0.f, 1.f, "%.6f")) {
+					m_simulator->setCoverageThreshold(m_coverageThreshold);
+				}
 				ImGui::Text("Coverage: %f%", m_simulator->getCoverage() * 100.f);
 				ImGui::TreePop();
 			}
@@ -684,6 +832,11 @@ namespace dunes
 				if (ImGui::DragFloat("Threshold", &m_abrasionThreshold, 0.05f))
 				{
 					m_simulator->setAbrasionThreshold(m_abrasionThreshold);
+				}
+
+				if (ImGui::DragFloat("Wind Only Amount", &m_windOnlyAbrasionAmount, 0.00001f, 0.f, 1.f, "%.6f"))
+				{
+					m_simulator->setWindOnlyAbrasionAmount(m_windOnlyAbrasionAmount);
 				}
 
 				ImGui::TreePop();

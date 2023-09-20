@@ -34,6 +34,8 @@ namespace dunes
 		static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 		static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };
 
+		void initializeAll();
+
 		// Functionality
 		void createApplicationNode();
 		void createRenderingNode();
@@ -97,6 +99,7 @@ namespace dunes
 		int m_saltationMode{ static_cast<int>(SaltationMode::Continuous) };
 		float m_saltationStrength{ 1.f };
 		float m_reptationStrength{ 0.0f };
+		float m_windOnlyAbrasionAmount{ 0.0001f };
 
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };

@@ -6,6 +6,9 @@
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
 
+// This is an outdated version of Reptation that was not used in the Paper. It can still be set in the UI by setting the Saltation Mode to "Per Frame".
+// Results will be different.
+
 namespace dunes
 {
 
