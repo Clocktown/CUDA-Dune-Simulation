@@ -146,6 +146,7 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 				warpDirection /= weight;
 			}
 
+			warpDirection /= (length(warpDirection) + 0.000001f);
 			t_windArray.write(cell, warpDirection * windSpeed);
 		}
 	}
