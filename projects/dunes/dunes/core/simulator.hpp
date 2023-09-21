@@ -87,6 +87,9 @@ namespace dunes
 		void setConstantCoverage(const bool t_constantCoverage);
 		void setConstantCoverageAllowRemove(const bool t_constantCoverageAllowRemove);
 
+		const std::vector<float>& getWatchTimings();
+		const std::vector<float>& getMeanWatchTimings();
+
 
 		void setSecondWindAngle(const float t_windAngle);
 		void enableBidirectional(const bool t_enable);
@@ -97,6 +100,8 @@ namespace dunes
 
 		void updateWindShadow();
 		void updateStickyCells();
+
+		bool queryTimeStepHappened();
 
 
 		// Getters
@@ -116,6 +121,8 @@ namespace dunes
 		void unmap();
 
 		void setWindDirection(const float t_windAngle);
+
+		bool m_timestepHappened{ false };
 
 		// Attributes
 		SimulationParameters m_simulationParameters;
@@ -163,6 +170,10 @@ namespace dunes
 		bool m_isAwake;
 		bool m_isPaused;
 		bool m_reinitializeWindWarping;
+
+		std::vector<float> m_watchTimings;
+		std::vector<float> m_meanWatchTimings;
+		std::vector<sthe::cu::Stopwatch> m_watches;
 	};
 
 }

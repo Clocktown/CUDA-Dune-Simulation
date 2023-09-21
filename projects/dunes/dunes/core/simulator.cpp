@@ -70,6 +70,10 @@ namespace dunes
 
 		m_renderParameterBuffer->bind(GL_UNIFORM_BUFFER, STHE_UNIFORM_BUFFER_CUSTOM0);
 		m_renderParameterBuffer->upload(reinterpret_cast<char*>(&m_renderParameters), sizeof(RenderParameters));
+
+		m_watches.resize(9);
+		m_watchTimings.resize(9);
+		m_meanWatchTimings.resize(9);
 	}
 
 	// Destructor
@@ -83,6 +87,8 @@ namespace dunes
 	{
 		m_time = 0.f;
 		m_timeStep = 0;
+		std::fill(m_watchTimings.begin(), m_watchTimings.end(), 0.f);
+		std::fill(m_meanWatchTimings.begin(), m_meanWatchTimings.end(), 0.f);
 		STHE_ASSERT(t_gridSize.x > 0 && (t_gridSize.x & (t_gridSize.x - 1)) == 0, "Grid size x must be a power of 2");
 		STHE_ASSERT(t_gridSize.y > 0 && (t_gridSize.y & (t_gridSize.y - 1)) == 0, "Grid size y must be a power of 2");
 		STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be 0");
@@ -138,10 +144,16 @@ namespace dunes
 		unmap();
 	}
 
+	bool Simulator::queryTimeStepHappened() {
+		return m_timestepHappened;
+	}
+
 	void Simulator::update()
 	{
+		m_timestepHappened = false;
 		if (!m_isPaused)
 		{
+			m_timestepHappened = true;
 			if (m_enableBidirectional) {
 				float time = m_time / m_windBidirectionalBaseTime;
 				time = fmod(time, m_windBidirectionalR + 1.f);
@@ -164,14 +176,32 @@ namespace dunes
 				addSandForCoverage(m_launchParameters, -m_coverageSpawnAmount);
 			}
 
+			m_watches[0].start();
+			m_watches[1].start();
 			venturi(m_launchParameters);
+			m_watches[1].stop();
+			m_watches[2].start();
 			windWarping(m_launchParameters);
+			m_watches[2].stop();
+			m_watches[3].start();
 			windShadow(m_launchParameters);
+			m_watches[3].stop();
+			m_watches[4].start();
 			sticky(m_launchParameters, m_simulationParameters);
+			m_watches[4].stop();
+			m_watches[5].start();
 			saltation(m_launchParameters);
+			m_watches[5].stop();
+			m_watches[6].start();
 			reptation(m_launchParameters);
+			m_watches[6].stop();
+			m_watches[7].start();
 			avalanching(m_launchParameters);
+			m_watches[7].stop();
+			m_watches[8].start();
 			bedrockAvalanching(m_launchParameters);
+			m_watches[8].stop();
+			m_watches[0].stop();
 
 			if (m_coverageMap) {
 				calculateCoverage();
@@ -182,10 +212,23 @@ namespace dunes
 
 			unmap();
 
+			for (int i = 0; i < m_watches.size(); ++i) {
+				float t = m_watches[i].getTime();
+				m_watchTimings[i] = t;
+				m_meanWatchTimings[i] = ((m_meanWatchTimings[i] * (m_timeStep - 1)) + t) / m_timeStep;
+			}
+
 			if (m_stopIterations != 0 && m_timeStep % m_stopIterations == 0) {
 				m_isPaused = true;
 			}
 		}
+	}
+
+	const std::vector<float>& Simulator::getWatchTimings() {
+		return m_watchTimings;
+	}
+	const std::vector<float>& Simulator::getMeanWatchTimings() {
+		return m_meanWatchTimings;
 	}
 
 	void Simulator::resume()

@@ -109,6 +109,15 @@ namespace dunes
 
 	void UI::onGUI()
 	{
+		m_frametime = sthe::getApplication().getUnscaledDeltaTime();
+		const int N = m_simulator->getTimeStep();
+		if (m_recordNextFrametime) {
+			m_mean_frametime = ((m_mean_frametime * (N - 1)) + m_frametime) / N;
+			m_recordNextFrametime = false;
+		}
+		if (m_simulator->queryTimeStepHappened()) {
+			m_recordNextFrametime = true;
+		}
 		if (m_takeScreenshot) {
 			m_takeScreenshot = false;
 
@@ -137,17 +146,6 @@ namespace dunes
 		}
 		ImGui::Begin("Settings");
 
-		createApplicationNode();
-		createRenderingNode();
-		createSceneNode();
-		createSimulationNode();
-
-		ImGui::End();
-	}
-
-	void UI::createApplicationNode()
-	{
-		sthe::Application& application{ sthe::getApplication() };
 		if (ImGui::Button("Screenshot")) {
 			char const* filterPatterns[1] = { "*.png" };
 			auto output = tinyfd_saveFileDialog("Save Screenshot", "./screenshot.png", 1, filterPatterns, "Portable Network Graphics (.png)");
@@ -156,6 +154,41 @@ namespace dunes
 				m_screenShotPath = output;
 			}
 		}
+
+		createPerformanceNode();
+		createApplicationNode();
+		createRenderingNode();
+		createSceneNode();
+		createSimulationNode();
+
+		ImGui::End();
+	}
+
+	void UI::createPerformanceNode() {
+		if (ImGui::TreeNode("Performance")) {
+			ImGui::LabelText("Frametime [ms]", "%f", 1000.f * sthe::getApplication().getUnscaledDeltaTime());
+			const auto& times = m_simulator->getWatchTimings();
+			const auto& meanTimes = m_simulator->getMeanWatchTimings();
+			for (int i = 0; i < times.size(); ++i) {
+				std::string ltext = watchTimingNames[i];
+				ltext += " [ms]";
+				ImGui::LabelText(ltext.c_str(), "%f", times[i]);
+			}
+			ImGui::Separator();
+			for (int i = 0; i < meanTimes.size(); ++i) {
+				std::string ltext = "Avg. ";
+				ltext += watchTimingNames[i];
+				ltext += " [ms]";
+				ImGui::LabelText(ltext.c_str(), "%f", meanTimes[i]);
+			}
+			ImGui::LabelText("Avg. Frametime [ms]", "%f", 1000.f * m_mean_frametime);
+			ImGui::TreePop();
+		}
+	}
+
+	void UI::createApplicationNode()
+	{
+		sthe::Application& application{ sthe::getApplication() };
 		if (ImGui::TreeNode("Application"))
 		{
 			if (ImGui::Checkbox("VSync", &m_vSync))
@@ -541,6 +574,7 @@ namespace dunes
 		{
 			if (ImGui::Button("Reset"))
 			{
+				m_mean_frametime = 0.f;
 				m_simulator->setInitializationParameters(m_initializationParameters);
 				m_simulator->reinitialize(m_gridSize, m_gridScale);
 				if (!m_heightMapPath.empty()) {

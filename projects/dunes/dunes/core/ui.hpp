@@ -33,10 +33,12 @@ namespace dunes
 		static inline const char* bedrockAvalancheModes[2]{ "To Sand", "To Bedrock" };
 		static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 		static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };
+		static inline const char* watchTimingNames[9]{ "All CUDA", "Venturi", "Wind Warping", "Wind Shadow", "Sticky Cells", "Saltation", "Reptation", "Avalanching", "Bedrock Avalanching" };
 
 		void initializeAll();
 
 		// Functionality
+		void createPerformanceNode();
 		void createApplicationNode();
 		void createRenderingNode();
 		void createSceneNode();
@@ -44,6 +46,10 @@ namespace dunes
 
 		// Attributes
 		Simulator* m_simulator{ nullptr };
+
+		float m_mean_frametime{ 0.f };
+		float m_frametime{ 0.f };
+		bool m_recordNextFrametime{ false };
 
 		// Files
 		bool toJson(const std::string& path);
