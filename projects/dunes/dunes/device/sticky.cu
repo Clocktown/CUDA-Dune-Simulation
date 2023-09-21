@@ -31,7 +31,7 @@ namespace dunes
 				const float2 nextTerrain{ t_terrainArray.sample(nextPosition) };
 				const float nextHeight{ nextTerrain.x + nextTerrain.y };
 				float cliffHeight{ height - nextHeight };
-				const float angle{ cliffHeight / c_parameters.gridScale };
+				const float angle{ cliffHeight * c_parameters.rGridScale };
 
 				const int cellIndex{ getCellIndex(cell) };
 
@@ -60,6 +60,7 @@ namespace dunes
 		float2 nextPosition{ make_float2(cell) };
 		const float erosionResistance{ -c_parameters.stickyStrength };
 		float4 resistance{ t_resistanceArray.read(cell) };
+		resistance.w = 0.f;
 
 		float2 windVelocity;
 		float windSpeed;
@@ -71,7 +72,7 @@ namespace dunes
 			windDirection = windVelocity / (windSpeed + 1e-06f);
 		}
 
-		for (float distance = c_parameters.gridScale; distance <= c_parameters.maxStickyHeight; distance += c_parameters.gridScale)
+		for (float distance = c_parameters.gridScale; distance <= c_parameters.stickyRange.y * c_parameters.maxStickyHeight; distance += c_parameters.gridScale)
 		{
 			if constexpr (Mode == WindShadowMode::Curved) {
 				windVelocity = t_windArray.sample(nextPosition);
@@ -95,34 +96,33 @@ namespace dunes
 				{
 					resistance.w = erosionResistance;
 					t_resistanceArray.write(cell, resistance);
+					return;
 				}
 				else if (distance <= stickyDistance)
 				{
-					resistance.w = 1.0f - (distance - erosionDistance) / (stickyDistance - erosionDistance);
-					t_resistanceArray.write(cell, resistance);
+					resistance.w = fmaxf(fminf(0.1 + 1.0f - (distance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
+					//t_resistanceArray.write(cell, resistance);
 				}
 
-				return;
+				//return;
 			}
 		}
-
-		resistance.w = 0.0f;
 		t_resistanceArray.write(cell, resistance);
 	}
 
 	void sticky(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters)
 	{
-		setupStickyKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>> (t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.tmpBuffer);
-
 		if (t_simulationParameters.stickyStrength > 0.0f)
 		{
+			setupStickyKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.tmpBuffer);
+
 			if (t_launchParameters.windShadowMode == WindShadowMode::Linear)
 			{
-				stickyKernel<WindShadowMode::Linear><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>> (t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
+				stickyKernel<WindShadowMode::Linear> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
 			}
-			else 
+			else
 			{
-				stickyKernel<WindShadowMode::Curved><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>> (t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
+				stickyKernel<WindShadowMode::Curved> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer);
 			}
 		}
 	}

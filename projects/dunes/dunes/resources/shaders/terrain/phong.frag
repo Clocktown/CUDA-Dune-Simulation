@@ -186,11 +186,11 @@ void main()
 
 		if (resistances.w < 0.0f) 
 		{
-		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.erosionColor.rgb, 0.5f);
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.erosionColor.rgb, 0.75f);
 		}
 		else if (resistances.w > 0.0f) 
 		{
-		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.stickyColor.rgb, 0.5f * resistances.w);
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.stickyColor.rgb, 0.75f);
 		}
 		else 
 		{

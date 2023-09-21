@@ -13,7 +13,7 @@ struct RenderParameters
 	glm::vec4 bedrockColor{ 0.5f, 0.5f, 0.5f, 1.0f };
 	glm::vec4 windShadowColor{ 1.0f, 0.25f, 0.25f, 1.0f };
 	glm::vec4 vegetationColor{ 0.25f, 0.75f, 0.25f, 1.0f };
-	glm::vec4 erosionColor{ 1.0f, 0.65, 0.0f, 1.0f };
+	glm::vec4 erosionColor{ 0.0f, 0.0, 1.f, 1.0f };
 	glm::vec4 stickyColor{ 0.5f, 0.0f, 0.5f, 1.0f };
 };
 

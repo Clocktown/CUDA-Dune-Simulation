@@ -29,11 +29,11 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float windSpeed{ length(windVelocity) };
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) * (1.0f - resistance.w) };
+			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) * (resistance.w > 0.0f ? 0.5f : 1.0f) };
 
 			const float scale{ c_parameters.deltaTime };
 
-			const float saltation{ fminf(c_parameters.saltationStrength * saltationScale * scale, terrain.y) };
+			const float saltation{ fminf(c_parameters.saltationStrength * saltationScale * scale + (resistance.w < 0.0f ? -resistance.w : 0.0f), terrain.y) };
 
 			terrain.y -= saltation;
 			t_terrainArray.write(cell, terrain);
@@ -94,8 +94,8 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) };
 			const float abrasionScale{ saltationScale * (1.0f - resistance.z) };
 			const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
-			const float depositionProbability = fmaxf(fmaxf(resistance.x,
-				(1.0f - vegetationFactor) + resistance.y * vegetationFactor), resistance.w);
+			const float depositionProbability = fminf(fmaxf(fmaxf(resistance.x,
+				(1.0f - vegetationFactor) + resistance.y * vegetationFactor), resistance.w), resistance.w < 0.f ? 0.f : 1.f);
 
 
 			const float new_slab = slab * (1.f - depositionProbability);
@@ -111,8 +111,8 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			//}
 			terrain.y += slab * depositionProbability;
 			t_terrainArray.write(cell, terrain);
-			t_slabBuffer[cellIndex] = slab * (1.f - depositionProbability);
-			t_advectedSlabBuffer[cellIndex] = slab * (1.f - resistance.y);
+			t_slabBuffer[cellIndex] = slab * (1.f - depositionProbability); // write updated advectedSlabBuffer back to slabBuffer (ping-pong)
+			t_advectedSlabBuffer[cellIndex] = slab * (1.f - resistance.y); // Used in Reptation as slabBuffer
 		}
 	}
 }
