@@ -85,6 +85,7 @@ namespace dunes
 		float m_windWarpingDivisor{ 20.0f };
 		std::array<float, 4> m_windWarpingRadii{ 200.0f, 50.0f, 0.0f, 0.0f };
 		std::array<float, 4> m_windWarpingStrengths{ 0.8f, 0.2f, 0.0f, 0.0f };
+		std::array<float, 4> m_windWarpingGradientStrengths{ 30.f, 5.f, 0.0f, 0.0f };
 
 		int m_windShadowMode{ static_cast<int>(WindShadowMode::Linear) };
 		float m_windShadowDistance{ 10.0f };
@@ -118,8 +119,8 @@ namespace dunes
 		int m_multigridPostsweepCount{ 0 };
 
 		int m_timeMode{ static_cast<int>(TimeMode::FixedDeltaTime) };
-		float m_timeScale{ 15.0f };
-		float m_fixedDeltaTime{ 0.02f };
+		float m_timeScale{ 1.0f };
+		float m_fixedDeltaTime{ 1.f };
 
 		InitializationParameters m_initializationParameters{};
 		RenderParameters m_renderParameters{};

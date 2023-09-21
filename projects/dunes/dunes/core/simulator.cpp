@@ -403,7 +403,7 @@ namespace dunes
 
 	void Simulator::setWindWarpingDivisor(const int t_windWarpingDivisor)
 	{
-		m_launchParameters.windWarping.divisor = t_windWarpingDivisor;
+		m_launchParameters.windWarping.i_divisor = 1.f / t_windWarpingDivisor;
 	}
 
 	void Simulator::setWindWarpingRadius(const int t_index, const float t_windWarpingRadius)
@@ -425,6 +425,14 @@ namespace dunes
 		STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
 
 		m_launchParameters.windWarping.strengths[t_index] = t_windWarpingStrength;
+	}
+
+	void Simulator::setWindWarpingGradientStrength(const int t_index, const float t_windWarpingGradientStrength)
+	{
+		STHE_ASSERT(t_index >= 0, "Index must be greater than or equal to 0");
+		STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
+
+		m_launchParameters.windWarping.gradientStrengths[t_index] = t_windWarpingGradientStrength;
 	}
 
 	void Simulator::setWindShadowMode(const WindShadowMode t_windShadowMode)

@@ -50,6 +50,10 @@ namespace dunes
 		}
 		for (int i{ 0 }; i < 4; ++i)
 		{
+			m_simulator->setWindWarpingGradientStrength(i, m_windWarpingGradientStrengths[i]);
+		}
+		for (int i{ 0 }; i < 4; ++i)
+		{
 			m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
 		}
 
@@ -319,6 +323,7 @@ namespace dunes
 		m_windWarpingDivisor = json["windWarpingDivisor"]; //
 		m_windWarpingRadii = json["windWarpingRadii"]; //
 		m_windWarpingStrengths = json["windWarpingStrengths"]; //
+		m_windWarpingGradientStrengths = json["windWarpingGradientStrengths"]; //
 
 		m_windShadowMode = getIndexFromNamedArray(windShadowModes, IM_ARRAYSIZE(windShadowModes), json["windShadowMode"], 0); //
 		m_windShadowDistance = json["windShadowDistance"]; //
@@ -436,6 +441,7 @@ namespace dunes
 		json["windWarpingDivisor"] = m_windWarpingDivisor;
 		json["windWarpingRadii"] = m_windWarpingRadii;
 		json["windWarpingStrengths"] = m_windWarpingStrengths;
+		json["windWarpingGradientStrengths"] = m_windWarpingGradientStrengths; //
 
 		json["windShadowMode"] = windShadowModes[m_windShadowMode];
 		json["windShadowDistance"] = m_windShadowDistance;
@@ -776,6 +782,14 @@ namespace dunes
 					for (int i{ 0 }; i < 4; ++i)
 					{
 						m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
+					}
+				}
+
+				if (ImGui::DragFloat4("Gradient Strenghts", m_windWarpingGradientStrengths.data(), 0.05f))
+				{
+					for (int i{ 0 }; i < 4; ++i)
+					{
+						m_simulator->setWindWarpingGradientStrength(i, m_windWarpingGradientStrengths[i]);
 					}
 				}
 

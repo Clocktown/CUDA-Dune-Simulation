@@ -125,19 +125,18 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 								                t_windWarping.smoothedHeights[i][getCellIndex(getWrappedCell(cell + int2{ 0, -1 }))].x,
 								                t_windWarping.smoothedHeights[i][getCellIndex(getWrappedCell(cell + int2{ 0, 1 }))].x };
 
-				const float scale{ 0.5f * c_parameters.rGridScale };
+				const float scale{ t_windWarping.i_divisor * 0.5f * c_parameters.rGridScale };
 				const float2 gradient{ scale * (smoothedHeights[1] - smoothedHeights[0]),
 								       scale * (smoothedHeights[3] - smoothedHeights[2]) };
 
 				const float gradientLength{ length(gradient) };
 				
-				const float2 gradientDirection{ gradient / (gradientLength + 0.000001f) };
-				float2 orthogonalDirection{ -gradientDirection.y, gradientDirection.x };
+				float2 orthogonalDirection{ -gradient.y, gradient.x };
 				orthogonalDirection *= sign(dot(windDirection, orthogonalDirection));
 				
-				float alpha{ fminf(gradientLength / t_windWarping.divisor, 1.0f) }; 
+				float alpha{ fminf(gradientLength, 1.0f) }; 
 			
-				warpDirection += t_windWarping.strengths[i] * lerp(windDirection, orthogonalDirection, alpha);
+				warpDirection += t_windWarping.strengths[i] * lerp(windDirection, t_windWarping.gradientStrengths[i] * orthogonalDirection, alpha);
 				weight += t_windWarping.strengths[i];
 			}
 

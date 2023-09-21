@@ -24,9 +24,10 @@ using Buffer = sthe::device::Buffer<T>;
 struct WindWarping
 {
 	int count{ 2 };
-	float divisor{ 20.0f };
+	float i_divisor{ 1.f / 20.0f };
 	float radii[4]{ 200.0f, 50.0f, 0.0f, 0.0f };
 	float strengths[4]{ 0.8f, 0.2f, 0.0f, 0.0f };
+	float gradientStrengths[4]{ 30.f, 5.f, 0.0f, 0.0f };
 	Buffer<cuComplex> gaussKernels[4];
 	Buffer<cuComplex> smoothedHeights[4];
 };

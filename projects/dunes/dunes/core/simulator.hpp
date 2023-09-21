@@ -46,6 +46,7 @@ namespace dunes
 		void setWindWarpingDivisor(const int t_windWarpingDivisor);
 		void setWindWarpingRadius(const int t_index, const float t_windWarpingRadius);
 		void setWindWarpingStrength(const int t_index, const float t_windWarpingStrength);
+		void setWindWarpingGradientStrength(const int t_index, const float t_windWarpingGradientStrength);
 		void setWindShadowMode(const WindShadowMode t_windShadowMode);
 		void setWindShadowDistance(const float t_windShadowDistance);
 		void setMinWindShadowAngle(const float t_minWindShadowAngle);
