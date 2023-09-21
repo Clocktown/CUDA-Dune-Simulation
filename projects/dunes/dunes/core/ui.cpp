@@ -10,6 +10,9 @@
 #include <fstream>
 #include <filesystem>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 namespace dunes
 {
 
@@ -102,6 +105,32 @@ namespace dunes
 
 	void UI::onGUI()
 	{
+		if (m_takeScreenshot) {
+			m_takeScreenshot = false;
+
+			glm::ivec2 res = sthe::getWindow().getResolution();
+
+			std::vector<uint8_t> screen_pixels(3 * res.x * res.y);
+
+			// Generates pixel path performance warning, but this is fine in our scenario
+			glReadPixels(0,
+				0,
+				res.x,
+				res.y,
+				GL_RGB,
+				GL_UNSIGNED_BYTE,
+				screen_pixels.data());
+
+			stbi_write_png_compression_level = 9;
+			stbi_flip_vertically_on_write(true);
+
+			stbi_write_png(m_screenShotPath.c_str(),
+				res.x,
+				res.y,
+				3,
+				screen_pixels.data(),
+				3 * res.x);
+		}
 		ImGui::Begin("Settings");
 
 		createApplicationNode();
@@ -115,7 +144,14 @@ namespace dunes
 	void UI::createApplicationNode()
 	{
 		sthe::Application& application{ sthe::getApplication() };
-
+		if (ImGui::Button("Screenshot")) {
+			char const* filterPatterns[1] = { "*.png" };
+			auto output = tinyfd_saveFileDialog("Save Screenshot", "./screenshot.png", 1, filterPatterns, "Portable Network Graphics (.png)");
+			if (output != nullptr) {
+				m_takeScreenshot = true;
+				m_screenShotPath = output;
+			}
+		}
 		if (ImGui::TreeNode("Application"))
 		{
 			if (ImGui::Checkbox("VSync", &m_vSync))

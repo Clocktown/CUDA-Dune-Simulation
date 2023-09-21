@@ -54,6 +54,8 @@ namespace dunes
 		std::string m_resistanceMapPath{};
 
 		// Application
+		bool m_takeScreenshot{ false };
+		std::string m_screenShotPath{};
 		bool m_vSync{ false };
 		bool m_calcCoverage{ false };
 		float m_coverageThreshold{ 0.1f };
