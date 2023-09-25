@@ -25,7 +25,7 @@ __global__ void initializeWindWarpingKernel(WindWarping t_windWarping)
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
 
-	const float2 center{ 0.5f * make_float2(c_parameters.gridSize) };
+	const int2 center{ c_parameters.gridSize / 2 };
 	int2 cell;
 
 	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
@@ -36,16 +36,16 @@ __global__ void initializeWindWarpingKernel(WindWarping t_windWarping)
 
 			int2 fftshift{ 0, 0 };
 
-			if (cell.x > center.x)
+			if (cell.x >= center.x)
 			{
 				fftshift.x = c_parameters.gridSize.x;
 			}
-			if (cell.y > center.y)
+			if (cell.y >= center.y)
 			{
 				fftshift.y = c_parameters.gridSize.y;
 			}
 
-			const float distance{ length(c_parameters.gridScale * (make_float2(cell - fftshift) + 0.5f)) };
+			const float distance{ length(c_parameters.gridScale * (make_float2(cell  - fftshift) + 0.5))};
 		
 			for (int i{ 0 }; i < t_windWarping.count; ++i)
 			{
@@ -93,8 +93,64 @@ __global__ void smoothTerrainsKernel(Buffer<cuComplex> t_heightBuffer, WindWarpi
 
 			for (int i{ 0 }; i < t_windWarping.count; ++i)
 			{
-				t_windWarping.smoothedHeights[i][cellIndex] = fftScale * t_windWarping.gaussKernels[i][cellIndex] * height;
+				const cuComplex gauss = t_windWarping.gaussKernels[i][cellIndex];
+				const cuComplex result = { // Complex Multiplication
+					gauss.x * height.x - gauss.y * height.y, 
+					gauss.x * height.y + gauss.y * height.x 
+				};
+				t_windWarping.smoothedHeights[i][cellIndex] = fftScale * result;
 			}
+		}
+	}
+}
+
+__global__ void readBackSmoothTerrainKernel(Array2D<float2> t_terrainArray, WindWarping t_windWarping) {
+	const int2 index{ getGlobalIndex2D() };
+	const int2 stride{ getGridStride2D() };
+
+	int2 cell;
+
+	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
+	{
+		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
+		{
+			const int cellIndex{ getCellIndex(cell) };
+			
+			t_terrainArray.write(cell, float2{ t_windWarping.smoothedHeights[1][cellIndex].x, 0.f });
+		}
+	}
+}
+
+__global__ void readGaussKernel(Array2D<float2> t_terrainArray, WindWarping t_windWarping) {
+	const int2 index{ getGlobalIndex2D() };
+	const int2 stride{ getGridStride2D() };
+
+	int2 cell;
+
+	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
+	{
+		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
+		{
+			const int cellIndex{ getCellIndex(cell) };
+			
+			t_terrainArray.write(cell, 25000.f * float2{ t_windWarping.gaussKernels[0][cellIndex].x, 0.f });
+		}
+	}
+}
+
+__global__ void scaleGaussKernel(cuComplex* t_gauss, float scale) {
+	const int2 index{ getGlobalIndex2D() };
+	const int2 stride{ getGridStride2D() };
+
+	int2 cell;
+
+	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
+	{
+		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
+		{
+			const int cellIndex{ getCellIndex(cell) };
+			
+			t_gauss[cellIndex].x *= scale;
 		}
 	}
 }
@@ -136,7 +192,7 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 				
 				float alpha{ fminf(gradientLength, 1.0f) }; 
 			
-				warpDirection += t_windWarping.strengths[i] * lerp(windDirection, t_windWarping.gradientStrengths[i] * orthogonalDirection, alpha);
+				warpDirection += t_windWarping.strengths[i] * lerp(windVelocity, t_windWarping.gradientStrengths[i] * orthogonalDirection, alpha);
 				weight += t_windWarping.strengths[i];
 			}
 
@@ -153,7 +209,13 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 
 void initializeWindWarping(const LaunchParameters& t_launchParameters)
 {
-	initializeWindWarpingKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.windWarping);
+	initializeWindWarpingKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.windWarping);
+
+	// Normalize Kernels
+	for (int i = 0; i < t_launchParameters.windWarping.count; ++i) {
+		float result = thrust::reduce(thrust::device, (float*)t_launchParameters.windWarping.gaussKernels[i], (float*)(t_launchParameters.windWarping.gaussKernels[i] + c_parameters.cellCount));
+		scaleGaussKernel << < t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.windWarping.gaussKernels[i], 1.f / result);
+	}
 
 	for (int i{ 0 }; i < t_launchParameters.windWarping.count; ++i)
 	{
