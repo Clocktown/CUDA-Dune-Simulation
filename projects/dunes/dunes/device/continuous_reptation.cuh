@@ -3,6 +3,6 @@
 
 namespace dunes
 {
-	void continuousReptation(const LaunchParameters& t_launchParameters);
+	void continuousReptation(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters);
 }
 

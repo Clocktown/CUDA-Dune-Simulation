@@ -132,12 +132,12 @@ namespace dunes
 				curr_resistance.z
 		};
 
-		if (cell.x > 1000 && cell.x < 1200 && cell.y > 1000 && cell.y < 1200)
-		{
-			const float2 terrain{ 500.0f, 0.0f };
-			t_terrainArray.write(cell, terrain);
-		}
-		else
+		//if (cell.x > 1000 && cell.x < 1200 && cell.y > 1000 && cell.y < 1200)
+		//{
+		//	const float2 terrain{ 500.0f, 0.0f };
+		//	t_terrainArray.write(cell, terrain);
+		//}
+		//else
 		{
 			const float2 terrain{ bedrockHeight, fmaxf(sandHeight, 0.f) };
 			t_terrainArray.write(cell, terrain);

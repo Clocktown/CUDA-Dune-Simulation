@@ -207,13 +207,13 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 	}
 }
 
-void initializeWindWarping(const LaunchParameters& t_launchParameters)
+void initializeWindWarping(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters)
 {
 	initializeWindWarpingKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.windWarping);
 
 	// Normalize Kernels
 	for (int i = 0; i < t_launchParameters.windWarping.count; ++i) {
-		float result = thrust::reduce(thrust::device, (float*)t_launchParameters.windWarping.gaussKernels[i], (float*)(t_launchParameters.windWarping.gaussKernels[i] + c_parameters.cellCount));
+		float result = thrust::reduce(thrust::device, (float*)t_launchParameters.windWarping.gaussKernels[i], (float*)(t_launchParameters.windWarping.gaussKernels[i] + t_simulationParameters.cellCount));
 		scaleGaussKernel << < t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.windWarping.gaussKernels[i], 1.f / result);
 	}
 

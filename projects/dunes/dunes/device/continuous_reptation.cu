@@ -79,12 +79,14 @@ __global__ void finishContinuousReptationKernel(Array2D<float2> t_terrainArray, 
 	}
 }
 
-void continuousReptation(const LaunchParameters& t_launchParameters)
+void continuousReptation(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters)
 {
-	if (c_parameters.reptationStrength > 0.f) {
-		Buffer<float> reptationBuffer{ t_launchParameters.tmpBuffer + t_launchParameters.multigrid[0].cellCount };
+	if (t_simulationParameters.reptationStrength > 0.f) {
+		Buffer<float> reptationBuffer{ t_launchParameters.tmpBuffer + t_simulationParameters.cellCount };
 
-		setupContinuousReptationKernel << <t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D >> > (reptationBuffer);
+		//if (t_simulationParameters.timestep == 0) {
+		//	setupContinuousReptationKernel << <t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D >> > (reptationBuffer);
+		//}
 		continuousReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer, reptationBuffer);
 		finishContinuousReptationKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.terrainArray, reptationBuffer);
 	}

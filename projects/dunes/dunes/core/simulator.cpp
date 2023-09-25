@@ -125,7 +125,7 @@ namespace dunes
 
 		initializeTerrain(m_launchParameters, m_initializationParameters);
 		venturi(m_launchParameters);
-		initializeWindWarping(m_launchParameters);
+		initializeWindWarping(m_launchParameters, m_simulationParameters);
 
 		unmap();
 
@@ -161,11 +161,12 @@ namespace dunes
 				setWindDirection(angle);
 			}
 
+			m_simulationParameters.timestep = m_timeStep;
 			map();
 
 			if (m_reinitializeWindWarping)
 			{
-				initializeWindWarping(m_launchParameters);
+				initializeWindWarping(m_launchParameters, m_simulationParameters);
 				m_reinitializeWindWarping = false;
 			}
 
@@ -193,7 +194,7 @@ namespace dunes
 			saltation(m_launchParameters);
 			m_watches[5].stop();
 			m_watches[6].start();
-			reptation(m_launchParameters);
+			reptation(m_launchParameters, m_simulationParameters);
 			m_watches[6].stop();
 			m_watches[7].start();
 			avalanching(m_launchParameters);

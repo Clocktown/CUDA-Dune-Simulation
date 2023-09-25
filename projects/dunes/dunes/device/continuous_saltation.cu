@@ -31,9 +31,9 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float4 resistance{ t_resistanceArray.read(cell) };
 			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) * (resistance.w > 0.0f ? 0.5f : 1.0f) };
 
-			const float scale{ c_parameters.deltaTime };
+			//const float scale{ windSpeed * c_parameters.deltaTime };
 
-			const float saltation{ fminf(c_parameters.saltationStrength * saltationScale * scale + (resistance.w < 0.0f ? -resistance.w : 0.0f), terrain.y) };
+			const float saltation{ fminf(c_parameters.saltationStrength * saltationScale + (resistance.w < 0.0f ? -resistance.w : 0.0f), terrain.y) };
 
 			terrain.y -= saltation;
 			t_terrainArray.write(cell, terrain);
@@ -66,13 +66,30 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 	if (slab > 0.0f)
 	{
 		const float2 nextPosition{ position + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
-		const int2 nextCell{ getNearestCell(nextPosition) };
+		//const int2 nextCell{ getNearestCell(nextPosition) };
+		const int2 nextCell{ make_int2(nextPosition) };
+
+		for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
+		{
+			const float u{ 1.0f - abs(static_cast<float>(x) - nextPosition.x) };
+
+			for (int y{ nextCell.y }; y <= nextCell.y + 1; ++y)
+			{
+				const float v{ 1.0f - abs(static_cast<float>(y) - nextPosition.y) };
+				const float weight{ u * v };
 		
-		atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), slab);
+				if (weight > 0.0f)
+				{
+					atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), weight * slab);
+				}
+			}
+		}
+		
+		//atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), slab);
 	}
 }
 
-__global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, const Array2D<float2> t_windArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, const Buffer<float> t_advectedSlabBuffer)
+__global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, const Array2D<float2> t_windArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, Buffer<float> t_advectedSlabBuffer)
 {
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };

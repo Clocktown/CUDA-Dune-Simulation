@@ -79,7 +79,7 @@ __global__ void finishReptationKernel(Array2D<float2> t_terrainArray, Buffer<flo
 	}
 }
 
-void reptation(const LaunchParameters& t_launchParameters)
+void reptation(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters)
 {
 	Buffer<float> reptationBuffer{ t_launchParameters.tmpBuffer + t_launchParameters.multigrid[0].cellCount };
 
@@ -92,7 +92,7 @@ void reptation(const LaunchParameters& t_launchParameters)
 
 		break;
 	case SaltationMode::Continuous:
-	    continuousReptation(t_launchParameters); 
+	    continuousReptation(t_launchParameters, t_simulationParameters); 
 	    break;
 	}
 }

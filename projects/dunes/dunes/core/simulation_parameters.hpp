@@ -75,6 +75,7 @@ struct SimulationParameters
 	float vegetationAngle{ TAN45 };
 
 	float deltaTime{ 1.0f };
+	int timestep = 0;
 };
 
 void upload(const SimulationParameters& t_simulationParameters);

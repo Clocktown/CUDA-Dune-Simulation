@@ -33,9 +33,10 @@ __global__ void windShadowKernel(const Array2D<float2> t_terrainArray, const Arr
 
 	const float height{ terrain.x + terrain.y };
 	float2 nextPosition{ make_float2(cell) + 0.5f };
+	//nextPosition -= windDirection;
 	float maxAngle{ 0.0f };
 
-	for (float distance = c_parameters.gridScale; distance <= c_parameters.windShadowDistance; distance += c_parameters.gridScale)
+	for (float distance = c_parameters.gridScale; distance <= c_parameters.gridScale * c_parameters.windShadowDistance; distance += c_parameters.gridScale)
 	{
 		if constexpr (Mode == WindShadowMode::Curved)
 		{
