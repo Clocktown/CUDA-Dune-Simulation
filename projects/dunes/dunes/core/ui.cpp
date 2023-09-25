@@ -402,6 +402,7 @@ namespace dunes
 				auto& params = m_initializationParameters.noiseGenerationParameters[idx];
 				params.flat = obj["flat"];
 				params.enabled = obj["enable"];
+				params.uniform_random = obj["uniform_random"];
 				params.iters = obj["iterations"];
 				params.stretch = { obj["stretch"][0], obj["stretch"][1] };
 				params.offset = { obj["offset"][0], obj["offset"][1] };
@@ -517,6 +518,7 @@ namespace dunes
 			auto obj = nlohmann::json::object();
 			obj["flat"] = params.flat;
 			obj["enable"] = params.enabled;
+			obj["uniform_random"] = params.uniform_random;
 			obj["iterations"] = params.iters;
 			obj["stretch"] = { params.stretch.x, params.stretch.y };
 			obj["offset"] = { params.offset.x, params.offset.y };
@@ -659,6 +661,7 @@ namespace dunes
 				if (ImGui::TreeNode(initializationTargets[i])) {
 					auto& params = m_initializationParameters.noiseGenerationParameters[i];
 					ImGui::Checkbox("Flat (Bias only)", &params.flat);
+					ImGui::Checkbox("Uniform Random (Bias + Scale)", &params.uniform_random);
 					ImGui::Checkbox("Enable", &params.enabled);
 					ImGui::DragInt("Noise Iterations", &params.iters, 0.1f, 0, 50);
 					ImGui::DragFloat2("Noise Stretch", &params.stretch.x, 1.f, 0.f, 100.f);

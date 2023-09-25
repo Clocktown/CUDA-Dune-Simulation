@@ -91,46 +91,24 @@ namespace dunes
 		const float2 curr_terrain = t_terrainArray.read(cell);
 		const float4 curr_resistance = t_resistanceArray.read(cell);
 
-		auto bedrockParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::Bedrock];
-		auto sandParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::Sand];
-		auto vegetationParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::Vegetation];
-		auto abrasionParams = t_initializationParameters.noiseGenerationParameters[(int)NoiseGenerationTarget::AbrasionResistance];
-
-		const float bedrockHeight{
-			bedrockParams.enabled ?
-				(bedrockParams.bias +
-				(bedrockParams.flat ?
-					0.0f :
-					bedrockParams.scale * seamless_pNoise(bedrockParams.offset, bedrockParams.stretch, uv, bedrockParams.iters, bedrockParams.border))) :
-				curr_terrain.x
+		const int indices[4]{
+			(int)NoiseGenerationTarget::Bedrock,
+			(int)NoiseGenerationTarget::Sand,
+			(int)NoiseGenerationTarget::Vegetation,
+			(int)NoiseGenerationTarget::AbrasionResistance
 		};
+		float values[4] = { curr_terrain.x, curr_terrain.y, curr_resistance.y, curr_resistance.z };
 
-		const float sandHeight{
-			sandParams.enabled ?
-				(sandParams.bias +
-				(sandParams.flat ?
-					0.0f :
-					sandParams.scale * seamless_pNoise(sandParams.offset, sandParams.stretch, uv, sandParams.iters, sandParams.border))) :
-				curr_terrain.y
-		};
-
-		const float vegetationRes{
-			vegetationParams.enabled ?
-				(vegetationParams.bias +
-				(vegetationParams.flat ?
-					0.0f :
-					vegetationParams.scale * seamless_pNoise(vegetationParams.offset, vegetationParams.stretch, uv, vegetationParams.iters, vegetationParams.border))) :
-				curr_resistance.y
-		};
-
-		const float abrasionRes{
-			abrasionParams.enabled ?
-				(abrasionParams.bias +
-				(abrasionParams.flat ?
-					0.0f :
-					abrasionParams.scale * seamless_pNoise(abrasionParams.offset, abrasionParams.stretch, uv, abrasionParams.iters, abrasionParams.border))) :
-				curr_resistance.z
-		};
+		for (int i = 0; i < 4; ++i) {
+			const auto& params = t_initializationParameters.noiseGenerationParameters[indices[i]];
+			values[i] = params.enabled ?
+				(params.bias +
+					(params.uniform_random ? params.scale * frand(params.offset + params.stretch * uv) :
+					(params.flat ?
+						0.0f :
+						params.scale * seamless_pNoise(params.offset, params.stretch, uv, params.iters, params.border)))) :
+				values[i];
+		}
 
 		//if (cell.x > 1000 && cell.x < 1200 && cell.y > 1000 && cell.y < 1200)
 		//{
@@ -139,11 +117,11 @@ namespace dunes
 		//}
 		//else
 		{
-			const float2 terrain{ bedrockHeight, fmaxf(sandHeight, 0.f) };
+			const float2 terrain{ values[0], fmaxf(values[1], 0.f)};
 			t_terrainArray.write(cell, terrain);
 		}
 
-		const float4 resistance{ 0.0f, clamp(vegetationRes, 0.f, 1.f), clamp(abrasionRes, 0.f, 1.f), 0.0f };
+		const float4 resistance{ 0.0f, clamp(values[2], 0.f, 1.f), clamp(values[3], 0.f, 1.f), 0.0f};
 		t_resistanceArray.write(cell, resistance);
 
 		t_slabBuffer[getCellIndex(cell)] = 0.0f;
@@ -160,7 +138,7 @@ namespace dunes
 
 		float2 curr_terrain = t_terrainArray.read(cell);
 
-		curr_terrain.y += amount;
+		curr_terrain.y += frand(make_float2(cell)) * 2.f * amount;
 		curr_terrain.y = fmaxf(curr_terrain.y, 0.f);
 
 		t_terrainArray.write(cell, curr_terrain);

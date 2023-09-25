@@ -86,6 +86,7 @@ struct NoiseGenerationParameters
     int iters = 0;
 	bool flat = false;
 	bool enabled = true;
+	bool uniform_random = false;
 };
 
 constexpr int NumNoiseGenerationTargets = 4;
@@ -99,9 +100,9 @@ struct InitializationParameters
 {
 	NoiseGenerationParameters noiseGenerationParameters[NumNoiseGenerationTargets]{
 		{},
-		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 100.f, 10.f, 0, true, true},
-		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 1.f, 0.f, 0, true, true},
-		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 1.f, 0.f, 0, true, true}
+		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 100.f, 10.f, 0, true, true, false},
+		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 1.f, 0.f, 0, true, true, false},
+		{{ 0.f, 0.f }, { 1.f, 1.f }, { 0.1f , 0.1f }, 1.f, 0.f, 0, true, true, false}
 	};
 };
 
