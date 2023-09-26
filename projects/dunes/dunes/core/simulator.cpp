@@ -104,7 +104,7 @@ namespace dunes
 			CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlan));
 		}
 
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
+		//CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
 
 		if (m_isAwake)
 		{
@@ -281,7 +281,7 @@ namespace dunes
 
 	void Simulator::setupWindWarping()
 	{
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.y, m_simulationParameters.gridSize.x, cufftType::CUFFT_C2C));
 
 		for (int i{ 0 }; i < 4; ++i)
 		{
