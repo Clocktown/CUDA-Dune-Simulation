@@ -48,7 +48,7 @@ __global__ void continuousReptationKernel(const Array2D<float2> t_terrainArray, 
 		const float nextHeight{ nextTerrain.x + nextTerrain.y };
 
 		const float heightDifference{ (nextHeight - height) * c_parameters.rGridScale * c_rDistances[i]};
-		const float heightScale = 1.f;// fmaxf(c_parameters.avalancheAngle - abs(heightDifference), 0.f) / c_parameters.avalancheAngle;
+		const float heightScale = abs(heightDifference);// fmaxf(c_parameters.avalancheAngle - abs(heightDifference), 0.f) / c_parameters.avalancheAngle;
 
 		// Enforce symmetric additive and subtractive changes, avoiding any atomics
 		float step = fmaxf(0.5f * heightScale * (slab + nextSlab) * c_parameters.reptationStrength, 0.f);
