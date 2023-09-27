@@ -67,7 +67,7 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 	{
 		const float2 nextPosition{ position + windVelocity * c_parameters.rGridScale * c_parameters.deltaTime };
 		//const int2 nextCell{ getNearestCell(nextPosition) };
-		const int2 nextCell{ make_int2(nextPosition) };
+		const int2 nextCell{ make_int2(floorf(nextPosition)) };
 
 		for (int x{ nextCell.x }; x <= nextCell.x + 1; ++x)
 		{
@@ -80,7 +80,7 @@ __global__ void continuousSaltationKernel(const Array2D<float2> t_windArray, Buf
 		
 				if (weight > 0.0f)
 				{
-					atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(nextCell)), weight * slab);
+					atomicAdd(t_advectedSlabBuffer + getCellIndex(getWrappedCell(int2{x,y})), weight * slab);
 				}
 			}
 		}
