@@ -101,10 +101,7 @@ namespace dunes
 				else if (distance <= stickyDistance)
 				{
 					resistance.w = fmaxf(fminf(0.1 + 1.0f - (distance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
-					//t_resistanceArray.write(cell, resistance);
 				}
-
-				//return;
 			}
 		}
 		t_resistanceArray.write(cell, resistance);

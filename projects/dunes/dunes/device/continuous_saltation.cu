@@ -29,7 +29,7 @@ __global__ void setupContinuousSaltationKernel(Array2D<float2> t_terrainArray, c
 			const float windSpeed{ length(windVelocity) };
 
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) * (resistance.w > 0.0f ? 0.5f : 1.0f) };
+			const float saltationScale{ (1.0f - resistance.x) * (1.0f - fmaxf(resistance.y, 0.f)) * (resistance.w > 0.0f ? 0.5f : 1.0f) };
 
 			//const float scale{ windSpeed * c_parameters.deltaTime };
 
@@ -108,11 +108,13 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			const float windSpeed{ length(t_windArray.read(cell)) };
 			
 			const float4 resistance{ t_resistanceArray.read(cell) };
-			const float saltationScale{ (1.0f - resistance.x) * (1.0f - resistance.y) };
-			const float abrasionScale{ saltationScale * (1.0f - resistance.z) };
+			const float vegetation = fmaxf(resistance.y, 0.f);
+			const float object = resistance.y < 0.f ? 0.f : 1.f;
+			const float saltationScale{ (1.0f - resistance.x) * (1.0f - vegetation) };
+			const float abrasionScale{ object * saltationScale * (1.0f - resistance.z) };
 			const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
-			const float depositionProbability = fminf(fmaxf(fmaxf(resistance.x,
-				(1.0f - vegetationFactor) + resistance.y * vegetationFactor), resistance.w), resistance.w < 0.f ? 0.f : 1.f);
+			const float depositionProbability = object * fminf(fmaxf(fmaxf(resistance.x,
+				(1.0f - vegetationFactor) + vegetation * vegetationFactor), resistance.w), resistance.w < 0.f ? 0.f : 1.f);
 
 
 			const float new_slab = slab * (1.f - depositionProbability);
@@ -129,7 +131,7 @@ __global__ void finishContinuousSaltationKernel(Array2D<float2> t_terrainArray, 
 			terrain.y += slab * depositionProbability;
 			t_terrainArray.write(cell, terrain);
 			t_slabBuffer[cellIndex] = slab * (1.f - depositionProbability); // write updated advectedSlabBuffer back to slabBuffer (ping-pong)
-			t_advectedSlabBuffer[cellIndex] = slab * (1.f - resistance.y); // Used in Reptation as slabBuffer
+			t_advectedSlabBuffer[cellIndex] = slab * (1.f - vegetation); // Used in Reptation as slabBuffer
 		}
 	}
 }

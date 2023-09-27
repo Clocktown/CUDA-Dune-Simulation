@@ -36,6 +36,10 @@ __global__ void bedrockAvalancheKernel(const Array2D<float4> t_resistanceArray, 
 
 	const float2 terrain{ t_terrainBuffer[cellIndex] };
 	const float height{ terrain.x };
+	const float object = t_resistanceArray.read(cell).y < 0.f ? 0.f : 1.f;
+	if (object == 0.f) {
+		return;
+	}
 	
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -49,7 +53,7 @@ __global__ void bedrockAvalancheKernel(const Array2D<float4> t_resistanceArray, 
 		const float nextHeight{ nextTerrain.x };
 
 		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - c_parameters.bedrockAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
+		avalanches[i] = object * fmaxf(heightDifference - c_parameters.bedrockAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
 		avalancheSum += avalanches[i];
 		maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
 	}

@@ -46,7 +46,7 @@ __global__ void multigridAvalanchingKernel(const MultigridLevel t_level, const A
 	const int cellIndex{ getCellIndex(cell, t_level.gridSize) };
 	const float2 terrain{ t_level.terrainBuffer[cellIndex] + make_float2(0.0f, t_level.fluxBuffer[cellIndex]) };
 	const float height{ terrain.x + terrain.y };
-	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -107,7 +107,7 @@ __global__ void multigridCorrectionKernel(const MultigridLevel t_level, const Ar
 
 	const float2 terrain{ t_level.terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y + flux };
-	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
 	int nextCellIndices[8];
 	float corrections[8];

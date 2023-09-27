@@ -33,7 +33,7 @@ __global__ void atomicAvalanchingKernel(Array2D<float2> t_terrainArray, const Ar
 
 	const float2 terrain{ t_terrainArray.read(cell) };
 	const float height{ terrain.x + terrain.y };
-	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -122,7 +122,7 @@ __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanc
 
 	const float2 terrain{ t_terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y };
-	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -175,7 +175,7 @@ __global__ void atomicInPlaceTaylorKernel(const Array2D<float4> t_resistanceArra
 
 	const float2 terrain{ t_terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y };
-	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y) };
+	const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
 	int nextCellIndices[8];
 	float avalanches[8];
@@ -250,7 +250,7 @@ __global__ void sharedAtomicInPlaceAvalanchingKernel(const Array2D<float4> t_res
 	const int              idx = cellIndex;
 	const int              idx_shared = linear_block_10x10(threadIdx.x, threadIdx.y);
 	const float2           terrain = t_terrainBuffer[idx];
-	const float avalancheAngle = lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, t_resistanceArray.read(cell).y);
+	const float avalancheAngle = lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f));
 
 	// Load into Shared memory
 	s[idx_shared] = terrain.x + terrain.y;
