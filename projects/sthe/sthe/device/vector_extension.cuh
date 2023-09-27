@@ -7,30 +7,30 @@
 #ifndef __CUDACC__
 #   include <cmath>
 
-	CU_INLINE CU_HOST_DEVICE int min(const int a, const int b)
-	{
-		return a < b ? a : b;
-	}
+CU_INLINE CU_HOST_DEVICE int min(const int a, const int b)
+{
+	return a < b ? a : b;
+}
 
-	CU_INLINE CU_HOST_DEVICE unsigned int min(const unsigned int a, const unsigned int b)
-	{
-		return a < b ? a : b;
-	}
+CU_INLINE CU_HOST_DEVICE unsigned int min(const unsigned int a, const unsigned int b)
+{
+	return a < b ? a : b;
+}
 
-	CU_INLINE CU_HOST_DEVICE int max(const int a, const int b)
-	{
-		return a > b ? a : b;
-	}
+CU_INLINE CU_HOST_DEVICE int max(const int a, const int b)
+{
+	return a > b ? a : b;
+}
 
-	CU_INLINE CU_HOST_DEVICE unsigned int max(const unsigned int a, const unsigned int b)
-	{
-		return a > b ? a : b;
-	}
+CU_INLINE CU_HOST_DEVICE unsigned int max(const unsigned int a, const unsigned int b)
+{
+	return a > b ? a : b;
+}
 
-	CU_INLINE CU_HOST_DEVICE float rsqrtf(const float a)
-	{
-		return 1.0f / sqrtf(a);
-	}
+CU_INLINE CU_HOST_DEVICE float rsqrtf(const float a)
+{
+	return 1.0f / sqrtf(a);
+}
 #endif
 
 CU_INLINE CU_HOST_DEVICE int sign(const int a)
@@ -1676,12 +1676,12 @@ CU_INLINE CU_HOST_DEVICE float smoothstep(const float e0, const float e1, const 
 
 CU_INLINE CU_HOST_DEVICE float mod(const float a, const float b)
 {
-	return a - b * floorf(a/b);
+	return a - b * floorf(a / b);
 }
 
 CU_INLINE CU_HOST_DEVICE float2 mod(const float2& a, const float b)
 {
-	return a - b * floorf(a/b);
+	return a - b * floorf(a / b);
 }
 
 CU_INLINE CU_HOST_DEVICE float2 cos(const float2& a)
@@ -1707,6 +1707,19 @@ CU_INLINE CU_HOST_DEVICE float2 reflect(const float2& a, const float2& n)
 CU_INLINE CU_HOST_DEVICE float2 lerp(const float2 a, const float2 b, const float t)
 {
 	return a + t * (b - a);
+}
+
+CU_INLINE CU_HOST_DEVICE float signed_angle(const float2 p0, const float2 p1)
+{
+	return atan2f(p1.y * p0.x - p1.x * p0.y, p0.x * p1.x + p0.y * p1.y);
+}
+
+CU_INLINE CU_HOST_DEVICE float2 rotate(const float2 p0, const float theta)
+{
+	return float2{
+		p0.x * cos(theta) - p0.y * sin(theta),
+		p0.x * sin(theta) + p0.y * cos(theta)
+	};
 }
 
 CU_INLINE CU_HOST_DEVICE float2 bilerp(const float2 a00, const float2 a10, const float2 a01, const float2 a11, const float u, const float v)
