@@ -110,16 +110,38 @@ namespace dunes
 				values[i];
 		}
 
-		//if (cell.x > 1000 && cell.x < 1200 && cell.y > 1000 && cell.y < 1200)
-		//{
-		//	const float2 terrain{ 500.0f, 0.0f };
-		//	t_terrainArray.write(cell, terrain);
-		//}
-		//else
+		float2 center{ make_float2(c_parameters.gridSize) / 2.f };
+
+		// Wind Tunnel initialization
+		/*center.x -= 100;
+		const float2 cellf{ make_float2(cell) };
+		if (length(cellf - center) <= 150 || ((cellf.x > center.x) && (cellf.x - 400 < center.x) && (abs(cellf.y - center.y) <= 150)))
 		{
-			const float2 terrain{ values[0], fmaxf(values[1], 0.f)};
+			const float2 terrain{ 100.0f, 0.0f };
 			t_terrainArray.write(cell, terrain);
 		}
+		else
+		{
+			const float2 terrain{ 0.f, fmaxf(values[1], 0.f)};
+			t_terrainArray.write(cell, terrain);
+		}*/
+
+		// Sand Column initialization
+		/*const float2 cellf{ make_float2(cell) };
+		if (length(cellf-center) < 100.f)
+		{
+			const float2 terrain{ 0.f, 402.f };
+			t_terrainArray.write(cell, terrain);
+		}
+		else
+		{
+			const float2 terrain{ 0.f, 2.f};
+			t_terrainArray.write(cell, terrain);
+		}*/
+
+		// Regular initialization
+		const float2 terrain{ values[0], fmaxf(values[1], 0.f)};
+		t_terrainArray.write(cell, terrain);
 
 		const float4 resistance{ 0.0f, clamp(values[2], 0.f, 1.f), clamp(values[3], 0.f, 1.f), 0.0f};
 		t_resistanceArray.write(cell, resistance);

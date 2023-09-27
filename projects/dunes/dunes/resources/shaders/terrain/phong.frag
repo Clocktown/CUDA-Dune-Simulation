@@ -184,17 +184,20 @@ void main()
 		fragmentColor.rgb += ambientColor * diffuseColor;
 		const vec3 illuminatedColor = lightColor * (cosPhi * diffuseColor + cosPsiN * specularColor);
 
-		if (resistances.w < 0.0f) 
+		if (resistances.w < 0.0f && renderParameters.erosionColor.a > 0.5f) 
 		{
-		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.erosionColor.rgb, 0.75f);
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.erosionColor.rgb, 0.5f);
 		}
-		else if (resistances.w > 0.0f) 
+		else if (resistances.w > 0.0f && renderParameters.stickyColor.a > 0.5f) 
 		{
-		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.stickyColor.rgb, 0.75f);
+		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.stickyColor.rgb, 0.5f * resistances.w);
 		}
-		else 
+		else if (resistances.x > 0.0f && renderParameters.windShadowColor.a > 0.5f)
 		{
 		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.windShadowColor.rgb, 0.5f * resistances.x);
+		} else 
+		{
+			fragmentColor.rgb += illuminatedColor;
 		}
 	}
 

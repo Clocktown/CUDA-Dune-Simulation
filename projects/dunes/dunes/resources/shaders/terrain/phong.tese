@@ -106,7 +106,6 @@ void main()
 		const float height = t_terrain.heightScale * (terrain.x + terrain.y);
 		fragment.position.y = height;
 
-		// TODO: This is bugged for non-square resolutions.
 		const vec2 size = vec2(2.0f * t_terrain.gridScale,0.0f);
         const ivec3 offset = ivec3(-1, 0, 1);
 

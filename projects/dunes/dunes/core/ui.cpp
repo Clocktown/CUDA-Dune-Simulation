@@ -210,8 +210,12 @@ namespace dunes
 		if (ImGui::TreeNode("Rendering"))
 		{
 			bool dirty = false;
-			dirty |= ImGui::ColorEdit3("Sand Color", glm::value_ptr(m_renderParameters.sandColor));
-			dirty |= ImGui::ColorEdit3("Vegetation Color", glm::value_ptr(m_renderParameters.vegetationColor));
+			dirty |= ImGui::ColorEdit4("Sand Color", glm::value_ptr(m_renderParameters.sandColor));
+			dirty |= ImGui::ColorEdit4("Bedrock Color", glm::value_ptr(m_renderParameters.bedrockColor));
+			dirty |= ImGui::ColorEdit4("Wind Shadow Color", glm::value_ptr(m_renderParameters.windShadowColor));
+			dirty |= ImGui::ColorEdit4("Vegetation Color", glm::value_ptr(m_renderParameters.vegetationColor));
+			dirty |= ImGui::ColorEdit4("Erosion Cell Color", glm::value_ptr(m_renderParameters.erosionColor));
+			dirty |= ImGui::ColorEdit4("Sticky Cell Color", glm::value_ptr(m_renderParameters.stickyColor));
 
 
 			if (dirty) {
@@ -414,7 +418,10 @@ namespace dunes
 
 		m_renderParameters.sandColor = { json["sandColor"][0], json["sandColor"][1], json["sandColor"][2], json["sandColor"][3] };
 		m_renderParameters.bedrockColor = { json["bedrockColor"][0], json["bedrockColor"][1], json["bedrockColor"][2], json["bedrockColor"][3] };
-
+		m_renderParameters.windShadowColor = { json["windShadowColor"][0], json["windShadowColor"][1], json["windShadowColor"][2], json["windShadowColor"][3] };
+		m_renderParameters.vegetationColor = { json["vegetationColor"][0], json["vegetationColor"][1], json["vegetationColor"][2], json["vegetationColor"][3] };
+		m_renderParameters.erosionColor = { json["erosionColor"][0], json["erosionColor"][1], json["erosionColor"][2], json["erosionColor"][3] };
+		m_renderParameters.stickyColor = { json["stickyColor"][0], json["stickyColor"][1], json["stickyColor"][2], json["stickyColor"][3] };
 
 		initializeAll();
 
@@ -533,11 +540,30 @@ namespace dunes
 			m_renderParameters.sandColor.z,
 			m_renderParameters.sandColor.w
 		};
-
 		json["bedrockColor"] = { m_renderParameters.bedrockColor.x,
 			m_renderParameters.bedrockColor.y,
 			m_renderParameters.bedrockColor.z,
 			m_renderParameters.bedrockColor.w
+		};
+		json["windShadowColor"] = { m_renderParameters.windShadowColor.x,
+			m_renderParameters.windShadowColor.y,
+			m_renderParameters.windShadowColor.z,
+			m_renderParameters.windShadowColor.w
+		};
+		json["vegetationColor"] = { m_renderParameters.vegetationColor.x,
+			m_renderParameters.vegetationColor.y,
+			m_renderParameters.vegetationColor.z,
+			m_renderParameters.vegetationColor.w
+		};
+		json["erosionColor"] = { m_renderParameters.erosionColor.x,
+			m_renderParameters.erosionColor.y,
+			m_renderParameters.erosionColor.z,
+			m_renderParameters.erosionColor.w
+		};
+		json["stickyColor"] = { m_renderParameters.stickyColor.x,
+			m_renderParameters.stickyColor.y,
+			m_renderParameters.stickyColor.z,
+			m_renderParameters.stickyColor.w
 		};
 
 		if (m_exportMaps) {
