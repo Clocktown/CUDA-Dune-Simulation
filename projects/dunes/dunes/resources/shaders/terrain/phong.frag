@@ -74,6 +74,7 @@ struct RenderParameters
 	vec4 vegetationColor;
 	vec4 erosionColor;
 	vec4 stickyColor;
+	vec4 objectColor;
 };
 
 layout(std140, binding = 0) uniform PipelineBuffer
@@ -176,14 +177,14 @@ void main()
 		const vec4 resistances = texture(t_resistanceMap, fragment.uv);
 		const vec3 bedrockColor = mix(renderParameters.bedrockColor.rgb, vec3(0), 0.75 * resistances.z);
 	    vec3 diffuseColor = mix(renderParameters.sandColor.rgb, bedrockColor, clamp((1.f - terrain.y) / (1.f), 0.f, 1.f));
-		diffuseColor = mix(diffuseColor, renderParameters.vegetationColor.rgb, resistances.y);
+		diffuseColor = mix(diffuseColor, renderParameters.vegetationColor.rgb, max(resistances.y, 0.f));
+		diffuseColor = mix(diffuseColor, renderParameters.objectColor.rgb, max(-resistances.y,0));
 			
 	    const vec3 specularColor = vec3(0);
 		const float cosPsiN = pow(cosPsi, 80.0f);
 		   
 		fragmentColor.rgb += ambientColor * diffuseColor;
 		const vec3 illuminatedColor = lightColor * (cosPhi * diffuseColor + cosPsiN * specularColor);
-
 		if (resistances.w < 0.0f && renderParameters.erosionColor.a > 0.5f) 
 		{
 		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.erosionColor.rgb, 0.5f);
@@ -191,14 +192,14 @@ void main()
 		else if (resistances.w > 0.0f && renderParameters.stickyColor.a > 0.5f) 
 		{
 		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.stickyColor.rgb, 0.5f * resistances.w);
-		}
-		else if (resistances.x > 0.0f && renderParameters.windShadowColor.a > 0.5f)
-		{
-		    fragmentColor.rgb += mix(illuminatedColor, illuminatedColor * renderParameters.windShadowColor.rgb, 0.5f * resistances.x);
 		} else 
 		{
 			fragmentColor.rgb += illuminatedColor;
 		}
+		if (resistances.x > 0.0f && renderParameters.windShadowColor.a > 0.5f)
+		{
+		    fragmentColor.rgb = mix(fragmentColor.rgb, illuminatedColor * renderParameters.windShadowColor.rgb, 0.5f * resistances.x);
+		} 
 	}
 
 	fragmentColor.rgb = clamp(fragmentColor.rgb, 0.0f, 1.0f);

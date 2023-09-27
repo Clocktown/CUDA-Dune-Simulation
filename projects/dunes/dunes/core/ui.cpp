@@ -216,7 +216,7 @@ namespace dunes
 			dirty |= ImGui::ColorEdit4("Vegetation Color", glm::value_ptr(m_renderParameters.vegetationColor));
 			dirty |= ImGui::ColorEdit4("Erosion Cell Color", glm::value_ptr(m_renderParameters.erosionColor));
 			dirty |= ImGui::ColorEdit4("Sticky Cell Color", glm::value_ptr(m_renderParameters.stickyColor));
-
+			dirty |= ImGui::ColorEdit4("Object Color", glm::value_ptr(m_renderParameters.objectColor));
 
 			if (dirty) {
 				m_simulator->setRenderParameters(m_renderParameters);
@@ -422,6 +422,7 @@ namespace dunes
 		m_renderParameters.vegetationColor = { json["vegetationColor"][0], json["vegetationColor"][1], json["vegetationColor"][2], json["vegetationColor"][3] };
 		m_renderParameters.erosionColor = { json["erosionColor"][0], json["erosionColor"][1], json["erosionColor"][2], json["erosionColor"][3] };
 		m_renderParameters.stickyColor = { json["stickyColor"][0], json["stickyColor"][1], json["stickyColor"][2], json["stickyColor"][3] };
+		m_renderParameters.objectColor = { json["objectColor"][0], json["objectColor"][1], json["objectColor"][2], json["objectColor"][3] };
 
 		initializeAll();
 
@@ -564,6 +565,11 @@ namespace dunes
 			m_renderParameters.stickyColor.y,
 			m_renderParameters.stickyColor.z,
 			m_renderParameters.stickyColor.w
+		};
+		json["objectColor"] = { m_renderParameters.objectColor.x,
+			m_renderParameters.objectColor.y,
+			m_renderParameters.objectColor.z,
+			m_renderParameters.objectColor.w
 		};
 
 		if (m_exportMaps) {
