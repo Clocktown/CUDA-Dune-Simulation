@@ -89,8 +89,8 @@ namespace dunes
 		m_timeStep = 0;
 		std::fill(m_watchTimings.begin(), m_watchTimings.end(), 0.f);
 		std::fill(m_meanWatchTimings.begin(), m_meanWatchTimings.end(), 0.f);
-		STHE_ASSERT(t_gridSize.x > 0 && (t_gridSize.x & (t_gridSize.x - 1)) == 0, "Grid size x must be a power of 2");
-		STHE_ASSERT(t_gridSize.y > 0 && (t_gridSize.y & (t_gridSize.y - 1)) == 0, "Grid size y must be a power of 2");
+		//STHE_ASSERT(t_gridSize.x > 0 && (t_gridSize.x & (t_gridSize.x - 1)) == 0, "Grid size x must be a power of 2");
+		//STHE_ASSERT(t_gridSize.y > 0 && (t_gridSize.y & (t_gridSize.y - 1)) == 0, "Grid size y must be a power of 2");
 		STHE_ASSERT(t_gridScale != 0.0f, "Grid scale cannot be 0");
 
 		m_simulationParameters.gridSize.x = t_gridSize.x;
@@ -445,7 +445,7 @@ namespace dunes
 		m_launchParameters.windWarping.count = t_windWarpingCount;
 	}
 
-	void Simulator::setWindWarpingDivisor(const int t_windWarpingDivisor)
+	void Simulator::setWindWarpingDivisor(const float t_windWarpingDivisor)
 	{
 		m_launchParameters.windWarping.i_divisor = 1.f / t_windWarpingDivisor;
 	}
