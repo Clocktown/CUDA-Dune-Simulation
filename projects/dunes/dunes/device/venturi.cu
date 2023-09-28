@@ -10,25 +10,30 @@ namespace dunes
 
 __global__ void venturiKernel(Array2D<float2> t_terrainArray, Array2D<float2> t_windArray)
 {
-	const int2 cell{ getGlobalIndex2D() };
+	const int2 index{ getGlobalIndex2D() };
+	const int2 stride{ getGridStride2D() };
 
-	if (isOutside(cell))
+	int2 cell;
+
+	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
 	{
-		return;
+		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
+		{
+
+			const float2 terrain{ t_terrainArray.read(cell) };
+			const float height{ terrain.x + terrain.y };
+
+			const float venturiScale{ (1.0f + c_parameters.venturiStrength * height) };
+			const float2 windVelocity{ venturiScale * c_parameters.windSpeed * c_parameters.windDirection };
+
+			t_windArray.write(cell, windVelocity);
+		}
 	}
-
-	const float2 terrain{ t_terrainArray.read(cell) };
-	const float height{ terrain.x + terrain.y };
-
-	const float venturiScale{ (1.0f + c_parameters.venturiStrength * height) };
-	const float2 windVelocity{ venturiScale * c_parameters.windSpeed * c_parameters.windDirection };
-
-	t_windArray.write(cell, windVelocity);
 }
 
 void venturi(const LaunchParameters& t_launchParameters)
 {
-	venturiKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray);
+	venturiKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, t_launchParameters.windArray);
 }
 
 }

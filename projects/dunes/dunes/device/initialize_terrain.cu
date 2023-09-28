@@ -114,7 +114,7 @@ namespace dunes
 
 		float2 center{ make_float2(c_parameters.gridSize) / 2.f };
 		// Wind Tunnel initialization
-		center.x -= 100;
+		/*center.x -= 100;
 		const float2 cellf{ make_float2(cell) };
 		if (length(cellf - center) <= 150 || ((cellf.x > center.x) && (cellf.x - 400 < center.x) && (abs(cellf.y - center.y) <= 150)))
 		{
@@ -129,7 +129,7 @@ namespace dunes
 		if (length(cellf - center) <= 152 || ((cellf.x > center.x - 1) && (cellf.x - 401 < center.x) && (abs(cellf.y - center.y) <= 152)))
 		{
 			values[2] = -1.f; // negative vegetation encodes objects
-		}
+		}*/
 
 		// Sand Column initialization
 		/*const float2 cellf{ make_float2(cell) };
