@@ -115,20 +115,14 @@ namespace dunes
 				const float4 resistance{ t_resistanceArray.read(cell) };
 				const float vegetation = fmaxf(resistance.y, 0.f);
 				const float object = resistance.y < 0.f ? 0.f : 1.f;
-				const float saltationScale{ (1.0f - resistance.x) * (1.0f - vegetation) };
-				const float abrasionScale{ object * saltationScale * (1.0f - resistance.z) };
+				const float abrasionScale{ object * c_parameters.abrasionStrength * c_parameters.deltaTime * windSpeed * (1.0f - vegetation) * (1.0f - resistance.z) };
 				const float vegetationFactor = (terrain.y > 0.0f ? 0.4f : 0.6f);
 				const float depositionProbability = object * fminf(fmaxf(fmaxf(resistance.x,
 					(1.0f - vegetationFactor) + vegetation * vegetationFactor), resistance.w), resistance.w < 0.f ? 0.f : 1.f);
 
 
 				const float new_slab = slab * (1.f - depositionProbability);
-				//if (new_slab > 0.0f) {
-				const float scale{ slab + c_parameters.windOnlyAbrasionAmount }; // 0.0001 is the amount of abrasion that happens with purely wind, no sand 
-				float abrasion{ terrain.y < c_parameters.abrasionThreshold ?
-				c_parameters.abrasionStrength * abrasionScale * windSpeed * c_parameters.deltaTime *
-				clamp(1.0f - terrain.y / c_parameters.abrasionThreshold, 0.f, 1.f) * scale : 0.0f };
-				//abrasion = fminf(abrasion, terrain.x);
+				float abrasion{ terrain.y < c_parameters.abrasionThreshold ? abrasionScale * new_slab : 0.0f };
 
 				terrain.y += abrasion;
 				terrain.x -= abrasion;

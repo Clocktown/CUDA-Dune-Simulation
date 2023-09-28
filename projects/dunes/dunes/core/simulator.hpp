@@ -58,7 +58,6 @@ namespace dunes
 		void setMaxStickyHeight(const float t_maxStickyHeight);
 		void setAbrasionStrength(const float t_abrasionStrength);
 		void setAbrasionThreshold(const float t_abrasionThreshold);
-		void setWindOnlyAbrasionAmount(const float t_V);
 		void setSaltationMode(const SaltationMode t_saltationMode);
 		void setSaltationStrength(const float t_saltationStrength);
 		void setReptationStrength(const float t_reptationStrength);

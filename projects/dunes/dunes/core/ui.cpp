@@ -72,7 +72,6 @@ namespace dunes
 		m_simulator->setSaltationStrength(m_saltationStrength);
 		m_simulator->setAbrasionStrength(m_abrasionStrength);
 		m_simulator->setAbrasionThreshold(m_abrasionThreshold);
-		m_simulator->setWindOnlyAbrasionAmount(m_windOnlyAbrasionAmount);
 		m_simulator->setReptationStrength(m_reptationStrength);
 
 		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
@@ -376,7 +375,6 @@ namespace dunes
 
 		m_abrasionStrength = json["abrasionStrength"]; //
 		m_abrasionThreshold = json["abrasionThreshold"]; //
-		m_windOnlyAbrasionAmount = json["windOnlyAbrasionAmount"]; //
 		m_saltationMode = getIndexFromNamedArray(saltationModes, IM_ARRAYSIZE(saltationModes), json["saltationMode"], 0); //
 		m_saltationStrength = json["saltationStrength"]; //
 		m_reptationStrength = json["reptationStrength"]; //
@@ -500,7 +498,6 @@ namespace dunes
 
 		json["abrasionStrength"] = m_abrasionStrength;
 		json["abrasionThreshold"] = m_abrasionThreshold;
-		json["windOnlyAbrasionAmount"] = m_windOnlyAbrasionAmount;
 		json["saltationMode"] = saltationModes[m_saltationMode];
 		json["saltationStrength"] = m_saltationStrength;
 		json["reptationStrength"] = m_reptationStrength;
@@ -958,11 +955,6 @@ namespace dunes
 				if (ImGui::DragFloat("Threshold", &m_abrasionThreshold, 0.05f))
 				{
 					m_simulator->setAbrasionThreshold(m_abrasionThreshold);
-				}
-
-				if (ImGui::DragFloat("Wind Only Amount", &m_windOnlyAbrasionAmount, 0.00001f, 0.f, 1.f, "%.6f"))
-				{
-					m_simulator->setWindOnlyAbrasionAmount(m_windOnlyAbrasionAmount);
 				}
 
 				ImGui::TreePop();

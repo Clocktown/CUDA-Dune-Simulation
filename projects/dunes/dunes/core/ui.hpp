@@ -105,11 +105,10 @@ namespace dunes
 		float m_maxStickyHeight{ 30.0f };
 
 		float m_abrasionStrength{ 0.0f };
-		float m_abrasionThreshold{ 0.1f };
+		float m_abrasionThreshold{ 0.025f };
 		int m_saltationMode{ static_cast<int>(SaltationMode::Continuous) };
 		float m_saltationStrength{ 1.f };
 		float m_reptationStrength{ 0.0f };
-		float m_windOnlyAbrasionAmount{ 0.0001f };
 
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };

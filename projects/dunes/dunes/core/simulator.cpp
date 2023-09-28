@@ -533,10 +533,6 @@ namespace dunes
 		m_simulationParameters.abrasionThreshold = t_abrasionThreshold;
 	}
 
-	void Simulator::setWindOnlyAbrasionAmount(const float t_V) {
-		m_simulationParameters.windOnlyAbrasionAmount = t_V;
-	}
-
 	void Simulator::setSaltationMode(const SaltationMode t_saltationMode)
 	{
 		m_launchParameters.saltationMode = t_saltationMode;
