@@ -36,7 +36,7 @@ namespace dunes
 		//nextPosition -= windDirection;
 		float maxAngle{ 0.0f };
 
-		for (float distance = c_parameters.gridScale; distance <= c_parameters.gridScale * c_parameters.windShadowDistance; distance += c_parameters.gridScale)
+		for (float distance = c_parameters.gridScale; distance <= c_parameters.windShadowDistance; distance += c_parameters.gridScale)
 		{
 			if constexpr (Mode == WindShadowMode::Curved)
 			{
