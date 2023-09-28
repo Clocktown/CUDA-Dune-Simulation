@@ -38,6 +38,7 @@ namespace dunes
 		void cleanupCoverageCalculation();
 
 		// Setters
+		void setUseBilinear(const bool t_useBilinear);
 		void setWindAngle(const float t_windAngle);
 		void setWindSpeed(const float t_windSpeed);
 		void setVenturiStrength(const float t_venturiStrength);

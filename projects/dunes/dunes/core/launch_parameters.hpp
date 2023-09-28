@@ -56,6 +56,7 @@ struct LaunchParameters
 	WindShadowMode windShadowMode{ WindShadowMode::Linear };
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	BedrockAvalancheMode bedrockAvalancheMode{ BedrockAvalancheMode::ToSand };
+	bool useBilinear{ true };
 	int avalancheIterations{ 50 };
 	int bedrockAvalancheIterations{ 2 };
 	int avalancheSoftIterationModulus{ 10 };

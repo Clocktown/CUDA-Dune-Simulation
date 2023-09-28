@@ -74,6 +74,7 @@ namespace dunes
 		int m_stopIterations{ 0 };
 
 		// Simulation
+		bool m_useBilinear{ true };
 		glm::ivec2 m_gridSize{ 2048, 2048 };
 		float m_gridScale{ 1.0f };
 

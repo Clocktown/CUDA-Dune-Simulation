@@ -21,6 +21,7 @@ namespace dunes
 		sthe::getApplication().setTargetFrameRate(m_targetFrameRate);
 
 		m_simulator->pause();
+		m_simulator->setUseBilinear(m_useBilinear);
 		m_simulator->setInitializationParameters(m_initializationParameters);
 		m_simulator->setRenderParameters(m_renderParameters);
 		m_simulator->reinitialize(m_gridSize, m_gridScale);
@@ -345,6 +346,7 @@ namespace dunes
 		m_stopIterations = json["stopIterations"]; //
 
 		// Simulation
+		m_useBilinear = json["bilinear"];
 		m_gridSize = { json["gridSize"][0], json["gridSize"][1] }; //
 		m_gridScale = json["gridScale"]; //
 		m_windAngle = json["windAngle"]; //
@@ -468,6 +470,7 @@ namespace dunes
 		json["stopIterations"] = m_stopIterations;
 
 		// Simulation
+		json["bilinear"] = m_useBilinear;
 		json["gridSize"] = { m_gridSize.x, m_gridSize.y };
 		json["gridScale"] = m_gridScale;
 		json["windAngle"] = m_windAngle;
@@ -748,6 +751,10 @@ namespace dunes
 				{
 					m_simulator->pause();
 				}
+			}
+
+			if (ImGui::Checkbox("Use Bilinear", &m_useBilinear)) {
+				m_simulator->setUseBilinear(m_useBilinear);
 			}
 
 			if (ImGui::DragInt("Stop after", &m_stopIterations, 0.1f, 0, 10000)) {

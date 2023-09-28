@@ -279,6 +279,10 @@ namespace dunes
 		m_launchParameters.tmpBuffer = m_tmpBuffer.getData<float>();
 	}
 
+	void Simulator::setUseBilinear(const bool t_useBilinear) {
+		m_launchParameters.useBilinear = t_useBilinear;
+	}
+
 	void Simulator::setupWindWarping()
 	{
 		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.y, m_simulationParameters.gridSize.x, cufftType::CUFFT_C2C));
