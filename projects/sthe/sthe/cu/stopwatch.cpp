@@ -119,13 +119,16 @@ float Stopwatch::getTime() const
 	if (m_state == State::Running)
 	{
 		float duration;
+		CU_CHECK_ERROR(cudaEventRecord(m_end, m_stream));
 		CU_CHECK_ERROR(cudaEventSynchronize(m_end));
 		CU_CHECK_ERROR(cudaEventElapsedTime(&duration, m_start, m_end));
 
 		return m_time + duration;
 	}
-
-	update();
+	else
+	{
+		update();
+	}
 
 	return m_time;
 }

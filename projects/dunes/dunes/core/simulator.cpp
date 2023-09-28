@@ -30,10 +30,10 @@ namespace dunes
 		m_coverage{ std::numeric_limits<float>::quiet_NaN() },
 		m_coverageThreshold{ 0.001f }
 	{
-		int device;
+		const int device{ 0 };
 		int smCount;
 		int smThreadCount;
-		CU_CHECK_ERROR(cudaGetDevice(&device));
+		CU_CHECK_ERROR(cudaSetDevice(device));
 		CU_CHECK_ERROR(cudaDeviceGetAttribute(&smCount, cudaDevAttrMultiProcessorCount, device));
 		CU_CHECK_ERROR(cudaDeviceGetAttribute(&smThreadCount, cudaDevAttrMaxThreadsPerMultiProcessor, device));
 		const float threadCount{ static_cast<float>(smCount * smThreadCount) };
