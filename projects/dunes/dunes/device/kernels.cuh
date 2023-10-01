@@ -7,7 +7,7 @@ namespace dunes
 {
 
 void initializeTerrain(const LaunchParameters& t_launchParameters, const InitializationParameters& t_initializationParameters);
-void addSandForCoverage(const LaunchParameters& t_launchParameters, float amount);
+void addSandForCoverage(const LaunchParameters& t_launchParameters, int2 res, bool uniform, int radius, float amount);
 void initializeWindWarping(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters);
 
 void venturi(const LaunchParameters& t_launchParameters);

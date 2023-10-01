@@ -70,6 +70,9 @@ namespace dunes
 		bool m_constantCoverageAllowRemove{ false };
 		float m_targetCoverage{ 1.0f };
 		float m_coverageSpawnAmount{ 1.f };
+		float m_coverageSubtractAmount{ 1.f };
+		int m_coverageRadius{ 100 };
+		bool m_coverageSpawnUniform{ false };
 		int m_spawnSteps{ 10 };
 		int m_stopIterations{ 0 };
 
@@ -83,6 +86,7 @@ namespace dunes
 		float m_windBidirectionalR{ 2.f };
 		float m_windBidirectionalBaseTime{ 15.f };
 		bool m_enableBidirectional{ false };
+		bool m_bidirectionalStrengthBased{ true };
 		float m_windSpeed{ 10.0f };
 
 		float m_venturiStrength{ 0.005f };

@@ -68,11 +68,11 @@ namespace dunes
 		}
 
 		return bilerp(
-			base_sample, 
+			base_sample,
 			pNoise(float2{ xy_uv.x, base_uv.y }, res),
 			pNoise(float2{ base_uv.x, xy_uv.y }, res),
 			pNoise(xy_uv, res),
-			0.5f * smoothstep(0.f, 1.f, distance.x), 
+			0.5f * smoothstep(0.f, 1.f, distance.x),
 			0.5f * smoothstep(0.f, 1.f, distance.y)
 		);
 	}
@@ -104,9 +104,9 @@ namespace dunes
 			values[i] = params.enabled ?
 				(params.bias +
 					(params.uniform_random ? params.scale * frand(params.offset + params.stretch * uv) :
-					(params.flat ?
-						0.0f :
-						params.scale * seamless_pNoise(params.offset, params.stretch, uv, params.iters, params.border)))) :
+						(params.flat ?
+							0.0f :
+							params.scale * seamless_pNoise(params.offset, params.stretch, uv, params.iters, params.border)))) :
 				values[i];
 		}
 
@@ -145,10 +145,10 @@ namespace dunes
 		}*/
 
 		// Regular initialization
-		const float2 terrain{ values[0], fmaxf(values[1], 0.f)};
+		const float2 terrain{ values[0], fmaxf(values[1], 0.f) };
 		t_terrainArray.write(cell, terrain);
 
-		const float4 resistance{ 0.0f, values[2], clamp(values[3], 0.f, 1.f), 0.0f};
+		const float4 resistance{ 0.0f, values[2], clamp(values[3], 0.f, 1.f), 0.0f };
 		t_resistanceArray.write(cell, resistance);
 
 		t_slabBuffer[getCellIndex(cell)] = 0.0f;
@@ -171,13 +171,43 @@ namespace dunes
 		t_terrainArray.write(cell, curr_terrain);
 	}
 
+	__global__ void addSandCircleForCoverageKernel(Array2D<float2> t_terrainArray, int2 pos, int radius, float amount)
+	{
+		const int2 cell{ getGlobalIndex2D() };
+
+		if (isOutside(cell))
+		{
+			return;
+		}
+
+		float2 curr_terrain = t_terrainArray.read(cell);
+
+		const float2 cellf{ make_float2(cell) };
+		const float2 posf{ make_float2(pos) };
+		float2 distance{ cellf.x - posf.x, cellf.y - posf.y };
+		distance.x = fminf(fabsf(distance.x), fminf(fabsf(distance.x + c_parameters.gridSize.x), fabsf(distance.x - c_parameters.gridSize.x)));
+		distance.y = fminf(fabsf(distance.y), fminf(fabsf(distance.y + c_parameters.gridSize.y), fabsf(distance.y - c_parameters.gridSize.y)));
+
+		if (length(distance) <= radius) {
+			curr_terrain.y += frand(make_float2(cell)) * 2.f * amount;;
+		}
+
+
+		t_terrainArray.write(cell, curr_terrain);
+	}
+
 	void initializeTerrain(const LaunchParameters& t_launchParameters, const InitializationParameters& t_initializationParameters)
 	{
 		initializeTerrainKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_initializationParameters);
 	}
 
-	void addSandForCoverage(const LaunchParameters& t_launchParameters, float amount) {
-		addSandForCoverageKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, amount);
+	void addSandForCoverage(const LaunchParameters& t_launchParameters, int2 res, bool uniform, int radius, float amount) {
+		if (uniform) {
+			addSandForCoverageKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, amount);
+		}
+		else {
+			addSandCircleForCoverageKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, int2{ rand() % res.x, rand() % res.y }, radius, amount);
+		}
 	}
 
 }

@@ -156,9 +156,14 @@ namespace dunes
 			m_timestepHappened = true;
 			if (m_enableBidirectional) {
 				float time = m_time / m_windBidirectionalBaseTime;
-				time = fmod(time, m_windBidirectionalR + 1.f);
-				float angle = time >= 1.f ? m_firstWindAngle : m_secondWindAngle;
+				time = fmod(time, m_bidirectionalStrengthBased ? 2.f : (m_windBidirectionalR + 1.f));
+				const float angle = time >= 1.f ? m_firstWindAngle : m_secondWindAngle;
 				setWindDirection(angle);
+
+				if (m_bidirectionalStrengthBased) {
+					const float speed = time >= 1.f ? m_windSpeed : m_windSpeed / m_windBidirectionalR;
+					applyWindSpeed(speed);
+				}
 			}
 
 			m_simulationParameters.timestep = m_timeStep;
@@ -171,10 +176,10 @@ namespace dunes
 			}
 
 			if (m_constantCoverage && ((m_timeStep % m_spawnSteps) == 0) && (m_coverage < m_targetCoverage)) {
-				addSandForCoverage(m_launchParameters, m_coverageSpawnAmount);
+				addSandForCoverage(m_launchParameters, m_simulationParameters.gridSize, m_coverageSpawnUniform, m_coverageRadius, m_coverageSpawnAmount);
 			}
 			else if (m_constantCoverageAllowRemove && m_constantCoverage && ((m_timeStep % m_spawnSteps) == 0) && (m_coverage > m_targetCoverage)) {
-				addSandForCoverage(m_launchParameters, -m_coverageSpawnAmount);
+				addSandForCoverage(m_launchParameters, m_simulationParameters.gridSize, true, m_coverageRadius, -m_coverageSubtractAmount);
 			}
 
 			m_watches[0].start();
@@ -353,6 +358,18 @@ namespace dunes
 		m_coverageSpawnAmount = t_amount;
 	}
 
+	void Simulator::setCoverageSubtractAmount(const float t_amount)
+	{
+		m_coverageSubtractAmount = t_amount;
+	}
+
+	void Simulator::setCoverageSpawnUniform(const bool t_uniform) {
+		m_coverageSpawnUniform = t_uniform;
+	}
+	void Simulator::setCoverageRadius(const int t_radius) {
+		m_coverageRadius = t_radius;
+	}
+
 	void Simulator::setSpawnSteps(const int t_steps)
 	{
 		m_spawnSteps = t_steps;
@@ -406,6 +423,10 @@ namespace dunes
 		m_enableBidirectional = t_enable;
 	}
 
+	void Simulator::setBidirectionalStrengthBased(const bool t_sBased) {
+		m_bidirectionalStrengthBased = t_sBased;
+	}
+
 	void Simulator::setBidirectionalBaseTime(const float t_time)
 	{
 		m_windBidirectionalBaseTime = t_time;
@@ -426,9 +447,14 @@ namespace dunes
 		m_simulationParameters.windDirection = float2{ glm::cos(windAngle), glm::sin(windAngle) };
 	}
 
+	void Simulator::applyWindSpeed(const float t_windSpeed) {
+		m_simulationParameters.windSpeed = t_windSpeed;
+	}
+
 	void Simulator::setWindSpeed(const float t_windSpeed)
 	{
-		m_simulationParameters.windSpeed = t_windSpeed;
+		m_windSpeed = t_windSpeed;
+		applyWindSpeed(m_windSpeed);
 	}
 
 	void Simulator::setVenturiStrength(const float t_venturiStrength)

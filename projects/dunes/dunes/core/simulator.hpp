@@ -83,6 +83,9 @@ namespace dunes
 		float getCoverage();
 		void setTargetCoverage(const float t_targetCoverage);
 		void setCoverageSpawnAmount(const float t_amount);
+		void setCoverageSubtractAmount(const float t_amount);
+		void setCoverageSpawnUniform(const bool t_uniform);
+		void setCoverageRadius(const int t_radius);
 		void setSpawnSteps(const int t_steps);
 		void setConstantCoverage(const bool t_constantCoverage);
 		void setConstantCoverageAllowRemove(const bool t_constantCoverageAllowRemove);
@@ -93,6 +96,7 @@ namespace dunes
 
 		void setSecondWindAngle(const float t_windAngle);
 		void enableBidirectional(const bool t_enable);
+		void setBidirectionalStrengthBased(const bool t_sBased);
 		void setBidirectionalBaseTime(const float t_time);
 		void setBidirectionalR(const float t_R);
 
@@ -121,6 +125,7 @@ namespace dunes
 		void unmap();
 
 		void setWindDirection(const float t_windAngle);
+		void applyWindSpeed(const float t_windSpeed);
 
 		bool m_timestepHappened{ false };
 
@@ -137,16 +142,21 @@ namespace dunes
 		bool m_constantCoverageAllowRemove{ false };
 		float m_targetCoverage{ 0.5f };
 		float m_coverageSpawnAmount{ 0.01f };
+		float m_coverageSubtractAmount{ 0.01f };
+		int m_coverageRadius{ 100 };
+		bool m_coverageSpawnUniform{ false };
 		int m_spawnSteps{ 10 };
 		int m_timeStep = 0;
 		int m_stopIterations = 0;
 
 		float m_time{ 0.f };
 		float m_firstWindAngle{ 0.0f };
+		float m_windSpeed{ 10.f };
 		float m_secondWindAngle{ 0.0f };
 		float m_windBidirectionalR{ 1.f };
 		float m_windBidirectionalBaseTime{ 1.f };
 		bool m_enableBidirectional{ false };
+		bool m_bidirectionalStrengthBased{ true };
 
 		sthe::TerrainRenderer* m_terrainRenderer;
 		std::shared_ptr<sthe::Terrain> m_terrain;

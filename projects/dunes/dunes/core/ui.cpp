@@ -31,6 +31,9 @@ namespace dunes
 		m_simulator->setConstantCoverageAllowRemove(m_constantCoverageAllowRemove);
 		m_simulator->setTargetCoverage(m_targetCoverage);
 		m_simulator->setCoverageSpawnAmount(m_coverageSpawnAmount);
+		m_simulator->setCoverageSubtractAmount(m_coverageSubtractAmount);
+		m_simulator->setCoverageRadius(m_coverageRadius);
+		m_simulator->setCoverageSpawnUniform(m_coverageSpawnUniform);
 		m_simulator->setSpawnSteps(m_spawnSteps);
 		m_simulator->setCoverageThreshold(m_coverageThreshold);
 
@@ -38,6 +41,7 @@ namespace dunes
 		m_simulator->setWindAngle(m_windAngle);
 		m_simulator->setVenturiStrength(m_venturiStrength);
 		m_simulator->enableBidirectional(m_enableBidirectional);
+		m_simulator->setBidirectionalStrengthBased(m_bidirectionalStrengthBased);
 		m_simulator->setSecondWindAngle(m_secondWindAngle);
 		m_simulator->setBidirectionalR(m_windBidirectionalR);
 		m_simulator->setBidirectionalBaseTime(m_windBidirectionalBaseTime);
@@ -341,6 +345,9 @@ namespace dunes
 		m_constantCoverageAllowRemove = json["constantCoverageAllowRemove"]; //
 		m_targetCoverage = json["targetCoverage"]; //
 		m_coverageSpawnAmount = json["coverageSpawnAmount"]; //
+		m_coverageSubtractAmount = json["coverageSubtractAmount"]; //
+		m_coverageRadius = json["coverageRadius"]; //
+		m_coverageSpawnUniform = json["coverageSpawnUniform"]; //
 		m_spawnSteps = json["spawnSteps"]; //
 		m_stopIterations = json["stopIterations"]; //
 
@@ -353,6 +360,7 @@ namespace dunes
 		m_windBidirectionalR = json["windBidirectionalR"]; //
 		m_windBidirectionalBaseTime = json["windBidirectionalBaseTime"]; //
 		m_enableBidirectional = json["enableBidirectional"]; //
+		m_bidirectionalStrengthBased = json["bidirectionalStrengthBased"]; //
 		m_windSpeed = json["windSpeed"]; //
 		m_venturiStrength = json["venturiStrength"]; //
 
@@ -464,6 +472,9 @@ namespace dunes
 		json["constantCoverageAllowRemove"] = m_constantCoverageAllowRemove;
 		json["targetCoverage"] = m_targetCoverage;
 		json["coverageSpawnAmount"] = m_coverageSpawnAmount;
+		json["coverageSubtractAmount"] = m_coverageSubtractAmount;
+		json["coverageRadius"] = m_coverageRadius; 
+		json["coverageSpawnUniform"] = m_coverageSpawnUniform; 
 		json["spawnSteps"] = m_spawnSteps;
 		json["stopIterations"] = m_stopIterations;
 
@@ -476,6 +487,7 @@ namespace dunes
 		json["windBidirectionalR"] = m_windBidirectionalR;
 		json["windBidirectionalBaseTime"] = m_windBidirectionalBaseTime;
 		json["enableBidirectional"] = m_enableBidirectional;
+		json["bidirectionalStrengthBased"] = m_bidirectionalStrengthBased;
 		json["windSpeed"] = m_windSpeed;
 		json["venturiStrength"] = m_venturiStrength;
 
@@ -775,11 +787,20 @@ namespace dunes
 					if (ImGui::Checkbox("Allow Removal", &m_constantCoverageAllowRemove)) {
 						m_simulator->setConstantCoverageAllowRemove(m_constantCoverageAllowRemove);
 					}
+					if (ImGui::Checkbox("Uniform", &m_coverageSpawnUniform)) {
+						m_simulator->setCoverageSpawnUniform(m_coverageSpawnUniform);
+					}
 					if (ImGui::DragFloat("Target Coverage", &m_targetCoverage)) {
 						m_simulator->setTargetCoverage(m_targetCoverage);
 					}
 					if (ImGui::DragFloat("Spawn Amount", &m_coverageSpawnAmount)) {
 						m_simulator->setCoverageSpawnAmount(m_coverageSpawnAmount);
+					}
+					if (ImGui::DragFloat("Subtract Amount", &m_coverageSubtractAmount)) {
+						m_simulator->setCoverageSubtractAmount(m_coverageSubtractAmount);
+					}
+					if (ImGui::DragInt("Spawn radius", &m_coverageRadius)) {
+						m_simulator->setCoverageRadius(m_coverageRadius);
 					}
 					if (ImGui::DragInt("Spawn every n steps", &m_spawnSteps)) {
 						m_simulator->setSpawnSteps(m_spawnSteps);
@@ -815,6 +836,10 @@ namespace dunes
 				if (ImGui::Checkbox("Enable", &m_enableBidirectional))
 				{
 					m_simulator->enableBidirectional(m_enableBidirectional);
+				}
+				if (ImGui::Checkbox("Strength based", &m_bidirectionalStrengthBased))
+				{
+					m_simulator->setBidirectionalStrengthBased(m_bidirectionalStrengthBased);
 				}
 				if (ImGui::DragFloat("Second Angle", &m_secondWindAngle))
 				{
