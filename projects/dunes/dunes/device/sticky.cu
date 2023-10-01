@@ -96,12 +96,12 @@ namespace dunes
 				if (correctedDistance <= erosionDistance)
 				{
 					resistance.w = erosionResistance;
-					t_resistanceArray.write(cell, resistance);
-					return;
+					break;
 				}
 				else if (correctedDistance <= stickyDistance)
 				{
 					resistance.w = fmaxf(fminf(0.1 + 1.0f - (correctedDistance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
+					//break;
 				}
 			}
 		}
