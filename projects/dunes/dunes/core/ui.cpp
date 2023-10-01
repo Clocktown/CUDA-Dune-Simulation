@@ -435,7 +435,7 @@ namespace dunes
 		initializeAll();
 
 
-		bool exportMaps = json["exportMaps"];
+		bool exportMaps =  json.contains("exportMaps") ? json["exportMaps"].get<bool>() : false;
 
 		if (exportMaps) {
 			std::string terrainMapPath = path + ".terrain.exr";
@@ -584,8 +584,8 @@ namespace dunes
 			m_renderParameters.objectColor.w
 		};
 
+		json["exportMaps"] = m_exportMaps;
 		if (m_exportMaps) {
-			json["exportMaps"] = true;
 			std::string terrainMapPath = path + ".terrain.exr";
 			std::string resistanceMapPath = path + ".resistance.exr";
 			const int width = m_simulator->getTerrainMap()->getWidth();

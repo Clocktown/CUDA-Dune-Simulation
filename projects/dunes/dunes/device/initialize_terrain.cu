@@ -132,8 +132,8 @@ namespace dunes
 		}*/
 
 		// Sand Column initialization
-		/*const float2 cellf{ make_float2(cell) };
-		if (length(cellf-center) < 100.f)
+		/*const float2 cellf{make_float2(cell)};
+		if (fabsf(cellf.x-center.x) < 100.f && fabsf(cellf.y - center.y) < 100.f)
 		{
 			values[0] = 0.f;
 			values[1] = 402.f;
