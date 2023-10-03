@@ -68,6 +68,20 @@ CU_INLINE CU_HOST_DEVICE float bilerp(const float a00, const float a10, const fl
 	return lerp(lerp(a00, a10, u), lerp(a01, a11, u), v);
 }
 
+CU_INLINE CU_HOST_DEVICE unsigned int nextPowerOfTwo(const unsigned int value)
+{
+	unsigned int nextPowerOfTwo = value;
+	nextPowerOfTwo--;
+	nextPowerOfTwo |= nextPowerOfTwo >> 1;
+	nextPowerOfTwo |= nextPowerOfTwo >> 2;
+	nextPowerOfTwo |= nextPowerOfTwo >> 4;
+	nextPowerOfTwo |= nextPowerOfTwo >> 8;
+	nextPowerOfTwo |= nextPowerOfTwo >> 16;
+	nextPowerOfTwo++;
+
+	return nextPowerOfTwo;
+}
+
 CU_INLINE CU_HOST_DEVICE float2 abs(const float2& v) {
 	return float2{ fabs(v.x), fabs(v.y) };
 }

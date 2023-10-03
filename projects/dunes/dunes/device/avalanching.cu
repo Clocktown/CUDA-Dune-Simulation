@@ -111,14 +111,66 @@ __global__ void setupAtomicInPlaceAvalanchingKernel(Array2D<float2> t_terrainArr
 template <bool TUseAvalancheStrength>
 __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
 {
-	const int2 cell{ getGlobalIndex2D() };
+	const int2 index{ getGlobalIndex2D() };
+	int2 cell;
 
-	if (isOutside(cell))
+	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += static_cast<int>(blockDim.x * gridDim.x))
 	{
-		return;
+		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += static_cast<int>(blockDim.y * gridDim.y))
+		{
+			const int cellIndex{ getCellIndex(cell) };
+
+			const float2 terrain{ t_terrainBuffer[cellIndex] };
+			const float height{ terrain.x + terrain.y };
+			const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
+
+			int nextCellIndices[8];
+			float avalanches[8];
+			float avalancheSum{ 0.0f };
+			float maxAvalanche{ 0.0f };
+
+			for (int i{ 0 }; i < 8; ++i)
+			{
+				nextCellIndices[i] = getCellIndex(getWrappedCell(cell + c_offsets[i]));
+				const float2 nextTerrain{ t_terrainBuffer[nextCellIndices[i]] };
+				const float nextHeight{ nextTerrain.x + nextTerrain.y };
+
+				const float heightDifference{ height - nextHeight };
+				avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
+				avalancheSum += avalanches[i];
+				maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
+			}
+
+			if (avalancheSum > 0.0f)
+			{
+				const float rAvalancheSum{ 1.0f / avalancheSum };
+				const float avalancheSize{ fminf((TUseAvalancheStrength ? c_parameters.avalancheStrength : 1.0f) * maxAvalanche /
+												 (1.0f + maxAvalanche * rAvalancheSum), terrain.y) };
+
+
+				const float scale{ avalancheSize * rAvalancheSum };
+
+				for (int i{ 0 }; i < 8; ++i)
+				{
+					if (avalanches[i] > 0.0f)
+					{
+						atomicAdd(&t_terrainBuffer[nextCellIndices[i]].y, scale * avalanches[i]);
+					}
+				}
+
+				atomicAdd(&t_terrainBuffer[cellIndex].y, -avalancheSize);
+			}
+		}
 	}
 
-	const int cellIndex{ getCellIndex(cell) };
+	//const int2 cell{ getGlobalIndex2D() };
+
+	//if (isOutside(cell))
+	//{
+	//	return;
+	//}
+
+	/*const int cellIndex{ getCellIndex(cell) };
 
 	const float2 terrain{ t_terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y };
@@ -159,7 +211,7 @@ __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanc
 		}
 
 		atomicAdd(&t_terrainBuffer[cellIndex].y, -avalancheSize);
-	}
+	}*/
 }
 
 __global__ void atomicInPlaceTaylorKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
@@ -384,11 +436,11 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
 				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations) 
 			{
-				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
+				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
 			}
 			else
 			{
-				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
+				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
 			}
 		}
 
