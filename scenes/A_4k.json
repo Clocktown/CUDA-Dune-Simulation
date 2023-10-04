@@ -162,7 +162,7 @@
  "targetFrameRate": 0,
  "timeMode": "Fixed Delta Time",
  "timeScale": 1.0,
- "vSync": true,
+ "vSync": false,
  "vegetationAngle": 45.0,
  "vegetationColor": [
   0.25,

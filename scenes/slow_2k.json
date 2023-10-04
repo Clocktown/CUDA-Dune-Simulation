@@ -3,7 +3,7 @@
  "abrasionThreshold": 0.02500000037252903,
  "avalancheAngle": 33.0,
  "avalancheFinalSoftIterations": 5,
- "avalancheIterations": 25,
+ "avalancheIterations": 15,
  "avalancheMode": "Atomic In-Place",
  "avalancheSoftIterationModulus": 10,
  "avalancheStrength": 1.0,
@@ -37,8 +37,8 @@
  "fixedDeltaTime": 1.0,
  "gridScale": 1.0,
  "gridSize": [
-  1024,
-  1024
+  2048,
+  2048
  ],
  "initializationParameters": {
   "Abrasion Resistance": {
@@ -82,7 +82,7 @@
    "uniform_random": false
   },
   "Sand": {
-   "bias": 0.5,
+   "bias": 10.0,
    "border": [
     0.10000000149011612,
     0.10000000149011612
@@ -94,7 +94,7 @@
     0.0,
     0.0
    ],
-   "scale": 1.5,
+   "scale": 10.0,
    "stretch": [
     1.0,
     1.0
@@ -182,7 +182,7 @@
  ],
  "windShadowDistance": 10.0,
  "windShadowMode": "Linear",
- "windSpeed": 5.0,
+ "windSpeed": 0.75,
  "windWarpingCount": 2,
  "windWarpingDivisor": 1.0,
  "windWarpingGradientStrengths": [
@@ -191,7 +191,7 @@
   0.0,
   0.0
  ],
- "windWarpingMode": "Standard",
+ "windWarpingMode": "None",
  "windWarpingRadii": [
   200.0,
   50.0,

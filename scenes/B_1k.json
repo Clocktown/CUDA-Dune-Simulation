@@ -3,7 +3,7 @@
  "abrasionThreshold": 0.02500000037252903,
  "avalancheAngle": 33.0,
  "avalancheFinalSoftIterations": 5,
- "avalancheIterations": 25,
+ "avalancheIterations": 31,
  "avalancheMode": "Atomic In-Place",
  "avalancheSoftIterationModulus": 10,
  "avalancheStrength": 1.0,
@@ -162,7 +162,7 @@
  "targetFrameRate": 0,
  "timeMode": "Fixed Delta Time",
  "timeScale": 1.0,
- "vSync": true,
+ "vSync": false,
  "vegetationAngle": 45.0,
  "vegetationColor": [
   0.25,
