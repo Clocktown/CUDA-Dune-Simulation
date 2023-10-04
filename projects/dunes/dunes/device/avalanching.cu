@@ -111,7 +111,7 @@ __global__ void setupAtomicInPlaceAvalanchingKernel(Array2D<float2> t_terrainArr
 template <bool TUseAvalancheStrength>
 __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
 {
-	const int2 index{ getGlobalIndex2D() };
+	/*const int2 index{ getGlobalIndex2D() };
 	int2 cell;
 
 	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += static_cast<int>(blockDim.x * gridDim.x))
@@ -161,16 +161,16 @@ __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanc
 				atomicAdd(&t_terrainBuffer[cellIndex].y, -avalancheSize);
 			}
 		}
+	}*/
+
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell))
+	{
+		return;
 	}
 
-	//const int2 cell{ getGlobalIndex2D() };
-
-	//if (isOutside(cell))
-	//{
-	//	return;
-	//}
-
-	/*const int cellIndex{ getCellIndex(cell) };
+	const int cellIndex{ getCellIndex(cell) };
 
 	const float2 terrain{ t_terrainBuffer[cellIndex] };
 	const float height{ terrain.x + terrain.y };
@@ -211,7 +211,7 @@ __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanc
 		}
 
 		atomicAdd(&t_terrainBuffer[cellIndex].y, -avalancheSize);
-	}*/
+	}
 }
 
 __global__ void atomicInPlaceTaylorKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
@@ -436,11 +436,11 @@ void avalanching(const LaunchParameters& t_launchParameters)
 			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
 				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations) 
 			{
-				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
+				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
 			}
 			else
 			{
-				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
+				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer);
 			}
 		}
 
