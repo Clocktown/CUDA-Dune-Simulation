@@ -100,8 +100,7 @@ namespace dunes
 						if (correctedDistance <= erosionDistance)
 						{
 							resistance.w = erosionResistance;
-							t_resistanceArray.write(cell, resistance);
-							return;
+							break;
 						}
 						else if (correctedDistance <= stickyDistance)
 						{
