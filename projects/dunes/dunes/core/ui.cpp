@@ -336,6 +336,9 @@ namespace dunes
 			m_simulator->cleanupCoverageCalculation();
 		}
 
+		m_heightMapPath = "";
+		m_resistanceMapPath = "";
+
 		// Application
 		m_vSync = json["vSync"]; //
 		m_calcCoverage = json["calcCoverage"]; //
@@ -736,7 +739,7 @@ namespace dunes
 				char const* filterPatterns[1] = { "*.json" };
 				auto input = tinyfd_openFileDialog("Save JSON", "./scene.json", 1, filterPatterns, "JSON (.json)", 0);
 				if (input != nullptr) {
-					std::cout << fromJson(input) << std::endl;
+					fromJson(input);
 				}
 			}
 			ImGui::TreePop();
