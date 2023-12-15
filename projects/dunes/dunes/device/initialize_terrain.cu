@@ -112,7 +112,7 @@ namespace dunes
 
 		values[2] = clamp(values[2], 0.f, 1.f);
 
-		float2 center{ make_float2(c_parameters.gridSize) / 2.f };
+		//float2 center{ make_float2(c_parameters.gridSize) / 2.f };
 		// Wind Tunnel initialization
 		/*center.x -= 100;
 		const float2 cellf{ make_float2(cell) };
@@ -142,6 +142,16 @@ namespace dunes
 		{
 			values[0] = 0.f;
 			values[1] = 2.f;
+		}*/
+		/*float2 center{make_float2(c_parameters.gridSize.x / 2.f, c_parameters.gridSize.y / 20.f)};
+		float2 cellf{ make_float2(cell) };
+		float veg_dens = 0.f;
+		for (int i = 0; i < 10; ++i) {
+			if (length(cellf - center) <= c_parameters.gridSize.x / 40.f) {
+				values[2] = veg_dens;
+			}
+			veg_dens += 1.f / 9.f;
+			center.y += c_parameters.gridSize.y / 10.f;
 		}*/
 
 		// Regular initialization
