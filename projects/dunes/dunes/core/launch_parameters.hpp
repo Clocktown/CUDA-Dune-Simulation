@@ -61,9 +61,9 @@ struct LaunchParameters
 	int bedrockAvalancheIterations{ 2 };
 	int avalancheSoftIterationModulus{ 10 };
 	int avalancheFinalSoftIterations{ 5 };
-	int multigridLevelCount{ 3 };
-	int multigridPresweepCount{ 0 };
-	int multigridPostsweepCount{ 0 };
+	int multigridLevelCount{ 1 };
+	int multigridVCycleIterations{ 1 };
+	int multigridSolverIterations{ 50 };
 	TimeMode timeMode{ TimeMode::DeltaTime };
 
 	Array2D<float2> terrainArray;

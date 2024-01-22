@@ -635,14 +635,14 @@ namespace dunes
 		}
 	}
 
-	void Simulator::setMultigridPresweepCount(const int t_multigridPresweepCount)
+	void Simulator::setMultigridVCycleIterations(const int t_multigridVCycleIterations)
 	{
-		m_launchParameters.multigridPresweepCount = t_multigridPresweepCount;
+		m_launchParameters.multigridVCycleIterations = t_multigridVCycleIterations;
 	}
 
-	void Simulator::setMultigridPostsweepCount(const int t_multigridPostsweepCount)
+	void Simulator::setMultigridSolverIterations(const int t_multigridSolverIterations)
 	{
-		m_launchParameters.multigridPostsweepCount = t_multigridPostsweepCount;
+		m_launchParameters.multigridSolverIterations = t_multigridSolverIterations;
 	}
 
 	void Simulator::setTimeMode(const TimeMode t_timeMode)

@@ -124,9 +124,9 @@ namespace dunes
 		float m_avalancheAngle{ 33.0f };
 		float m_bedrockAngle{ 68.0f };
 		float m_vegetationAngle{ 45.0f };
-		int m_multigridLevelCount{ 3 };
-		int m_multigridPresweepCount{ 0 };
-		int m_multigridPostsweepCount{ 0 };
+		int m_multigridLevelCount{ 1 };
+		int m_multigridVCycleIterations{ 1 };
+		int m_multigridSolverIterations{ 50 };
 
 		int m_timeMode{ static_cast<int>(TimeMode::FixedDeltaTime) };
 		float m_timeScale{ 1.0f };
