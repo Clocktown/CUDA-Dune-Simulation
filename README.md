@@ -1,5 +1,5 @@
 # CUDA-Dune-Simulation
-This repository contains the full source code of our paper **Real-Time Desertscapes Simulation with CUDA**
+This repository contains the full source code of our paper **Real-Time Desertscapes Simulation with CUDA** found [here](https://www.scitepress.org/PublicationsDetail.aspx?ID=dywC2RBocrQ=&t=1).
 
 # Setup
 We provided a visual studio solution file. We have only tested our code on Windows, but it should be possible to get it to work on Linux. Mac might be an issue, as we are using OpenGL 4.6 for visualization.
