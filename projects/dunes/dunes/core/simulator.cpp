@@ -201,7 +201,7 @@ namespace dunes
 			reptation(m_launchParameters, m_simulationParameters);
 			m_watches[6].stop();
 			m_watches[7].start();
-			avalanching(m_launchParameters);
+			avalanching(m_launchParameters, m_simulationParameters);
 			m_watches[7].stop();
 			m_watches[8].start();
 			bedrockAvalanching(m_launchParameters);
@@ -571,6 +571,11 @@ namespace dunes
 	void Simulator::setReptationStrength(const float t_reptationStrength)
 	{
 		m_simulationParameters.reptationStrength = t_reptationStrength;
+	}
+
+	void Simulator::setReptationSmoothingStrength(const float t_reptationStrength)
+	{
+		m_simulationParameters.reptationSmoothingStrength = t_reptationStrength;
 	}
 
 	void Simulator::setAvalancheMode(const AvalancheMode t_avalancheMode)

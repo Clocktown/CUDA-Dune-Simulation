@@ -61,6 +61,7 @@ namespace dunes
 		void setSaltationMode(const SaltationMode t_saltationMode);
 		void setSaltationStrength(const float t_saltationStrength);
 		void setReptationStrength(const float t_reptationStrength);
+		void setReptationSmoothingStrength(const float t_reptationStrength);
 		void setAvalancheMode(const AvalancheMode t_avalancheMode);
 		void setBedrockAvalancheMode(const BedrockAvalancheMode t_bedrockAvalancheMode);
 		void setAvalancheIterations(const int t_avalancheIterations);

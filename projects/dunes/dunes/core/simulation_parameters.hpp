@@ -67,6 +67,7 @@ struct SimulationParameters
 	float abrasionThreshold{ 0.1f };
 	float saltationStrength{ 0.05f };
 	float reptationStrength{ 0.0f };
+	float reptationSmoothingStrength{ 0.0f };
 
 	float avalancheStrength{ 0.5f };
 	float avalancheAngle{ TAN33 };

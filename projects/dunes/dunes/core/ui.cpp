@@ -77,6 +77,7 @@ namespace dunes
 		m_simulator->setAbrasionStrength(m_abrasionStrength);
 		m_simulator->setAbrasionThreshold(m_abrasionThreshold);
 		m_simulator->setReptationStrength(m_reptationStrength);
+		m_simulator->setReptationSmoothingStrength(m_reptationSmoothingStrength);
 
 		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
 		m_simulator->setAvalancheIterations(m_avalancheIterations);
@@ -389,6 +390,8 @@ namespace dunes
 		m_saltationMode = getIndexFromNamedArray(saltationModes, IM_ARRAYSIZE(saltationModes), json["saltationMode"], 0); //
 		m_saltationStrength = json["saltationStrength"]; //
 		m_reptationStrength = json["reptationStrength"]; //
+		if (json.contains("reptationSmoothingStrength"))
+			m_reptationSmoothingStrength = json["reptationSmoothingStrength"];
 
 		m_avalancheMode = getIndexFromNamedArray(avalancheModes, IM_ARRAYSIZE(avalancheModes), json["avalancheMode"], 1); //
 		m_bedrockAvalancheMode = getIndexFromNamedArray(bedrockAvalancheModes, IM_ARRAYSIZE(bedrockAvalancheModes), json["bedrockAvalancheMode"], 0); //
@@ -401,8 +404,10 @@ namespace dunes
 		m_bedrockAngle = json["bedrockAngle"]; //
 		m_vegetationAngle = json["vegetationAngle"]; //
 		m_multigridLevelCount = json["multigridLevelCount"]; //
-		m_multigridVCycleIterations = json["multigridVCycleIterations"]; //
-		m_multigridSolverIterations = json["multigridSolverIterations"]; //
+		if(json.contains("multigridVCycleIterations"))
+			m_multigridVCycleIterations = json["multigridVCycleIterations"]; //
+		if(json.contains("multigridSolverIterations"))
+			m_multigridSolverIterations = json["multigridSolverIterations"]; //
 
 		m_timeMode = getIndexFromNamedArray(timeModes, IM_ARRAYSIZE(timeModes), json["timeMode"], 1); //
 		m_timeScale = json["timeScale"]; //
@@ -516,6 +521,7 @@ namespace dunes
 		json["saltationMode"] = saltationModes[m_saltationMode];
 		json["saltationStrength"] = m_saltationStrength;
 		json["reptationStrength"] = m_reptationStrength;
+		json["reptationSmoothingStrength"] = m_reptationSmoothingStrength;
 
 		json["avalancheMode"] = avalancheModes[m_avalancheMode];
 		json["bedrockAvalancheMode"] = bedrockAvalancheModes[m_bedrockAvalancheMode];
@@ -990,9 +996,14 @@ namespace dunes
 
 			if (ImGui::TreeNode("Reptation"))
 			{
-				if (ImGui::DragFloat("Strength", &m_reptationStrength, 0.05f))
+				if (ImGui::DragFloat("Strength", &m_reptationStrength, 0.005f))
 				{
 					m_simulator->setReptationStrength(m_reptationStrength);
+				}
+
+				if (ImGui::DragFloat("Smoothing Strength", &m_reptationSmoothingStrength, 0.005f))
+				{
+					m_simulator->setReptationSmoothingStrength(m_reptationSmoothingStrength);
 				}
 
 				ImGui::TreePop();
