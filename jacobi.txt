@@ -1,0 +1,21 @@
+Gl. 1: h(x,y)_(i+1) = h(x,y)_i - s (h(x,y)_i - h(x+1,y)_i - tan(angle))
+Gl. 2: h(x,y)_(i+1) = h(x,y)_i + s (h(x-1,y)_i - h(x,y)_i - tan(angle))
+
+Implizit Gl. 1:
+h(x,y)_i = h(x,y)_(i+1) + s (h(x,y)_(i+1) - h(x+1,y)_(i+1) - tan(angle))
+
+h(x,y)_i = (1+s) h(x,y)_(i+1) - s(h(x+1,y)_(i+1) + tan(angle))
+
+(1+s) h(x,y)_(i+1) = s(h(x+1,y)_(i+1) + tan(angle)) + h(x,y)_i
+
+Implizit Gl. 2:
+h(x,y)_i = h(x,y)_(i+1) - s (h(x-1,y)_(i+1) - h(x,y)_(i+1) - tan(angle))
+h(x,y)_i = (1+s) h(x,y)_(i+1) - s (h(x-1,y)_(i+1) - tan(angle))
+(1+s) h(x,y)_(i+1) = s (h(x-1,y)_(i+1) - tan(angle)) + h(x,y)_i
+
+Gleichungen:
+h(x,y)_(i+1) = (1/(1+s)) ( s[h(x+1,y)_(i+1) + tan(angle)] + h(x,y)_i)
+h(x,y)_(i+1) = (1/(1+s)) ( s[h(x-1,y)_(i+1) - tan(angle)] + h(x,y)_i)
+
+=> a total of 8 equations with 4-neighborhood, so add all of them and divide by 8
+=> if an angle is already stable, replace the right side with the current height

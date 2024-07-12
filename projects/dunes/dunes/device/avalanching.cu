@@ -146,8 +146,10 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 	const float avalancheAngle{ lerp(baseAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
 	float val = 0.f;
+	constexpr float s = 500000.f;
+	constexpr float one_over_s_plus_one = 1.f / (1 + s);
 
-	for (int i{ 0 }; i < 8; i+=2)
+	for (int i{ 0 }; i < 8; ++i)
 	{
 		const int2 nextCell = getWrappedCell(cell + c_offsets[i]);
 		const int nextCellIndex = getCellIndex(nextCell);
@@ -161,21 +163,27 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 		}
 		const float nextAvalancheAngle{ lerp(nextBaseAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(nextCell).y, 0.f)) };
 
-		float h1{ nextHeight + avalancheAngle * c_parameters.gridScale + 2*b };
-		if (height - (nextHeight + avalancheAngle * c_parameters.gridScale) <= 0) {
-			h1 = 3*height;
+		const float h1{ s * (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) + b };
+		if (height - (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) <= 0) {
+			val += height;
+			//val += one_over_s_plus_one * h1;
 		}
-		float h2{ nextHeight - nextAvalancheAngle * c_parameters.gridScale + 2*b };
-		if (nextHeight - (height + nextAvalancheAngle * c_parameters.gridScale) <= 0) {
-			h2 = 3*height;
+		else {
+			val += one_over_s_plus_one * h1;
 		}
-		val += h1;
-		val += h2;
+		const float h2{ s * (nextHeight - nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) + b };
+		if (nextHeight - (height + nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) <= 0) {
+			val += height;
+			//val += one_over_s_plus_one * h2;
+		}
+		else {
+			val += one_over_s_plus_one * h2;
+		}
 	}
-	val /= 24.f;
+	val *= 0.0625;
 	float diff = height - val;
 	if (diff > oldSandHeight) {
-		//diff = oldSandHeight;
+		diff = oldSandHeight;
 	}
 
 	t_newSandBuffer[cellIndex] = oldSandHeight - diff;
