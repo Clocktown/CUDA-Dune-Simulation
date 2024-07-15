@@ -149,6 +149,7 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 	constexpr float s = 500000.f;
 	constexpr float one_over_s_plus_one = 1.f / (1 + s);
 
+
 	for (int i{ 0 }; i < 8; ++i)
 	{
 		const int2 nextCell = getWrappedCell(cell + c_offsets[i]);
@@ -159,12 +160,12 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 
 		float nextBaseAngle = c_parameters.avalancheAngle;
 		if (c_parameters.reptationStrength > 0.f) {
-			nextBaseAngle = lerp(0.f, baseAngle, t_reptationBuffer[nextCellIndex]);
+			nextBaseAngle = lerp(0.f, nextBaseAngle, t_reptationBuffer[nextCellIndex]);
 		}
 		const float nextAvalancheAngle{ lerp(nextBaseAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(nextCell).y, 0.f)) };
 
 		const float h1{ s * (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) + b };
-		if (height - (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) <= 0) {
+		if (height - (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) < 0) {
 			val += height;
 			//val += one_over_s_plus_one * h1;
 		}
@@ -172,7 +173,7 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 			val += one_over_s_plus_one * h1;
 		}
 		const float h2{ s * (nextHeight - nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) + b };
-		if (nextHeight - (height + nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) <= 0) {
+		if (nextHeight - (height + nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) < 0) {
 			val += height;
 			//val += one_over_s_plus_one * h2;
 		}

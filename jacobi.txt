@@ -19,3 +19,69 @@ h(x,y)_(i+1) = (1/(1+s)) ( s[h(x-1,y)_(i+1) - tan(angle)] + h(x,y)_i)
 
 => a total of 8 equations with 4-neighborhood, so add all of them and divide by 8
 => if an angle is already stable, replace the right side with the current height
+
+__global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray, const Array2D<float2> t_terrainArray, const Buffer<float> t_reptationBuffer, const Buffer<float> t_oldSandBuffer, Buffer<float> t_newSandBuffer)
+{
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell))
+	{
+		return;
+	}
+
+	const int cellIndex{ getCellIndex(cell) };
+
+	const float2 terrain{ t_terrainArray.read(cell) };
+	const float oldSandHeight{ t_oldSandBuffer[cellIndex] };
+	const float b{ terrain.x + terrain.y };
+	const float bSand{ terrain.y };
+	const float height{ terrain.x + oldSandHeight };
+	float baseAngle = c_parameters.avalancheAngle;
+	if (c_parameters.reptationStrength > 0.f) {
+		baseAngle = lerp(0.f, baseAngle, t_reptationBuffer[cellIndex]);
+	}
+	const float avalancheAngle{ lerp(baseAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
+
+	float val = 0.f;
+	constexpr float s = 50000.f;
+	constexpr float one_over_s_plus_one = 1.f / (1 + s);
+
+	for (int i{ 0 }; i < 8; ++i)
+	{
+		const int2 nextCell = getWrappedCell(cell + c_offsets[i]);
+		const int nextCellIndex = getCellIndex(nextCell);
+		const float2 nextTerrain{ t_terrainArray.read(nextCell)};
+		const float nextOldSandHeight{ t_oldSandBuffer[nextCellIndex] };
+		const float nextHeight{ nextTerrain.x + nextOldSandHeight };
+
+		float nextBaseAngle = c_parameters.avalancheAngle;
+		if (c_parameters.reptationStrength > 0.f) {
+			nextBaseAngle = lerp(0.f, nextBaseAngle, t_reptationBuffer[nextCellIndex]);
+		}
+		const float nextAvalancheAngle{ lerp(nextBaseAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(nextCell).y, 0.f)) };
+
+		const float h1{ s * (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) + b };
+		if (height - (nextHeight + avalancheAngle * c_parameters.gridScale * c_distances[i]) < 0) {
+			val += height;
+			//val += one_over_s_plus_one * h1;
+		}
+		else {
+			val += one_over_s_plus_one * h1;
+		}
+		const float h2{ s * (nextHeight - nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) + b };
+		if (nextHeight - (height + nextAvalancheAngle * c_parameters.gridScale * c_distances[i]) < 0) {
+			val += height;
+			//val += one_over_s_plus_one * h2;
+		}
+		else {
+			val += one_over_s_plus_one * h2;
+		}
+	}
+	val *= 0.0625;
+	float diff = height - val;
+	if (diff > oldSandHeight) {
+		diff = oldSandHeight;
+	}
+
+	t_newSandBuffer[cellIndex] = oldSandHeight - diff;
+}
