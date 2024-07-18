@@ -16,7 +16,7 @@ enum class TimeMode : unsigned char
 
 enum class SaltationMode : unsigned char
 {
-	PerFrame, Continuous
+	Backward, Forward
 };
 
 enum class WindWarpingMode : unsigned char
@@ -31,7 +31,7 @@ enum class WindShadowMode : unsigned char
 
 enum class AvalancheMode : unsigned char
 {
-	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid, Taylor
+	AtomicBuffered, AtomicInPlace, SharedAtomicInPlace, MixedInPlace, Multigrid, Taylor, Jacobi
 };
 
 enum class BedrockAvalancheMode : unsigned char
@@ -51,13 +51,14 @@ struct LaunchParameters
 	unsigned int optimalGridSize1D;
 	dim3 optimalGridSize2D;
 
-	SaltationMode saltationMode{ SaltationMode::PerFrame };
+	SaltationMode saltationMode{ SaltationMode::Forward };
 	WindWarpingMode windWarpingMode{ WindWarpingMode::None };
 	WindShadowMode windShadowMode{ WindShadowMode::Linear };
 	AvalancheMode avalancheMode{ AvalancheMode::AtomicInPlace };
 	BedrockAvalancheMode bedrockAvalancheMode{ BedrockAvalancheMode::ToSand };
 	bool useBilinear{ true };
 	int avalancheIterations{ 50 };
+	int pressureProjectionIterations{ 0 };
 	int bedrockAvalancheIterations{ 2 };
 	int avalancheSoftIterationModulus{ 10 };
 	int avalancheFinalSoftIterations{ 5 };

@@ -193,58 +193,6 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 template <bool TUseAvalancheStrength>
 __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer, const Buffer<float> t_reptationBuffer)
 {
-	/*const int2 index{ getGlobalIndex2D() };
-	int2 cell;
-
-	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += static_cast<int>(blockDim.x * gridDim.x))
-	{
-		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += static_cast<int>(blockDim.y * gridDim.y))
-		{
-			const int cellIndex{ getCellIndex(cell) };
-
-			const float2 terrain{ t_terrainBuffer[cellIndex] };
-			const float height{ terrain.x + terrain.y };
-			const float avalancheAngle{ lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
-
-			int nextCellIndices[8];
-			float avalanches[8];
-			float avalancheSum{ 0.0f };
-			float maxAvalanche{ 0.0f };
-
-			for (int i{ 0 }; i < 8; ++i)
-			{
-				nextCellIndices[i] = getCellIndex(getWrappedCell(cell + c_offsets[i]));
-				const float2 nextTerrain{ t_terrainBuffer[nextCellIndices[i]] };
-				const float nextHeight{ nextTerrain.x + nextTerrain.y };
-
-				const float heightDifference{ height - nextHeight };
-				avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
-				avalancheSum += avalanches[i];
-				maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
-			}
-
-			if (avalancheSum > 0.0f)
-			{
-				const float rAvalancheSum{ 1.0f / avalancheSum };
-				const float avalancheSize{ fminf((TUseAvalancheStrength ? c_parameters.avalancheStrength : 1.0f) * maxAvalanche /
-												 (1.0f + maxAvalanche * rAvalancheSum), terrain.y) };
-
-
-				const float scale{ avalancheSize * rAvalancheSum };
-
-				for (int i{ 0 }; i < 8; ++i)
-				{
-					if (avalanches[i] > 0.0f)
-					{
-						atomicAdd(&t_terrainBuffer[nextCellIndices[i]].y, scale * avalanches[i]);
-					}
-				}
-
-				atomicAdd(&t_terrainBuffer[cellIndex].y, -avalancheSize);
-			}
-		}
-	}*/
-
 	const int2 cell{ getGlobalIndex2D() };
 
 	if (isOutside(cell))
@@ -513,22 +461,21 @@ void avalanching(const LaunchParameters& t_launchParameters, const SimulationPar
 	Buffer<float> oldSandBuffer{ t_launchParameters.tmpBuffer };
 	Buffer<float> newSandBuffer{ t_launchParameters.tmpBuffer + t_simulationParameters.cellCount };
 
-	// Fill bBuffer with height, oldSandBuffer with sand
-	setupJacobiAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, oldSandBuffer);
-
-	// "Jacobi"-Iterations
-	for (int i = 0; i < t_launchParameters.avalancheIterations; ++i) {
-		jacobiAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, t_launchParameters.terrainArray, reptationBuffer, oldSandBuffer, newSandBuffer);
-		std::swap(oldSandBuffer, newSandBuffer);
-	}
-
-	// copy sandBuffer to actual surface
-	finishJacobiAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, oldSandBuffer);
-
-	return;
-
 	switch (t_launchParameters.avalancheMode)
 	{
+	case AvalancheMode::Jacobi:
+		// Fill bBuffer with height, oldSandBuffer with sand
+		setupJacobiAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, oldSandBuffer);
+
+		// "Jacobi"-Iterations
+		for (int i = 0; i < t_launchParameters.avalancheIterations; ++i) {
+			jacobiAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, t_launchParameters.terrainArray, reptationBuffer, oldSandBuffer, newSandBuffer);
+			std::swap(oldSandBuffer, newSandBuffer);
+		}
+
+		// copy sandBuffer to actual surface
+		finishJacobiAvalanchingKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, oldSandBuffer);
+		break;
 	case AvalancheMode::AtomicBuffered:
 		setupAtomicAvalanchingKernel<<<t_launchParameters.optimalGridSize1D, t_launchParameters.optimalBlockSize1D>>>(t_launchParameters.terrainArray, t_launchParameters.tmpBuffer);
 
@@ -615,7 +562,7 @@ void avalanching(const LaunchParameters& t_launchParameters, const SimulationPar
 		}
 
 		finishAtomicInPlaceAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
-
+		break;
 	}
 }
 

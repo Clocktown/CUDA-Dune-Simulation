@@ -65,6 +65,7 @@ namespace dunes
 		void setAvalancheMode(const AvalancheMode t_avalancheMode);
 		void setBedrockAvalancheMode(const BedrockAvalancheMode t_bedrockAvalancheMode);
 		void setAvalancheIterations(const int t_avalancheIterations);
+		void setPressureProjectionIterations(int t_iters);
 		void setAvalancheFinalSoftIterations(const int t_avalancheFinalSoftIterations);
 		void setAvalancheSoftIterationModulus(const int t_avalancheSoftIterationModulus);
 		void setBedrockAvalancheIterations(const int t_bedrockAvalancheIterations);

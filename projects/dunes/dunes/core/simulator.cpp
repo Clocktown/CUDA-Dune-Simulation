@@ -70,9 +70,9 @@ namespace dunes
 		m_renderParameterBuffer->bind(GL_UNIFORM_BUFFER, STHE_UNIFORM_BUFFER_CUSTOM0);
 		m_renderParameterBuffer->upload(reinterpret_cast<char*>(&m_renderParameters), sizeof(RenderParameters));
 
-		m_watches.resize(9);
-		m_watchTimings.resize(9);
-		m_meanWatchTimings.resize(9);
+		m_watches.resize(10);
+		m_watchTimings.resize(10);
+		m_meanWatchTimings.resize(10);
 	}
 
 	// Destructor
@@ -188,17 +188,22 @@ namespace dunes
 			m_watches[2].start();
 			windWarping(m_launchParameters);
 			m_watches[2].stop();
+			m_watches[9].start();
+			pressureProjection(m_launchParameters, m_simulationParameters);
+			m_watches[9].stop();
 			m_watches[3].start();
-			windShadow(m_launchParameters);
+			if (m_launchParameters.pressureProjectionIterations <= 0) {
+				windShadow(m_launchParameters);
+			}
 			m_watches[3].stop();
 			m_watches[4].start();
 			sticky(m_launchParameters, m_simulationParameters);
 			m_watches[4].stop();
 			m_watches[5].start();
-			saltation(m_launchParameters);
+			continuousSaltation(m_launchParameters);
 			m_watches[5].stop();
 			m_watches[6].start();
-			reptation(m_launchParameters, m_simulationParameters);
+			continuousReptation(m_launchParameters, m_simulationParameters);
 			m_watches[6].stop();
 			m_watches[7].start();
 			avalanching(m_launchParameters, m_simulationParameters);
@@ -591,6 +596,10 @@ namespace dunes
 	void Simulator::setAvalancheIterations(const int t_avalancheIterations)
 	{
 		m_launchParameters.avalancheIterations = t_avalancheIterations;
+	}
+
+	void Simulator::setPressureProjectionIterations(int t_iters) {
+		m_launchParameters.pressureProjectionIterations = t_iters;
 	}
 
 	void Simulator::setAvalancheFinalSoftIterations(const int t_avalancheFinalSoftIterations)

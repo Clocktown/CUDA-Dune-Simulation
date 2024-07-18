@@ -29,8 +29,6 @@
     <ClInclude Include="dunes\core\simulator.hpp" />
     <ClInclude Include="dunes\core\ui.hpp" />
     <ClInclude Include="dunes\device\constants.cuh" />
-    <ClInclude Include="dunes\device\continuous_reptation.cuh" />
-    <ClInclude Include="dunes\device\continuous_saltation.cuh" />
     <ClInclude Include="dunes\device\grid.cuh" />
     <ClInclude Include="dunes\device\kernels.cuh" />
     <ClInclude Include="dunes\device\multigrid.cuh" />
@@ -47,8 +45,7 @@
     <CudaCompile Include="dunes\device\coverage.cu" />
     <CudaCompile Include="dunes\device\initialize_terrain.cu" />
     <CudaCompile Include="dunes\device\multigrid.cu" />
-    <CudaCompile Include="dunes\device\reptation.cu" />
-    <CudaCompile Include="dunes\device\saltation.cu" />
+    <CudaCompile Include="dunes\device\project.cu" />
     <CudaCompile Include="dunes\device\sticky.cu" />
     <CudaCompile Include="dunes\device\venturi.cu" />
     <CudaCompile Include="dunes\device\wind_shadow.cu" />

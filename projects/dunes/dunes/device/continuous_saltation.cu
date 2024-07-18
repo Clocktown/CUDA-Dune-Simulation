@@ -1,4 +1,4 @@
-#include "continuous_saltation.cuh"
+#include "kernels.cuh"
 #include "constants.cuh"
 #include "grid.cuh"
 #include <dunes/core/simulation_parameters.hpp>
@@ -137,6 +137,7 @@ namespace dunes
 
 	void continuousSaltation(const LaunchParameters& t_launchParameters)
 	{
+		// TODO: implement Backward saltation (saltationMode)
 		setupContinuousSaltationKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.slabBuffer, t_launchParameters.tmpBuffer);
 		if (t_launchParameters.useBilinear) {
 			continuousSaltationKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, t_launchParameters.slabBuffer, t_launchParameters.tmpBuffer);

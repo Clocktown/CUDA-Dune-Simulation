@@ -1,5 +1,5 @@
-#include "continuous_reptation.cuh"
 #include "constants.cuh"
+#include "kernels.cuh"
 #include "grid.cuh"
 #include <dunes/core/simulation_parameters.hpp>
 #include <dunes/core/launch_parameters.hpp>

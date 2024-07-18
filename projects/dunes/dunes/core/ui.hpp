@@ -26,14 +26,14 @@ namespace dunes
 		void onGUI();
 	private:
 		// Static
-		static inline const char* saltationModes[2]{ "Per Frame", "Continuous" };
+		static inline const char* saltationModes[2]{ "Backward", "Forward" };
 		static inline const char* windWarpingModes[2]{ "None", "Standard" };
 		static inline const char* windShadowModes[2]{ "Linear", "Curved" };
-		static inline const char* avalancheModes[6]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid", "Taylor"};
+		static inline const char* avalancheModes[7]{ "Atomic Buffered", "Atomic In-Place", "Shared In-Place", "Mixed In-Place", "Multigrid", "Taylor", "Jacobi"};
 		static inline const char* bedrockAvalancheModes[2]{ "To Sand", "To Bedrock" };
 		static inline const char* timeModes[2]{ "Delta Time", "Fixed Delta Time" };
 		static inline const char* initializationTargets[NumNoiseGenerationTargets]{ "Bedrock", "Sand", "Vegetation", "Abrasion Resistance" };
-		static inline const char* watchTimingNames[9]{ "All CUDA", "Venturi", "Wind Warping", "Wind Shadow", "Sticky Cells", "Saltation", "Reptation", "Avalanching", "Bedrock Avalanching" };
+		static inline const char* watchTimingNames[10]{ "All CUDA", "Venturi", "Wind Warping", "Wind Shadow", "Sticky Cells", "Saltation", "Reptation", "Avalanching", "Bedrock Avalanching", "Pressure Projection"};
 
 		void initializeAll();
 
@@ -110,7 +110,7 @@ namespace dunes
 
 		float m_abrasionStrength{ 0.0f };
 		float m_abrasionThreshold{ 0.025f };
-		int m_saltationMode{ static_cast<int>(SaltationMode::Continuous) };
+		int m_saltationMode{ static_cast<int>(SaltationMode::Forward) };
 		float m_saltationStrength{ 1.f };
 		float m_reptationStrength{ 0.0f };
 		float m_reptationSmoothingStrength{ 0.0f };
@@ -118,6 +118,7 @@ namespace dunes
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };
 		int m_avalancheIterations{ 50 };
+		int m_pressureProjectionIterations{ 0 };
 		int m_bedrockAvalancheIterations{ 1 };
 		int m_avalancheSoftIterationModulus{ 10 };
 		int m_avalancheFinalSoftIterations{ 5 };

@@ -81,6 +81,7 @@ namespace dunes
 
 		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
 		m_simulator->setAvalancheIterations(m_avalancheIterations);
+		m_simulator->setPressureProjectionIterations(m_pressureProjectionIterations);
 		m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
 		m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 		m_simulator->setAvalancheStrength(m_avalancheStrength);
@@ -387,7 +388,7 @@ namespace dunes
 
 		m_abrasionStrength = json["abrasionStrength"]; //
 		m_abrasionThreshold = json["abrasionThreshold"]; //
-		m_saltationMode = getIndexFromNamedArray(saltationModes, IM_ARRAYSIZE(saltationModes), json["saltationMode"], 0); //
+		m_saltationMode = getIndexFromNamedArray(saltationModes, IM_ARRAYSIZE(saltationModes), json["saltationMode"], 1); //
 		m_saltationStrength = json["saltationStrength"]; //
 		m_reptationStrength = json["reptationStrength"]; //
 		if (json.contains("reptationSmoothingStrength"))
@@ -396,6 +397,9 @@ namespace dunes
 		m_avalancheMode = getIndexFromNamedArray(avalancheModes, IM_ARRAYSIZE(avalancheModes), json["avalancheMode"], 1); //
 		m_bedrockAvalancheMode = getIndexFromNamedArray(bedrockAvalancheModes, IM_ARRAYSIZE(bedrockAvalancheModes), json["bedrockAvalancheMode"], 0); //
 		m_avalancheIterations = json["avalancheIterations"]; //
+		if (json.contains("pressureProjectionIterations")) {
+			m_pressureProjectionIterations = json["pressureProjectionIterations"];
+		}
 		m_bedrockAvalancheIterations = json["bedrockAvalancheIterations"]; //
 		m_avalancheSoftIterationModulus = json["avalancheSoftIterationModulus"]; //
 		m_avalancheFinalSoftIterations = json["avalancheFinalSoftIterations"]; //
@@ -526,6 +530,7 @@ namespace dunes
 		json["avalancheMode"] = avalancheModes[m_avalancheMode];
 		json["bedrockAvalancheMode"] = bedrockAvalancheModes[m_bedrockAvalancheMode];
 		json["avalancheIterations"] = m_avalancheIterations;
+		json["pressureProjectionIterations"] = m_pressureProjectionIterations;
 		json["bedrockAvalancheIterations"] = m_bedrockAvalancheIterations;
 		json["avalancheSoftIterationModulus"] = m_avalancheSoftIterationModulus;
 		json["avalancheFinalSoftIterations"] = m_avalancheFinalSoftIterations;
@@ -823,6 +828,11 @@ namespace dunes
 			}
 
 			if (ImGui::TreeNode("Wind")) {
+				if (ImGui::DragInt("Iterations", &m_pressureProjectionIterations))
+				{
+					m_simulator->setPressureProjectionIterations(m_pressureProjectionIterations);
+				}
+
 				if (ImGui::DragFloat("Speed", &m_windSpeed))
 				{
 					m_simulator->setWindSpeed(m_windSpeed);
