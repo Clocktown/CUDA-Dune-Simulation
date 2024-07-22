@@ -91,6 +91,7 @@ namespace dunes
 		void setSpawnSteps(const int t_steps);
 		void setConstantCoverage(const bool t_constantCoverage);
 		void setConstantCoverageAllowRemove(const bool t_constantCoverageAllowRemove);
+		void setProjectionMode(const ProjectionMode t_mode);
 
 		const std::vector<float>& getWatchTimings();
 		const std::vector<float>& getMeanWatchTimings();
@@ -123,6 +124,7 @@ namespace dunes
 		void setupBuffers();
 		void setupWindWarping();
 		void setupMultigrid();
+		void setupProjection();
 		void map();
 		void unmap();
 
@@ -177,6 +179,8 @@ namespace dunes
 		std::array<sthe::cu::Buffer, 4> m_windWarpingBuffers;
 		std::vector<sthe::cu::Buffer> m_multigrid;
 		std::unique_ptr<sthe::cu::Buffer> m_coverageMap;
+		sthe::cu::Buffer m_velocityBuffer;
+		sthe::cu::Buffer m_frequencyBuffer;
 		cudaTextureDesc m_textureDescriptor;
 
 		bool m_isAwake;

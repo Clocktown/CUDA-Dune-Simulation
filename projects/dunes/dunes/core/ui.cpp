@@ -82,6 +82,7 @@ namespace dunes
 		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
 		m_simulator->setAvalancheIterations(m_avalancheIterations);
 		m_simulator->setPressureProjectionIterations(m_pressureProjectionIterations);
+		m_simulator->setProjectionMode(static_cast<ProjectionMode>(m_projectionMode));
 		m_simulator->setAvalancheFinalSoftIterations(m_avalancheFinalSoftIterations);
 		m_simulator->setAvalancheSoftIterationModulus(m_avalancheSoftIterationModulus);
 		m_simulator->setAvalancheStrength(m_avalancheStrength);
@@ -828,6 +829,11 @@ namespace dunes
 			}
 
 			if (ImGui::TreeNode("Wind")) {
+				if (ImGui::Combo("Projection Mode", &m_projectionMode, projectionModes, IM_ARRAYSIZE(projectionModes)))
+				{
+					m_simulator->setProjectionMode(static_cast<ProjectionMode>(m_projectionMode));
+				}
+
 				if (ImGui::DragInt("Iterations", &m_pressureProjectionIterations))
 				{
 					m_simulator->setPressureProjectionIterations(m_pressureProjectionIterations);
