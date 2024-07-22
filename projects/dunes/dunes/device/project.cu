@@ -2,9 +2,12 @@
 #include "constants.cuh"
 #include "grid.cuh"
 #include "multigrid.cuh"
+#include <sthe/config/debug.hpp>
 #include <dunes/core/simulation_parameters.hpp>
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
+#include <thrust/execution_policy.h>
+#include <thrust/transform_reduce.h>
 
 namespace dunes {
 
@@ -61,9 +64,6 @@ namespace dunes {
 		const int cellIndex{ getCellIndex(cell) };
 
 		float2 velocity = t_windArray.read(cell);
-		float4 resistance = t_resistanceArray.read(cell);
-		resistance.x = 0.f;
-		t_resistanceArray.write(cell, resistance);
 
 		velocity.x -= 0.5f * (
 				t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[0]))] 
@@ -77,7 +77,7 @@ namespace dunes {
 		t_windArray.write(cell, velocity);
 	}
 
-	__global__ void multiplyWindShadowKernel(Array2D<float2> t_windArray, const Array2D<float4> t_resistanceArray) {
+	__global__ void multiplyWindShadowKernel(Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray) {
 		const int2 cell{ getGlobalIndex2D() };
 
 		if (isOutside(cell))
@@ -88,30 +88,153 @@ namespace dunes {
 		const int cellIndex{ getCellIndex(cell) };
 
 		float2 velocity = t_windArray.read(cell) * (1.f - t_resistanceArray.read(cell).x);
-
+		float4 resistance = t_resistanceArray.read(cell);
+		resistance.x = 0.0f;
+		
 		t_windArray.write(cell, velocity);
+		t_resistanceArray.write(cell, resistance);
 	}
 
+	__global__ void setupProjection(const Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray, Buffer<float> velocityBufferX, Buffer<float> velocityBufferY)
+	{
+		const int2 cell{ getGlobalIndex2D() };
 
-
-	void pressureProjection(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters) {
-		if (t_launchParameters.pressureProjectionIterations <= 0) {
+		if (isOutside(cell))
+		{
 			return;
 		}
-		windShadow(t_launchParameters);
+
+		const int cellIndex{ getCellIndex(cell) };
+
+		const float2 velocity = t_windArray.read(cell);
+		float4 resistance = t_resistanceArray.read(cell);
+		
+		velocityBufferX[cellIndex] = velocity.x * (1.0f - resistance.x);
+		velocityBufferY[cellIndex] = velocity.y * (1.0f - resistance.x);
+
+		resistance.x = 0.0f;
+		t_resistanceArray.write(cell, resistance);
+	}
+
+	__global__ void fftProjection(Buffer<cuComplex> frequencyBufferX, Buffer<cuComplex> frequencyBufferY)
+	{
+		const int2 cell{ getGlobalIndex2D() };
+
+		if (isOutside(cell))
+		{
+			return;
+		}
+
+		const int cellIndex{ getCellIndex(cell) };
+
+		cuComplex freqX{ frequencyBufferX[cellIndex] };
+		cuComplex freqY{ frequencyBufferY[cellIndex] };
+
+		const int iix{ cell.x };
+		const int iiy{ cell.y > c_parameters.gridSize.y / 2 ? cell.y - c_parameters.gridSize.y : cell.y };
+
+		const float kk{ static_cast<float>(iix * iix + iiy * iiy) };
+		float diff = 1.0f / (1.0f + kk * 0.0025f * c_parameters.deltaTime);
+
+		if (kk > 0.0f)
+		{
+			const float rkk{ 1.0f / kk };
+			const float rkp{ iix * freqX.x + iiy * freqY.x };
+			const float ikp{ iix * freqX.y + iiy * freqY.y };
+
+			freqX.x -= rkk * rkp * iix;
+			freqX.y -= rkk * ikp * iix;
+			freqY.x -= rkk * rkp * iiy;
+			freqY.y -= rkk * ikp * iiy;
+		}
+
+		frequencyBufferX[cellIndex] = freqX;
+		frequencyBufferY[cellIndex] = freqY;
+	}
+
+	__global__ void finalizeProjection(Array2D<float2> t_windArray, Buffer<float> velocityBufferX, Buffer<float> velocityBufferY)
+	{
+		const int2 cell{ getGlobalIndex2D() };
+
+		if (isOutside(cell))
+		{
+			return;
+		}
+
+		const int cellIndex{ getCellIndex(cell) };
+		const float scale{ 1.0f / static_cast<float>(c_parameters.gridSize.x * c_parameters.gridSize.y) };
+
+		const float2 velocity{ velocityBufferX[cellIndex], velocityBufferY[cellIndex] };
+		t_windArray.write(cell, scale * velocity);
+	}
+
+	// Debug Operator for divergence reduction
+	struct Unary
+	{
+		__device__ float operator()(float x)
+		{
+			return fabsf(x);
+		}
+	};
+	struct Binary
+	{
+		__device__ float operator()(float x, float y)
+		{
+			return x + y;
+		}
+	};
+
+	void pressureProjection(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters) 
+	{
+		Buffer<float> divergenceBuffer{ t_launchParameters.tmpBuffer + 2 * t_simulationParameters.cellCount };
 		Buffer<float> pressureABuffer{ t_launchParameters.tmpBuffer + 0 * t_simulationParameters.cellCount };
 		Buffer<float> pressureBBuffer{ t_launchParameters.tmpBuffer + 1 * t_simulationParameters.cellCount };
-		Buffer<float> divergenceBuffer{ t_launchParameters.tmpBuffer + 2 * t_simulationParameters.cellCount };
 
-		multiplyWindShadowKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, t_launchParameters.resistanceArray);
+		if (t_launchParameters.projection.mode == ProjectionMode::Jacobi)
+		{
+			multiplyWindShadowKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.resistanceArray);
+			initDivergencePressureKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
 
-		initDivergencePressureKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
+			// Debug
+			float div = thrust::transform_reduce(thrust::device, divergenceBuffer, divergenceBuffer + t_simulationParameters.cellCount, Unary(), 0.0f, Binary());
+			printf("%f -> ", div / t_simulationParameters.cellCount);
 
-		for (int i = 0; i < t_launchParameters.pressureProjectionIterations; ++i) {
-			projectKernel<< <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, divergenceBuffer, pressureABuffer, pressureBBuffer);
-			std::swap(pressureABuffer, pressureBBuffer);
+			for (int i = 0; i < t_launchParameters.projection.jacobiIterations; ++i) 
+			{
+		        projectKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, divergenceBuffer, pressureABuffer, pressureBBuffer);
+		        std::swap(pressureABuffer, pressureBBuffer);
+		    }
+
+		    finalizeVelocities<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, t_launchParameters.windArray, pressureABuffer);
+		 	
+			// Debug
+		    initDivergencePressureKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
+		    div = thrust::transform_reduce(thrust::device, divergenceBuffer, divergenceBuffer + t_simulationParameters.cellCount, Unary(), 0.0f, Binary());
+		    printf("%f\n", div / t_simulationParameters.cellCount);
 		}
-		finalizeVelocities << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, t_launchParameters.windArray, pressureABuffer);
+		else if (t_launchParameters.projection.mode == ProjectionMode::FFT)
+		{
+			// Debug
+			initDivergencePressureKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
+            float div = thrust::transform_reduce(thrust::device, divergenceBuffer, divergenceBuffer + t_simulationParameters.cellCount, Unary(), 0.0f, Binary());
+            printf("%f -> ", div / t_simulationParameters.cellCount);
 
+			setupProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
+
+		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, t_launchParameters.projection.velocities[0], t_launchParameters.projection.frequencies[0]));
+		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, t_launchParameters.projection.velocities[1], t_launchParameters.projection.frequencies[1]));
+
+		    fftProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.projection.frequencies[0], t_launchParameters.projection.frequencies[1]);
+
+		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, t_launchParameters.projection.frequencies[0], t_launchParameters.projection.velocities[0]));
+		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, t_launchParameters.projection.frequencies[1], t_launchParameters.projection.velocities[1]));
+
+		    finalizeProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
+		
+			// Debug
+		    initDivergencePressureKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
+		    div = thrust::transform_reduce(thrust::device, divergenceBuffer, divergenceBuffer + t_simulationParameters.cellCount, Unary(), 0.0f, Binary());
+		    printf("%f\n", div / t_simulationParameters.cellCount);
+		}
 	}
 }

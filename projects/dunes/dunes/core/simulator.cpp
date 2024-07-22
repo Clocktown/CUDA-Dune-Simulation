@@ -79,6 +79,8 @@ namespace dunes
 	Simulator::~Simulator()
 	{
 		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlan));
+		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.projection.planR2C));
+		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.projection.planC2R));
 	}
 
 	// Functionality
@@ -119,12 +121,14 @@ namespace dunes
 		setupBuffers();
 		setupWindWarping();
 		setupMultigrid();
+		setupProjection();
 
 		map();
 
 		initializeTerrain(m_launchParameters, m_initializationParameters);
 		venturi(m_launchParameters);
 		initializeWindWarping(m_launchParameters, m_simulationParameters);
+		//windWarping(m_launchParameters);
 
 		unmap();
 
@@ -189,13 +193,11 @@ namespace dunes
 			windWarping(m_launchParameters);
 			m_watches[2].stop();
 			m_watches[9].start();
+			m_watches[3].start();
+			windShadow(m_launchParameters);
+			m_watches[3].stop();
 			pressureProjection(m_launchParameters, m_simulationParameters);
 			m_watches[9].stop();
-			m_watches[3].start();
-			if (m_launchParameters.pressureProjectionIterations <= 0) {
-				windShadow(m_launchParameters);
-			}
-			m_watches[3].stop();
 			m_watches[4].start();
 			sticky(m_launchParameters, m_simulationParameters);
 			m_watches[4].stop();
@@ -294,7 +296,7 @@ namespace dunes
 
 	void Simulator::setupWindWarping()
 	{
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.y, m_simulationParameters.gridSize.x, cufftType::CUFFT_C2C));
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
 
 		for (int i{ 0 }; i < 4; ++i)
 		{
@@ -332,6 +334,22 @@ namespace dunes
 			gridScale *= 2.0f;
 			cellCount /= 4;
 		}
+	}
+
+	void Simulator::setupProjection()
+	{
+		const int2 gridSize{ m_simulationParameters.gridSize };
+		const int cellCount{ m_simulationParameters.cellCount };
+
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, gridSize.x, gridSize.y, cufftType::CUFFT_R2C));
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, gridSize.x, gridSize.y, cufftType::CUFFT_C2R));
+
+		m_velocityBuffer.reinitialize(2 * cellCount, sizeof(float));
+		m_frequencyBuffer.reinitialize(2 * cellCount, sizeof(cuComplex));
+		m_launchParameters.projection.velocities[0] = m_velocityBuffer.getData<float>();
+		m_launchParameters.projection.velocities[1] = m_launchParameters.projection.velocities[0] + cellCount;
+		m_launchParameters.projection.frequencies[0] = m_frequencyBuffer.getData<cuComplex>();
+		m_launchParameters.projection.frequencies[1] = m_launchParameters.projection.frequencies[0] + cellCount;
 	}
 
 	void Simulator::setupCoverageCalculation() {
@@ -387,6 +405,11 @@ namespace dunes
 	void Simulator::setConstantCoverageAllowRemove(const bool t_constantCoverageAllowRemove)
 	{
 		m_constantCoverageAllowRemove = t_constantCoverageAllowRemove;
+	}
+
+	void Simulator::setProjectionMode(const ProjectionMode t_mode)
+	{
+		m_launchParameters.projection.mode = t_mode;
 	}
 
 	void Simulator::map()
@@ -599,7 +622,7 @@ namespace dunes
 	}
 
 	void Simulator::setPressureProjectionIterations(int t_iters) {
-		m_launchParameters.pressureProjectionIterations = t_iters;
+		m_launchParameters.projection.jacobiIterations = t_iters;
 	}
 
 	void Simulator::setAvalancheFinalSoftIterations(const int t_avalancheFinalSoftIterations)

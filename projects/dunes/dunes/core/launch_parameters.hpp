@@ -39,6 +39,21 @@ enum class BedrockAvalancheMode : unsigned char
 	ToSand, ToBedrock
 };
 
+enum class ProjectionMode : unsigned char
+{
+	None, Jacobi, FFT
+};
+
+struct Projection
+{
+	ProjectionMode mode{ ProjectionMode::Jacobi };
+	int jacobiIterations{ 50 };
+	cufftHandle planR2C;
+	cufftHandle planC2R;
+	Buffer<float> velocities[2];
+	Buffer<cuComplex> frequencies[2];
+};
+
 struct LaunchParameters
 {
 	unsigned int blockSize1D;
@@ -58,7 +73,6 @@ struct LaunchParameters
 	BedrockAvalancheMode bedrockAvalancheMode{ BedrockAvalancheMode::ToSand };
 	bool useBilinear{ true };
 	int avalancheIterations{ 50 };
-	int pressureProjectionIterations{ 0 };
 	int bedrockAvalancheIterations{ 2 };
 	int avalancheSoftIterationModulus{ 10 };
 	int avalancheFinalSoftIterations{ 5 };
@@ -74,6 +88,7 @@ struct LaunchParameters
 	Buffer<float> tmpBuffer; // 4 * gridSize.x * gridSize.y
 	WindWarping windWarping;
 	std::vector<MultigridLevel> multigrid;
+	Projection projection;
 
 	cufftHandle fftPlan;
 };
