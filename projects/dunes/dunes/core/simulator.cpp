@@ -126,9 +126,9 @@ namespace dunes
 		map();
 
 		initializeTerrain(m_launchParameters, m_initializationParameters);
-		venturi(m_launchParameters);
 		initializeWindWarping(m_launchParameters, m_simulationParameters);
-		//windWarping(m_launchParameters);
+		venturi(m_launchParameters);
+		windWarping(m_launchParameters);
 
 		unmap();
 
@@ -187,16 +187,16 @@ namespace dunes
 
 			m_watches[0].start();
 			m_watches[1].start();
-			venturi(m_launchParameters);
+			//venturi(m_launchParameters);
 			m_watches[1].stop();
 			m_watches[2].start();
-			windWarping(m_launchParameters);
+			//windWarping(m_launchParameters);
 			m_watches[2].stop();
 			m_watches[9].start();
 			pressureProjection(m_launchParameters, m_simulationParameters);
 			m_watches[9].stop();
 			m_watches[3].start();
-			windShadow(m_launchParameters);
+			//windShadow(m_launchParameters);
 			m_watches[3].stop();
 			m_watches[4].start();
 			sticky(m_launchParameters, m_simulationParameters);
