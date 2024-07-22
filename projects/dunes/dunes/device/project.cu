@@ -64,6 +64,8 @@ namespace dunes {
 		const int cellIndex{ getCellIndex(cell) };
 
 		float2 velocity = t_windArray.read(cell);
+		float4 resistance = t_resistanceArray.read(cell);
+		resistance.x = 0.0f;
 
 		velocity.x -= 0.5f * (
 				t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[0]))] 
@@ -75,6 +77,7 @@ namespace dunes {
 			);
 
 		t_windArray.write(cell, velocity);
+		t_resistanceArray.write(cell, resistance);
 	}
 
 	__global__ void multiplyWindShadowKernel(Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray) {
@@ -88,11 +91,8 @@ namespace dunes {
 		const int cellIndex{ getCellIndex(cell) };
 
 		float2 velocity = t_windArray.read(cell) * (1.f - t_resistanceArray.read(cell).x);
-		float4 resistance = t_resistanceArray.read(cell);
-		resistance.x = 0.0f;
 		
 		t_windArray.write(cell, velocity);
-		t_resistanceArray.write(cell, resistance);
 	}
 
 	__global__ void setupProjection(const Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray, Buffer<float> velocityBufferX, Buffer<float> velocityBufferY)
