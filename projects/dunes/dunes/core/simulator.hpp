@@ -180,7 +180,6 @@ namespace dunes
 		std::vector<sthe::cu::Buffer> m_multigrid;
 		std::unique_ptr<sthe::cu::Buffer> m_coverageMap;
 		sthe::cu::Buffer m_velocityBuffer;
-		sthe::cu::Buffer m_frequencyBuffer;
 		cudaTextureDesc m_textureDescriptor;
 
 		bool m_isAwake;

@@ -127,8 +127,8 @@ namespace dunes
 
 		initializeTerrain(m_launchParameters, m_initializationParameters);
 		initializeWindWarping(m_launchParameters, m_simulationParameters);
-		venturi(m_launchParameters);
-		windWarping(m_launchParameters);
+		//venturi(m_launchParameters);
+		//windWarping(m_launchParameters);
 
 		unmap();
 
@@ -187,16 +187,16 @@ namespace dunes
 
 			m_watches[0].start();
 			m_watches[1].start();
-			//venturi(m_launchParameters);
+			venturi(m_launchParameters);
 			m_watches[1].stop();
 			m_watches[2].start();
-			//windWarping(m_launchParameters);
+			windWarping(m_launchParameters);
 			m_watches[2].stop();
 			m_watches[9].start();
 			pressureProjection(m_launchParameters, m_simulationParameters);
 			m_watches[9].stop();
 			m_watches[3].start();
-			//windShadow(m_launchParameters);
+			windShadow(m_launchParameters);
 			m_watches[3].stop();
 			m_watches[4].start();
 			sticky(m_launchParameters, m_simulationParameters);
@@ -344,12 +344,11 @@ namespace dunes
 		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, gridSize.x, gridSize.y, cufftType::CUFFT_R2C));
 		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, gridSize.x, gridSize.y, cufftType::CUFFT_C2R));
 
-		m_velocityBuffer.reinitialize(2 * cellCount, sizeof(float));
-		m_frequencyBuffer.reinitialize(2 * cellCount, sizeof(cuComplex));
+		const int size{ (gridSize.x / 2 + 1) * gridSize.y };
+
+		m_velocityBuffer.reinitialize(4 * size, sizeof(float));
 		m_launchParameters.projection.velocities[0] = m_velocityBuffer.getData<float>();
-		m_launchParameters.projection.velocities[1] = m_launchParameters.projection.velocities[0] + cellCount;
-		m_launchParameters.projection.frequencies[0] = m_frequencyBuffer.getData<cuComplex>();
-		m_launchParameters.projection.frequencies[1] = m_launchParameters.projection.frequencies[0] + cellCount;
+		m_launchParameters.projection.velocities[1] = m_launchParameters.projection.velocities[0] + 2 * size;
 	}
 
 	void Simulator::setupCoverageCalculation() {

@@ -51,7 +51,6 @@ struct Projection
 	cufftHandle planR2C;
 	cufftHandle planC2R;
 	Buffer<float> velocities[2];
-	Buffer<cuComplex> frequencies[2];
 };
 
 struct LaunchParameters

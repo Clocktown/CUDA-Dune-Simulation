@@ -104,7 +104,8 @@ namespace dunes {
 			return;
 		}
 
-		const int cellIndex{ getCellIndex(cell) };
+		const int width{ 2 * (c_parameters.gridSize.x / 2 + 1) };
+		const int cellIndex{ cell.x + cell.y * width };
 
 		const float2 velocity = t_windArray.read(cell);
 		velocityBufferX[cellIndex] = velocity.x;
@@ -114,19 +115,20 @@ namespace dunes {
 	__global__ void fftProjection(Buffer<cuComplex> frequencyBufferX, Buffer<cuComplex> frequencyBufferY)
 	{
 		const int2 cell{ getGlobalIndex2D() };
+		const int2 size{ c_parameters.gridSize.x / 2 + 1, c_parameters.gridSize.y };
 
-		if (isOutside(cell))
+		if (isOutside(cell, size))
 		{
 			return;
 		}
 
-		const int cellIndex{ getCellIndex(cell) };
+		const int cellIndex{ getCellIndex(cell, size) };
 
 		cuComplex xterm{ frequencyBufferX[cellIndex] };
 		cuComplex yterm{ frequencyBufferY[cellIndex] };
 
 		const int iix{ cell.x };
-		const int iiy{ cell.y > c_parameters.gridSize.y / 2 ? cell.y - c_parameters.gridSize.y : cell.y };
+		const int iiy{ cell.y > size.y / 2 ? cell.y - size.y : cell.y };
 
 		const float kk{ static_cast<float>(iix * iix + iiy * iiy) };
 
@@ -162,7 +164,9 @@ namespace dunes {
 			return;
 		}
 
-		const int cellIndex{ getCellIndex(cell) };
+		const int width{ 2 * (c_parameters.gridSize.x / 2 + 1) };
+
+		const int cellIndex{ cell.x + cell.y * width };
 		const float scale{ 1.0f / static_cast<float>(c_parameters.gridSize.x * c_parameters.gridSize.y) };
 
 		const float2 velocity{ velocityBufferX[cellIndex], velocityBufferY[cellIndex] };
@@ -224,13 +228,18 @@ namespace dunes {
 
 			setupProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.resistanceArray, t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
 
-		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, t_launchParameters.projection.velocities[0], t_launchParameters.projection.frequencies[0]));
-		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, t_launchParameters.projection.velocities[1], t_launchParameters.projection.frequencies[1]));
+		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)t_launchParameters.projection.velocities[0], (cuComplex*)t_launchParameters.projection.velocities[0]));
+		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)t_launchParameters.projection.velocities[1], (cuComplex*)t_launchParameters.projection.velocities[1]));
 
-		    fftProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.projection.frequencies[0], t_launchParameters.projection.frequencies[1]);
+			dim3 gridSize;
+			gridSize.x = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.gridSize.x / 2 + 1) / 8.0f));
+			gridSize.y = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.gridSize.y) / 8.0f));
+			gridSize.z = 1;
 
-		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, t_launchParameters.projection.frequencies[0], t_launchParameters.projection.velocities[0]));
-		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, t_launchParameters.projection.frequencies[1], t_launchParameters.projection.velocities[1]));
+		    fftProjection<<<gridSize, dim3{ 8, 8, 1 } >> >((cuComplex*)t_launchParameters.projection.velocities[0], (cuComplex*)t_launchParameters.projection.velocities[1]);
+
+		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, (cuComplex*)t_launchParameters.projection.velocities[0], (cufftReal*)t_launchParameters.projection.velocities[0]));
+		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, (cuComplex*)t_launchParameters.projection.velocities[1], (cufftReal*)t_launchParameters.projection.velocities[1]));
 
 		    finalizeProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
 		
