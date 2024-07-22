@@ -193,11 +193,11 @@ namespace dunes
 			windWarping(m_launchParameters);
 			m_watches[2].stop();
 			m_watches[9].start();
+			pressureProjection(m_launchParameters, m_simulationParameters);
+			m_watches[9].stop();
 			m_watches[3].start();
 			windShadow(m_launchParameters);
 			m_watches[3].stop();
-			pressureProjection(m_launchParameters, m_simulationParameters);
-			m_watches[9].stop();
 			m_watches[4].start();
 			sticky(m_launchParameters, m_simulationParameters);
 			m_watches[4].stop();

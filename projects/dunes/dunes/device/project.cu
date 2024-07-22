@@ -48,7 +48,7 @@ namespace dunes {
 			new_pressure += t_pressureABuffer[nextCellIndex];
 		}
 		new_pressure *= 0.25f;
-		new_pressure *= (1.f - t_resistanceArray.read(cell).x);
+		//new_pressure *= (1.f - t_resistanceArray.read(cell).x);
 
 		t_pressureBBuffer[cellIndex] = new_pressure;
 	}
@@ -72,12 +72,12 @@ namespace dunes {
 			-	t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[4]))]
 			);
 		velocity.y -= 0.5f * (
-				0.5f * (t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[2]))] 
-			-	t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[6]))])
+				t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[2]))] 
+			-	t_pressureBuffer[getCellIndex(getWrappedCell(cell + c_offsets[6]))]
 			);
 
 		t_windArray.write(cell, velocity);
-		t_resistanceArray.write(cell, resistance);
+		//t_resistanceArray.write(cell, resistance);
 	}
 
 	__global__ void multiplyWindShadowKernel(Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray) {
@@ -109,11 +109,11 @@ namespace dunes {
 		const float2 velocity = t_windArray.read(cell);
 		float4 resistance = t_resistanceArray.read(cell);
 		
-		velocityBufferX[cellIndex] = velocity.x * (1.0f - resistance.x);
-		velocityBufferY[cellIndex] = velocity.y * (1.0f - resistance.x);
+		velocityBufferX[cellIndex] = velocity.x;// *(1.0f - resistance.x);
+		velocityBufferY[cellIndex] = velocity.y;// *(1.0f - resistance.x);
 
 		resistance.x = 0.0f;
-		t_resistanceArray.write(cell, resistance);
+		//t_resistanceArray.write(cell, resistance);
 	}
 
 	__global__ void fftProjection(Buffer<cuComplex> frequencyBufferX, Buffer<cuComplex> frequencyBufferY)
@@ -134,7 +134,7 @@ namespace dunes {
 		const int iiy{ cell.y > c_parameters.gridSize.y / 2 ? cell.y - c_parameters.gridSize.y : cell.y };
 
 		const float kk{ static_cast<float>(iix * iix + iiy * iiy) };
-		float diff = 1.0f / (1.0f + kk * 0.0025f * c_parameters.deltaTime);
+		float diff = 1.0f / (1.0f + kk * 0.f * c_parameters.deltaTime);
 
 		if (kk > 0.0f)
 		{
@@ -148,8 +148,8 @@ namespace dunes {
 			freqY.y -= rkk * ikp * iiy;
 		}
 
-		frequencyBufferX[cellIndex] = freqX;
-		frequencyBufferY[cellIndex] = freqY;
+		frequencyBufferX[cellIndex] = freqX * diff;
+		frequencyBufferY[cellIndex] = freqY * diff;
 	}
 
 	__global__ void finalizeProjection(Array2D<float2> t_windArray, Buffer<float> velocityBufferX, Buffer<float> velocityBufferY)
@@ -192,7 +192,7 @@ namespace dunes {
 
 		if (t_launchParameters.projection.mode == ProjectionMode::Jacobi)
 		{
-			multiplyWindShadowKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.resistanceArray);
+			//multiplyWindShadowKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.resistanceArray);
 			initDivergencePressureKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
 
 			// Debug
