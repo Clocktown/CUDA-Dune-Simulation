@@ -169,7 +169,7 @@ namespace dunes
 
 
 				const float new_slab = slab * (1.f - depositionProbability);
-				float abrasion{ terrain.y < c_parameters.abrasionThreshold ? abrasionScale * new_slab : 0.0f };
+				float abrasion{ terrain.y < c_parameters.abrasionThreshold ? abrasionScale * (1.f - depositionProbability) : 0.0f };
 
 				terrain.y += abrasion;
 				terrain.x -= abrasion;
