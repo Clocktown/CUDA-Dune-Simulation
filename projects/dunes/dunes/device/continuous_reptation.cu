@@ -22,7 +22,7 @@ __global__ void setupContinuousReptationKernel(Buffer<float> t_reptationBuffer)
 	}
 }
 
-__global__ void continuousAngularReptationKernel(const Array2D<float2> t_terrainArray, Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
+__global__ void continuousAngularReptationKernel(const Array2D<float2> t_terrainArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -33,12 +33,13 @@ __global__ void continuousAngularReptationKernel(const Array2D<float2> t_terrain
 
 	const int cellIndex{ getCellIndex(cell) };
 	const float2 terrain{ t_terrainArray.read(cell) };
+	const float windShadow{ t_resistanceArray.read(cell).x };
 	const float height{ terrain.x + terrain.y };
 
 	const float slab{ t_slabBuffer[cellIndex] };
 	const float2 wind{ t_windArray.read(cell) };
 
-	t_reptationBuffer[cellIndex] = exp(-slab * length(wind) * c_parameters.reptationStrength);
+	t_reptationBuffer[cellIndex] = exp(-slab * (1 - windShadow) * length(wind) * c_parameters.reptationStrength);
 }
 
 __global__ void continuousReptationKernel(const Array2D<float2> t_terrainArray, Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
@@ -191,7 +192,7 @@ void continuousReptation(const LaunchParameters& t_launchParameters, const Simul
 		finishContinuousReptationKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.terrainArray, reptationBuffer);
 	}
 	if (t_simulationParameters.reptationStrength > 0.f) {
-		continuousAngularReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.tmpBuffer, reptationBuffer, t_launchParameters.windArray);
+		continuousAngularReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer, reptationBuffer, t_launchParameters.windArray);
 	}
 }
 
