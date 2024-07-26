@@ -115,6 +115,7 @@ namespace dunes
 		float m_saltationStrength{ 1.f };
 		float m_reptationStrength{ 0.0f };
 		float m_reptationSmoothingStrength{ 0.0f };
+		bool m_reptationUseWindShadow{ false };
 
 		int m_avalancheMode{ static_cast<int>(AvalancheMode::AtomicInPlace) };
 		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };

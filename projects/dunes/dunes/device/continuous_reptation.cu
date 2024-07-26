@@ -33,13 +33,13 @@ __global__ void continuousAngularReptationKernel(const Array2D<float2> t_terrain
 
 	const int cellIndex{ getCellIndex(cell) };
 	const float2 terrain{ t_terrainArray.read(cell) };
-	const float windShadow{ t_resistanceArray.read(cell).x };
+	const float windShadow{ t_resistanceArray.read(cell).x * c_parameters.reptationUseWindShadow };
 	const float height{ terrain.x + terrain.y };
 
 	const float slab{ t_slabBuffer[cellIndex] };
 	const float2 wind{ t_windArray.read(cell) };
 
-	t_reptationBuffer[cellIndex] = exp(-slab * (1 - windShadow) * length(wind) * c_parameters.reptationStrength);
+	t_reptationBuffer[cellIndex] = exp(-slab * (1.f - windShadow) * length(wind) * c_parameters.reptationStrength);
 }
 
 __global__ void continuousReptationKernel(const Array2D<float2> t_terrainArray, Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)

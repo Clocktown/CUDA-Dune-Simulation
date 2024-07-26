@@ -78,6 +78,7 @@ namespace dunes
 		m_simulator->setAbrasionThreshold(m_abrasionThreshold);
 		m_simulator->setReptationStrength(m_reptationStrength);
 		m_simulator->setReptationSmoothingStrength(m_reptationSmoothingStrength);
+		m_simulator->setReptationUseWindShadow(float(m_reptationUseWindShadow));
 
 		m_simulator->setAvalancheMode(static_cast<AvalancheMode>(m_avalancheMode));
 		m_simulator->setAvalancheIterations(m_avalancheIterations);
@@ -394,6 +395,8 @@ namespace dunes
 		m_reptationStrength = json["reptationStrength"]; //
 		if (json.contains("reptationSmoothingStrength"))
 			m_reptationSmoothingStrength = json["reptationSmoothingStrength"];
+		if (json.contains("reptationUseWindShadow"))
+			m_reptationUseWindShadow = json["reptationUseWindShadow"];
 
 		m_avalancheMode = getIndexFromNamedArray(avalancheModes, IM_ARRAYSIZE(avalancheModes), json["avalancheMode"], 1); //
 		m_bedrockAvalancheMode = getIndexFromNamedArray(bedrockAvalancheModes, IM_ARRAYSIZE(bedrockAvalancheModes), json["bedrockAvalancheMode"], 0); //
@@ -527,6 +530,7 @@ namespace dunes
 		json["saltationStrength"] = m_saltationStrength;
 		json["reptationStrength"] = m_reptationStrength;
 		json["reptationSmoothingStrength"] = m_reptationSmoothingStrength;
+		json["reptationUseWindShadow"] = m_reptationUseWindShadow;
 
 		json["avalancheMode"] = avalancheModes[m_avalancheMode];
 		json["bedrockAvalancheMode"] = bedrockAvalancheModes[m_bedrockAvalancheMode];
@@ -1015,6 +1019,10 @@ namespace dunes
 				if (ImGui::DragFloat("Strength", &m_reptationStrength, 0.005f))
 				{
 					m_simulator->setReptationStrength(m_reptationStrength);
+				}
+
+				if (ImGui::Checkbox("Use wind shadow", &m_reptationUseWindShadow)) {
+					m_simulator->setReptationUseWindShadow(float(m_reptationUseWindShadow));
 				}
 
 				if (ImGui::DragFloat("Smoothing Strength", &m_reptationSmoothingStrength, 0.005f))

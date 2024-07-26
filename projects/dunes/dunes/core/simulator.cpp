@@ -605,6 +605,10 @@ namespace dunes
 		m_simulationParameters.reptationSmoothingStrength = t_reptationStrength;
 	}
 
+	void Simulator::setReptationUseWindShadow(const float t_reptationUseWindShadow) {
+		m_simulationParameters.reptationUseWindShadow = t_reptationUseWindShadow;
+	}
+
 	void Simulator::setAvalancheMode(const AvalancheMode t_avalancheMode)
 	{
 		m_launchParameters.avalancheMode = t_avalancheMode;
