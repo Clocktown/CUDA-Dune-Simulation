@@ -404,6 +404,9 @@ namespace dunes
 		if (json.contains("pressureProjectionIterations")) {
 			m_pressureProjectionIterations = json["pressureProjectionIterations"];
 		}
+		if (json.contains("projectionMode")) {
+			m_projectionMode = json["projectionMode"];
+		}
 		m_bedrockAvalancheIterations = json["bedrockAvalancheIterations"]; //
 		m_avalancheSoftIterationModulus = json["avalancheSoftIterationModulus"]; //
 		m_avalancheFinalSoftIterations = json["avalancheFinalSoftIterations"]; //
@@ -537,6 +540,7 @@ namespace dunes
 		json["avalancheIterations"] = m_avalancheIterations;
 		json["pressureProjectionIterations"] = m_pressureProjectionIterations;
 		json["bedrockAvalancheIterations"] = m_bedrockAvalancheIterations;
+		json["projectionMode"] = m_projectionMode;
 		json["avalancheSoftIterationModulus"] = m_avalancheSoftIterationModulus;
 		json["avalancheFinalSoftIterations"] = m_avalancheFinalSoftIterations;
 		json["avalancheStrength"] = m_avalancheStrength;

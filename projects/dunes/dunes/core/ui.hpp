@@ -121,7 +121,7 @@ namespace dunes
 		int m_bedrockAvalancheMode{ static_cast<int>(BedrockAvalancheMode::ToSand) };
 		int m_avalancheIterations{ 50 };
 		int m_pressureProjectionIterations{ 50 };
-		int m_projectionMode{ static_cast<int>(ProjectionMode::None) };
+		int m_projectionMode{ static_cast<int>(ProjectionMode::FFT) };
 		int m_bedrockAvalancheIterations{ 1 };
 		int m_avalancheSoftIterationModulus{ 10 };
 		int m_avalancheFinalSoftIterations{ 5 };

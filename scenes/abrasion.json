@@ -1,0 +1,210 @@
+{
+ "abrasionStrength": 0.009999999776482582,
+ "abrasionThreshold": 0.02500000037252903,
+ "avalancheAngle": 33.0,
+ "avalancheFinalSoftIterations": 5,
+ "avalancheIterations": 50,
+ "avalancheMode": "Atomic In-Place",
+ "avalancheSoftIterationModulus": 10,
+ "avalancheStrength": 0.5,
+ "bedrockAngle": 68.0,
+ "bedrockAvalancheIterations": 1,
+ "bedrockAvalancheMode": "To Bedrock",
+ "bedrockColor": [
+  0.5,
+  0.5,
+  0.5,
+  1.0
+ ],
+ "bidirectionalStrengthBased": true,
+ "bilinear": true,
+ "calcCoverage": false,
+ "constantCoverage": false,
+ "constantCoverageAllowRemove": false,
+ "coverageRadius": 100,
+ "coverageSpawnAmount": 1.0,
+ "coverageSpawnUniform": false,
+ "coverageSubtractAmount": 1.0,
+ "coverageThreshold": 0.10000000149011612,
+ "enableBidirectional": true,
+ "erosionColor": [
+  0.0,
+  0.0,
+  1.0,
+  1.0
+ ],
+ "exportMaps": false,
+ "fixedDeltaTime": 1.0,
+ "gridScale": 1.0,
+ "gridSize": [
+  2048,
+  2048
+ ],
+ "initializationParameters": {
+  "Abrasion Resistance": {
+   "bias": 0.0,
+   "border": [
+    0.10000000149011612,
+    0.10000000149011612
+   ],
+   "enable": true,
+   "flat": true,
+   "iterations": 0,
+   "offset": [
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "stretch": [
+    1.0,
+    1.0
+   ],
+   "uniform_random": false
+  },
+  "Bedrock": {
+   "bias": 0.0,
+   "border": [
+    0.10000000149011612,
+    0.10000000149011612
+   ],
+   "enable": true,
+   "flat": false,
+   "iterations": 8,
+   "offset": [
+    0.0,
+    0.0
+   ],
+   "scale": 400.0,
+   "stretch": [
+    1.0,
+    1.0
+   ],
+   "uniform_random": false
+  },
+  "Sand": {
+   "bias": 10.0,
+   "border": [
+    0.10000000149011612,
+    0.10000000149011612
+   ],
+   "enable": true,
+   "flat": true,
+   "iterations": 0,
+   "offset": [
+    0.0,
+    0.0
+   ],
+   "scale": 100.0,
+   "stretch": [
+    1.0,
+    1.0
+   ],
+   "uniform_random": false
+  },
+  "Vegetation": {
+   "bias": 0.0,
+   "border": [
+    0.10000000149011612,
+    0.10000000149011612
+   ],
+   "enable": true,
+   "flat": true,
+   "iterations": 0,
+   "offset": [
+    0.0,
+    0.0
+   ],
+   "scale": 1.0,
+   "stretch": [
+    1.0,
+    1.0
+   ],
+   "uniform_random": false
+  }
+ },
+ "maxStickyHeight": 30.0,
+ "maxWindShadowAngle": 15.0,
+ "minWindShadowAngle": 10.0,
+ "multigridLevelCount": 1,
+ "multigridSolverIterations": 50,
+ "multigridVCycleIterations": 1,
+ "objectColor": [
+  0.75,
+  0.25,
+  0.75,
+  1.0
+ ],
+ "pressureProjectionIterations": 50,
+ "reptationSmoothingStrength": 0.5,
+ "reptationStrength": 0.10000000149011612,
+ "reptationUseWindShadow": true,
+ "saltationMode": "Forward",
+ "saltationStrength": 1.0,
+ "sandColor": [
+  0.8999999761581421,
+  0.800000011920929,
+  0.6000000238418579,
+  1.0
+ ],
+ "secondWindAngle": 45.0,
+ "spawnSteps": 10,
+ "stickyAngle": 55.0,
+ "stickyColor": [
+  1.0,
+  1.0,
+  0.0,
+  1.0
+ ],
+ "stickyRange": [
+  0.4000000059604645,
+  2.0
+ ],
+ "stickyStrength": 0.0,
+ "stopIterations": 0,
+ "targetCoverage": 1.0,
+ "targetFrameRate": 0,
+ "timeMode": "Fixed Delta Time",
+ "timeScale": 1.0,
+ "vSync": false,
+ "vegetationAngle": 45.0,
+ "vegetationColor": [
+  0.25,
+  0.75,
+  0.25,
+  1.0
+ ],
+ "venturiStrength": 0.004999999888241291,
+ "windAngle": 0.0,
+ "windBidirectionalBaseTime": 50.0,
+ "windBidirectionalR": 2.0,
+ "windShadowColor": [
+  1.0,
+  0.25,
+  0.25,
+  1.0
+ ],
+ "windShadowDistance": 10.0,
+ "windShadowMode": "Linear",
+ "windSpeed": 5.0,
+ "windWarpingCount": 2,
+ "windWarpingDivisor": 0.5,
+ "windWarpingGradientStrengths": [
+  30.0,
+  5.0,
+  0.0,
+  0.0
+ ],
+ "windWarpingMode": "Standard",
+ "windWarpingRadii": [
+  200.0,
+  50.0,
+  0.0,
+  0.0
+ ],
+ "windWarpingStrengths": [
+  0.800000011920929,
+  0.20000000298023224,
+  0.0,
+  0.0
+ ]
+}
