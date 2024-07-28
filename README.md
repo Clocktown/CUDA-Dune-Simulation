@@ -7,7 +7,8 @@ We provided a visual studio solution file. We have only tested our code on Windo
 ## Requirements
 The project is setup using CUDA 12.3 and `compute_75,sm75` flags. Older architectures and CUDA versions will work too, but you'll have to manually fix the visual studio solution to make it work.
 
-If you are running the executable on a Laptop, make sure that it runs on your dedicated NVIDIA graphics card instead of i.e. the Intel integrated GPU. While not a problem for CUDA, the OpenGL part of our application will likely not work properly with these GPUs.
+If you are running the executable on a Laptop, make sure that it runs on your dedicated NVIDIA graphics card instead of i.e. the Intel integrated GPU. While not a problem for CUDA, the OpenGL part of our application will likely not work properly with these GPUs. Additionally,
+we are sharing OpenGL textures which CUDA, which could cause additional problems if OpenGL runs on a different GPU compared to CUDA kernels.
 
 A `vcpkg.json` manifest file has been provided. Default installs of Visual Studio 2022 already include VCPKG and should install the required packages automatically.
 
