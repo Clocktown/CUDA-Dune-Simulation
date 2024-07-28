@@ -24,7 +24,6 @@ namespace dunes
 		m_simulator->setUseBilinear(m_useBilinear);
 		m_simulator->setInitializationParameters(m_initializationParameters);
 		m_simulator->setRenderParameters(m_renderParameters);
-		m_simulator->reinitialize(m_gridSize, m_gridScale);
 
 		m_simulator->setStopIterations(m_stopIterations);
 		m_simulator->setConstantCoverage(m_constantCoverage);
@@ -99,6 +98,8 @@ namespace dunes
 		m_simulator->setTimeMode(static_cast<TimeMode>(m_timeMode));
 		m_simulator->setTimeScale(m_timeScale);
 		m_simulator->setFixedDeltaTime(m_fixedDeltaTime);
+
+		m_simulator->reinitialize(m_gridSize, m_gridScale);
 
 		if (m_calcCoverage) {
 			m_simulator->setupCoverageCalculation();
@@ -302,6 +303,7 @@ namespace dunes
 		const char* err = nullptr; // or nullptr in C++11
 
 		int ret = LoadEXR(&out, &width, &height, input.c_str(), &err);
+		
 		if (ret != TINYEXR_SUCCESS) {
 			if (err) {
 				std::string errorMsg = std::string("Could not load file:\n") + input + "\nReason: " + err;
@@ -319,6 +321,8 @@ namespace dunes
 			free(out); // release memory of image data
 			return true;
 		}
+
+		
 		return false;
 	}
 
@@ -453,7 +457,6 @@ namespace dunes
 
 		initializeAll();
 
-
 		bool exportMaps =  json.contains("exportMaps") ? json["exportMaps"].get<bool>() : false;
 
 		if (exportMaps) {
@@ -471,6 +474,8 @@ namespace dunes
 				}
 			}
 		}
+
+		m_simulator->updateStickyCells();
 
 		if (m_calcCoverage) {
 			m_simulator->setupCoverageCalculation();
