@@ -127,8 +127,10 @@ namespace dunes
 
 		initializeTerrain(m_launchParameters, m_initializationParameters);
 		initializeWindWarping(m_launchParameters, m_simulationParameters);
-		//venturi(m_launchParameters);
-		//windWarping(m_launchParameters);
+		venturi(m_launchParameters);
+		windWarping(m_launchParameters);
+		pressureProjection(m_launchParameters, m_simulationParameters);
+		windShadow(m_launchParameters);
 
 		unmap();
 
