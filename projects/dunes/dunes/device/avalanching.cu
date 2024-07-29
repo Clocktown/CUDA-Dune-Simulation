@@ -202,14 +202,14 @@ __global__ void atomicInPlaceAvalanchingKernel(const Array2D<float4> t_resistanc
 
 	const int cellIndex{ getCellIndex(cell) };
 
-	const float2 terrain{ t_terrainBuffer[cellIndex] };
-	const float height{ terrain.x + terrain.y };
 	float baseAngle = c_parameters.avalancheAngle;
 	if (c_parameters.reptationStrength > 0.f) {
 		baseAngle = lerp(0.f, baseAngle, t_reptationBuffer[cellIndex]);
 	}
 	const float avalancheAngle{ lerp(baseAngle, c_parameters.vegetationAngle, fmaxf(t_resistanceArray.read(cell).y, 0.f)) };
 
+	const float2 terrain{ t_terrainBuffer[cellIndex] };
+	const float height{ terrain.x + terrain.y };
 	int nextCellIndices[8];
 	float avalanches[8];
 	float avalancheSum{ 0.0f };
@@ -496,16 +496,24 @@ void avalanching(const LaunchParameters& t_launchParameters, const SimulationPar
 	case AvalancheMode::AtomicInPlace:
 		setupAtomicInPlaceAvalanchingKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
 
-		for (int i = 0; i < t_launchParameters.avalancheIterations; ++i)
-		{
-			if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
-				i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations) 
+		if (t_simulationParameters.avalancheStrength == 1.f) {
+			for (int i = 0; i < t_launchParameters.avalancheIterations; ++i)
 			{
-				atomicInPlaceAvalanchingKernel<true><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer, reptationBuffer);
+				atomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer, reptationBuffer);
 			}
-			else
+		}
+		else {
+			for (int i = 0; i < t_launchParameters.avalancheIterations; ++i)
 			{
-				atomicInPlaceAvalanchingKernel<false><<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.resistanceArray, terrainBuffer, reptationBuffer);
+				if (i % t_launchParameters.avalancheSoftIterationModulus == 0 ||
+					i >= t_launchParameters.avalancheIterations - t_launchParameters.avalancheFinalSoftIterations)
+				{
+					atomicInPlaceAvalanchingKernel<true> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer, reptationBuffer);
+				}
+				else
+				{
+					atomicInPlaceAvalanchingKernel<false> << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, terrainBuffer, reptationBuffer);
+				}
 			}
 		}
 
