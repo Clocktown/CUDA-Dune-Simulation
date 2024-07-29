@@ -22,7 +22,7 @@ __global__ void setupContinuousReptationKernel(Buffer<float> t_reptationBuffer)
 	}
 }
 
-__global__ void continuousAngularReptationKernel(const Array2D<float2> t_terrainArray, const Array2D<float4> t_resistanceArray, Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
+__global__ void continuousAngularReptationKernel(const Array2D<float4> t_resistanceArray, const Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -32,14 +32,32 @@ __global__ void continuousAngularReptationKernel(const Array2D<float2> t_terrain
 	}
 
 	const int cellIndex{ getCellIndex(cell) };
-	const float2 terrain{ t_terrainArray.read(cell) };
-	const float windShadow{ t_resistanceArray.read(cell).x * c_parameters.reptationUseWindShadow };
-	const float height{ terrain.x + terrain.y };
+	const float2 resistance{ t_resistanceArray.read(cell).x, t_resistanceArray.read(cell).y };
+	const float windShadow{ resistance.x * c_parameters.reptationUseWindShadow };
 
 	const float slab{ t_slabBuffer[cellIndex] };
 	const float2 wind{ t_windArray.read(cell) };
 
-	t_reptationBuffer[cellIndex] = exp(-slab * (1.f - windShadow) * length(wind) * c_parameters.reptationStrength);
+	float baseAngle = c_parameters.avalancheAngle * exp(-slab * (1.f - windShadow) * length(wind) * c_parameters.reptationStrength);
+
+	// Store precomputed angle
+	t_reptationBuffer[cellIndex] = lerp(baseAngle, c_parameters.vegetationAngle, fmaxf(resistance.y, 0.f));
+}
+
+__global__ void noReptationKernel(const Array2D<float4> t_resistanceArray, Buffer<float> t_reptationBuffer)
+{
+	const int2 cell{ getGlobalIndex2D() };
+
+	if (isOutside(cell))
+	{
+		return;
+	}
+
+	const int cellIndex{ getCellIndex(cell) };
+	const float vegetation{ t_resistanceArray.read(cell).y };
+
+	// Store precomputed angle
+	t_reptationBuffer[cellIndex] = lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(vegetation, 0.f));
 }
 
 __global__ void continuousReptationKernel(const Array2D<float2> t_terrainArray, Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
@@ -192,7 +210,10 @@ void continuousReptation(const LaunchParameters& t_launchParameters, const Simul
 		finishContinuousReptationKernel << <t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D >> > (t_launchParameters.terrainArray, reptationBuffer);
 	}
 	if (t_simulationParameters.reptationStrength > 0.f) {
-		continuousAngularReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.terrainArray, t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer, reptationBuffer, t_launchParameters.windArray);
+		continuousAngularReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, t_launchParameters.tmpBuffer, reptationBuffer, t_launchParameters.windArray);
+	}
+	else {
+		noReptationKernel << <t_launchParameters.gridSize2D, t_launchParameters.blockSize2D >> > (t_launchParameters.resistanceArray, reptationBuffer);
 	}
 }
 
