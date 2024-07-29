@@ -298,7 +298,8 @@ namespace dunes
 
 	void Simulator::setupWindWarping()
 	{
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
+		const int2 gridSize{ m_simulationParameters.gridSize };
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, gridSize.y, gridSize.x, cufftType::CUFFT_C2C));
 
 		for (int i{ 0 }; i < 4; ++i)
 		{
@@ -343,8 +344,8 @@ namespace dunes
 		const int2 gridSize{ m_simulationParameters.gridSize };
 		const int cellCount{ m_simulationParameters.cellCount };
 
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, gridSize.x, gridSize.y, cufftType::CUFFT_R2C));
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, gridSize.x, gridSize.y, cufftType::CUFFT_C2R));
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, gridSize.y, gridSize.x, cufftType::CUFFT_R2C));
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, gridSize.y, gridSize.x, cufftType::CUFFT_C2R));
 
 		const int size{ (gridSize.x / 2 + 1) * gridSize.y };
 

@@ -43,7 +43,10 @@
     <CudaCompile Include="dunes\device\continuous_reptation.cu" />
     <CudaCompile Include="dunes\device\continuous_saltation.cu" />
     <CudaCompile Include="dunes\device\coverage.cu" />
-    <CudaCompile Include="dunes\device\initialize_terrain.cu" />
+    <CudaCompile Include="dunes\device\initialize_terrain.cu">
+      <FastMath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</FastMath>
+      <FastMath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</FastMath>
+    </CudaCompile>
     <CudaCompile Include="dunes\device\multigrid.cu" />
     <CudaCompile Include="dunes\device\project.cu" />
     <CudaCompile Include="dunes\device\sticky.cu" />
@@ -101,6 +104,7 @@
       <WarningLevel>Level3</WarningLevel>
       <ObjectFileName>$(IntDir)%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -110,6 +114,9 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_75,sm_75</CodeGeneration>
+      <SplitCompile>MaxThreads</SplitCompile>
+      <FastMath>true</FastMath>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -117,6 +124,7 @@
       <WarningLevel>Level3</WarningLevel>
       <ObjectFileName>$(IntDir)%(RelativeDir)/</ObjectFileName>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -129,7 +137,8 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
-      <FastMath>false</FastMath>
+      <FastMath>true</FastMath>
+      <SplitCompile>MaxThreads</SplitCompile>
     </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

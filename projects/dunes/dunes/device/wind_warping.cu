@@ -242,7 +242,7 @@ __global__ void windWarpingKernelImproved(Array2D<float2> t_windArray, WindWarpi
 				float2 orthogonalDirection{ -gradient.y, gradient.x };
 				orthogonalDirection *= sign(dot(windVelocity, orthogonalDirection));
 				
-				float alpha{ fminf(gradientLength / windSpeed, 1.0f) }; 
+				float alpha{ fminf(gradientLength / (windSpeed + 1e-06f), 1.0f) }; 
 			
 				warpAngle += t_windWarping.strengths[i] * alpha * signed_angle(windVelocity, orthogonalDirection);
 				weight += t_windWarping.strengths[i];

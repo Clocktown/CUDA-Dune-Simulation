@@ -441,3 +441,5 @@ FodyWeavers.xsd
 
 # ImGui
 *.ini
+
+vcpkg_installed

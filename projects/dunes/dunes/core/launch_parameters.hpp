@@ -89,7 +89,7 @@ struct LaunchParameters
 	std::vector<MultigridLevel> multigrid;
 	Projection projection;
 
-	cufftHandle fftPlan;
+	cufftHandle fftPlan{ 0 };
 };
 
 struct NoiseGenerationParameters 
