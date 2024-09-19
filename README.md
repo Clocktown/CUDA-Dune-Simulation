@@ -1,6 +1,6 @@
 # CUDA-Dune-Simulation
-This repository contains the full source code of our paper **Real-Time Desertscapes Simulation with CUDA** found [here](https://www.scitepress.org/PublicationsDetail.aspx?ID=dywC2RBocrQ=&t=1).
-The source code has since been extended for submission of an extended paper for Springer CCIS.
+This repository contains the full source code of our *GRAPP 2024* paper **Real-Time Desertscapes Simulation with CUDA** found [here](https://www.scitepress.org/PublicationsDetail.aspx?ID=dywC2RBocrQ=&t=1).
+The source code has since been extended for submission of an extended paper for *Communications in Computer and Information Science (CCIS)*, titled **Real-Time Desertscapes Simulation with Reptation and Divergence-Free Wind Fields**. For this extended paper, we added divergence-free wind fields via a FFT-based method and improved the previously artifact-ridden approach to reptation with a new method. The expected publication date is January 07, 2025.
 
 
 
