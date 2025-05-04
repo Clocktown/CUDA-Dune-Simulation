@@ -65,8 +65,14 @@ namespace dunes
 
 	__forceinline__ __device__ int2 getWrappedCell(const int2& t_cell, const int2& t_gridSize = c_parameters.gridSize)
 	{
-		return int2{ (t_cell.x + t_gridSize.x) % t_gridSize.x,
-					 (t_cell.y + t_gridSize.y) % t_gridSize.y };
+		int2 sign;
+		sign.x = (int)(t_cell.x < 0) - (int)(t_cell.x >= t_gridSize.x);
+		sign.y = (int)(t_cell.y < 0) - (int)(t_cell.y >= t_gridSize.y);
+
+		return t_cell + sign * t_gridSize;
+
+		//return int2{ (t_cell.x + t_gridSize.x) % t_gridSize.x,
+		//			   (t_cell.y + t_gridSize.y) % t_gridSize.y };
 	}
 
 	__forceinline__ __device__ int2 getNearestCell(const float2& t_position)
