@@ -104,7 +104,7 @@ namespace dunes
 						}
 						else if (correctedDistance <= stickyDistance)
 						{
-							resistance.w = fmaxf(fminf(0.1 + 1.0f - (correctedDistance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
+							resistance.w = fmaxf(fminf(0.1f + 1.0f - (correctedDistance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
 						}
 					}
 				}
@@ -161,7 +161,7 @@ namespace dunes
 				}
 				else if (correctedDistance <= stickyDistance)
 				{
-					resistance.w = fmaxf(fminf(0.1 + 1.0f - (correctedDistance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
+					resistance.w = fmaxf(fminf(0.1f + 1.0f - (correctedDistance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
 					//break;
 				}
 			}

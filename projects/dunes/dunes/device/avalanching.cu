@@ -181,7 +181,7 @@ __global__ void jacobiAvalanchingKernel(const Array2D<float4> t_resistanceArray,
 			val += one_over_s_plus_one * h2;
 		}
 	}
-	val *= 0.0625;
+	val *= 0.0625f;
 	float diff = height - val;
 	if (diff > oldSandHeight) {
 		diff = oldSandHeight;

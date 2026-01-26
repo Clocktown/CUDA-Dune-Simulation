@@ -45,7 +45,7 @@ __global__ void initializeWindWarpingKernel(WindWarping t_windWarping)
 				fftshift.y = c_parameters.gridSize.y;
 			}
 
-			const float distance{ length(c_parameters.gridScale * (make_float2(cell  - fftshift) + 0.5))};
+			const float distance{ length(c_parameters.gridScale * (make_float2(cell  - fftshift) + 0.5f))};
 		
 			for (int i{ 0 }; i < t_windWarping.count; ++i)
 			{

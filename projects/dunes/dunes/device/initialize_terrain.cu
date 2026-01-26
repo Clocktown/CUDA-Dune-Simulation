@@ -7,9 +7,9 @@
 
 namespace dunes
 {
-#define M_PI 3.1415926535897932384626433832795
+#define M_PI 3.1415926535897932384626433832795f
 
-	__device__ float frand(float2 c) { return fract(sin(dot(c, float2{ 12.9898, 78.233 })) * 43758.5453); }
+	__device__ float frand(float2 c) { return fract(sin(dot(c, float2{ 12.9898f, 78.233f })) * 43758.5453f); }
 
 	__device__ float noise(float2 p, float freq)
 	{
@@ -19,24 +19,24 @@ namespace dunes
 
 		//xy = 3.*xy*xy-2.*xy*xy*xy; // Alternative to cos
 		xy = 0.5f * (1.f - cos(M_PI * xy));
-		float a = frand((ij + float2{ 0., 0. }));
-		float b = frand((ij + float2{ 1., 0. }));
-		float c = frand((ij + float2{ 0., 1. }));
-		float d = frand((ij + float2{ 1., 1. }));
+		float a = frand((ij + float2{ 0.f, 0.f }));
+		float b = frand((ij + float2{ 1.f, 0.f }));
+		float c = frand((ij + float2{ 0.f, 1.f }));
+		float d = frand((ij + float2{ 1.f, 1.f }));
 		return bilerp(a, b, c, d, xy.x, xy.y);
 	}
 
 	__device__ float pNoise(float2 p, int res)
 	{
-		float persistance = .5;
-		float n = 0.;
-		float normK = 0.;
-		float f = 4.;
-		float amp = 1.;
+		float persistance = .5f;
+		float n = 0.f;
+		float normK = 0.f;
+		float f = 4.f;
+		float amp = 1.f;
 		for (int i = 0; i <= res; i++)
 		{
 			n += amp * noise(p, f);
-			f *= 2.;
+			f *= 2.f;
 			normK += amp;
 			amp *= persistance;
 		}

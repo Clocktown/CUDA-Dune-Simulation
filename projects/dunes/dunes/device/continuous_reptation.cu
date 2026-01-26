@@ -95,7 +95,7 @@ __global__ void continuousReptationKernel(const Array2D<float2> t_terrainArray, 
         change += signbit(heightDifference) ? -fminf(step, terrain.y) : fminf(step, nextTerrain.y);
 	}
 
-	t_reptationBuffer[cellIndex] = change * 0.125;
+	t_reptationBuffer[cellIndex] = change * 0.125f;
 }
 
 __global__ void continuousBilinearReptationKernel(const Array2D<float2> t_terrainArray, const Buffer<float> t_slabBuffer, Buffer<float> t_reptationBuffer, const Array2D<float2> t_windArray)
