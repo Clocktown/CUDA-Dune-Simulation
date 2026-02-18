@@ -3,6 +3,7 @@
 #include "function_qualifier.cuh"
 #include <vector_types.h>
 #include <vector_functions.h>
+#include <cuda_fp16.h>
 
 #ifndef __CUDACC__
 #   include <cmath>
@@ -32,6 +33,30 @@ CU_INLINE CU_HOST_DEVICE float rsqrtf(const float a)
 	return 1.0f / sqrtf(a);
 }
 #endif
+
+struct alignas(alignof(float2)) half4
+{
+    half2 a;
+    half2 b;
+};
+
+CU_INLINE CU_HOST_DEVICE float4 half4toFloat4(const half4& v)
+{
+    float4 res;
+    auto   res2 = reinterpret_cast<float2*>(&res);
+    res2[0]     = __half22float2(v.a);
+    res2[1]     = __half22float2(v.b);
+    return res;
+}
+
+CU_INLINE CU_HOST_DEVICE half4 toHalf4(const float4& v)
+{
+    auto  v2 = reinterpret_cast<const float2*>(&v);
+    half4 res;
+    res.a = __float22half2_rn(v2[0]);
+    res.b = __float22half2_rn(v2[1]);
+    return res;
+}
 
 CU_INLINE CU_HOST_DEVICE int sign(const int a)
 {

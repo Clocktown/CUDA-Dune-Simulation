@@ -31,7 +31,6 @@
     <ClInclude Include="dunes\device\constants.cuh" />
     <ClInclude Include="dunes\device\grid.cuh" />
     <ClInclude Include="dunes\device\kernels.cuh" />
-    <ClInclude Include="dunes\device\multigrid.cuh" />
     <ClInclude Include="dunes\dunes.hpp" />
     <ClInclude Include="dunes\util\io.hpp" />
   </ItemGroup>
@@ -47,7 +46,6 @@
       <FastMath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</FastMath>
       <FastMath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</FastMath>
     </CudaCompile>
-    <CudaCompile Include="dunes\device\multigrid.cu" />
     <CudaCompile Include="dunes\device\project.cu" />
     <CudaCompile Include="dunes\device\sticky.cu" />
     <CudaCompile Include="dunes\device\venturi.cu" />

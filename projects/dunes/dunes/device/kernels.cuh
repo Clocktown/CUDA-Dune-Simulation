@@ -2,6 +2,7 @@
 
 #include <dunes/core/launch_parameters.hpp>
 #include <cuda_runtime.h>
+#include <cuda_fp16.h>
 
 namespace dunes
 {

@@ -32,16 +32,6 @@ struct WindWarping
 	Buffer<cuComplex> smoothedHeights[4];
 };
 
-struct MultigridLevel
-{
-	int2 gridSize;
-	float gridScale;
-	int cellCount;
-	Buffer<float2> terrainBuffer;
-	Buffer<float> fluxBuffer;
-	Buffer<float> avalancheBuffer;
-};
-
 struct SimulationParameters
 {
 	int2 gridSize{ 2048, 2048 };

@@ -88,9 +88,7 @@ namespace dunes
 		m_simulator->setAvalancheStrength(m_avalancheStrength);
 		m_simulator->setAvalancheAngle(m_avalancheAngle);
 		m_simulator->setVegetationAngle(m_vegetationAngle);
-		m_simulator->setMultigridLevelCount(m_multigridLevelCount);
-		m_simulator->setMultigridVCycleIterations(m_multigridVCycleIterations);
-		m_simulator->setMultigridSolverIterations(m_multigridSolverIterations);
+
 		m_simulator->setBedrockAvalancheMode(static_cast<BedrockAvalancheMode>(m_bedrockAvalancheMode));
 		m_simulator->setBedrockAvalancheIterations(m_bedrockAvalancheIterations);
 		m_simulator->setBedrockAngle(m_bedrockAngle);
@@ -1086,17 +1084,14 @@ namespace dunes
 			{
 				if (ImGui::DragInt("Level Count", &m_multigridLevelCount))
 				{
-					m_simulator->setMultigridLevelCount(m_multigridLevelCount);
 				}
 
 				if (ImGui::DragInt("V-Cycle Iterations", &m_multigridVCycleIterations))
 				{
-					m_simulator->setMultigridVCycleIterations(m_multigridVCycleIterations);
 				}
 
 				if (ImGui::DragInt("Solver Iterations", &m_multigridSolverIterations))
 				{
-					m_simulator->setMultigridSolverIterations(m_multigridSolverIterations);
 				}
 
 				ImGui::TreePop();

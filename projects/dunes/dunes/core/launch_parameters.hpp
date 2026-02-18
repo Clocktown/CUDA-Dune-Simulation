@@ -5,6 +5,7 @@
 #include <cufft.h>
 #include <array>
 #include <vector>
+#include <cuda_fp16.h>
 
 namespace dunes
 {
@@ -75,18 +76,14 @@ struct LaunchParameters
 	int bedrockAvalancheIterations{ 2 };
 	int avalancheSoftIterationModulus{ 10 };
 	int avalancheFinalSoftIterations{ 5 };
-	int multigridLevelCount{ 1 };
-	int multigridVCycleIterations{ 1 };
-	int multigridSolverIterations{ 50 };
 	TimeMode timeMode{ TimeMode::DeltaTime };
 
-	Array2D<float2> terrainArray;
-	Array2D<float2> windArray;
-	Array2D<float4> resistanceArray; // .x = wind shadow, .y = vegetation, .z = erosion, .w = sticky
-	Buffer<float> slabBuffer;
-	Buffer<float> tmpBuffer; // 4 * gridSize.x * gridSize.y
+	Array2D<half2> terrainArray;
+	Array2D<half2> windArray;
+	Array2D<half4> resistanceArray; // .x = wind shadow, .y = vegetation, .z = erosion, .w = sticky
+	Buffer<half> slabBuffer;
+	Buffer<half> tmpBuffer; // 4 * gridSize.x * gridSize.y
 	WindWarping windWarping;
-	std::vector<MultigridLevel> multigrid;
 	Projection projection;
 
 	cufftHandle fftPlan{ 0 };

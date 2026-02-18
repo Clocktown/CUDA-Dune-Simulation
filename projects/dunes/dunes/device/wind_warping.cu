@@ -1,4 +1,3 @@
-#include "multigrid.cuh"
 #include "constants.cuh"
 #include "grid.cuh"
 #include <dunes/core/simulation_parameters.hpp>
@@ -55,7 +54,7 @@ __global__ void initializeWindWarpingKernel(WindWarping t_windWarping)
 	}
 }
 
-__global__ void setupWindWarpingKernel(Array2D<float2> t_terrainArray, Buffer<cuComplex> t_heightBuffer)
+__global__ void setupWindWarpingKernel(Array2D<half2> t_terrainArray, Buffer<cuComplex> t_heightBuffer)
 {
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
@@ -68,7 +67,7 @@ __global__ void setupWindWarpingKernel(Array2D<float2> t_terrainArray, Buffer<cu
 		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
 		{
 			const int cellIndex{ getCellIndex(cell) };
-			const float2 terrain{ t_terrainArray.read(cell) };
+			const float2 terrain{ __half22float2(t_terrainArray.read(cell)) };
 			const float height{ terrain.x + terrain.y };
 
 			t_heightBuffer[cellIndex] = cuComplex{ height, 0.0f };
@@ -104,7 +103,7 @@ __global__ void smoothTerrainsKernel(Buffer<cuComplex> t_heightBuffer, WindWarpi
 	}
 }
 
-__global__ void readBackSmoothTerrainKernel(Array2D<float2> t_terrainArray, WindWarping t_windWarping) {
+__global__ void readBackSmoothTerrainKernel(Array2D<half2> t_terrainArray, WindWarping t_windWarping) {
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
 
@@ -116,12 +115,12 @@ __global__ void readBackSmoothTerrainKernel(Array2D<float2> t_terrainArray, Wind
 		{
 			const int cellIndex{ getCellIndex(cell) };
 			
-			t_terrainArray.write(cell, float2{ t_windWarping.smoothedHeights[0][cellIndex].x, 0.f });
+			t_terrainArray.write(cell, half2{ t_windWarping.smoothedHeights[0][cellIndex].x, 0.f });
 		}
 	}
 }
 
-__global__ void readGaussKernel(Array2D<float2> t_terrainArray, WindWarping t_windWarping) {
+__global__ void readGaussKernel(Array2D<half2> t_terrainArray, WindWarping t_windWarping) {
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
 
@@ -133,7 +132,7 @@ __global__ void readGaussKernel(Array2D<float2> t_terrainArray, WindWarping t_wi
 		{
 			const int cellIndex{ getCellIndex(cell) };
 			
-			t_terrainArray.write(cell, 25000.f * float2{ t_windWarping.gaussKernels[0][cellIndex].x, 0.f });
+			t_terrainArray.write(cell, half2{ 25000.f * t_windWarping.gaussKernels[0][cellIndex].x, 0.f });
 		}
 	}
 }
@@ -155,7 +154,7 @@ __global__ void scaleGaussKernel(cuComplex* t_gauss, float scale) {
 	}
 }
 
-__global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_windWarping)
+__global__ void windWarpingKernel(Array2D<half2> t_windArray, WindWarping t_windWarping)
 {
 	const int2 index{ getGlobalIndex2D() };
 	const int2 stride{ getGridStride2D() };
@@ -167,7 +166,7 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
 		{
 			const int cellIndex{ getCellIndex(cell) };
-			const float2 windVelocity{ t_windArray.read(cell) };
+            const float2 windVelocity{ __half22float2(t_windArray.read(cell)) };
 			const float windSpeed{ length(windVelocity) };
 			//const float2 windDirection{ windVelocity / (windSpeed + 0.000001f) };
 			
@@ -202,58 +201,7 @@ __global__ void windWarpingKernel(Array2D<float2> t_windArray, WindWarping t_win
 			}
 
 			warpDirection /= (length(warpDirection) + 0.000001f);
-			t_windArray.write(cell, warpDirection * windSpeed);
-		}
-	}
-}
-
-__global__ void windWarpingKernelImproved(Array2D<float2> t_windArray, WindWarping t_windWarping)
-{
-	const int2 index{ getGlobalIndex2D() };
-	const int2 stride{ getGridStride2D() };
-
-	int2 cell;
-
-	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
-	{
-		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
-		{
-			const int cellIndex{ getCellIndex(cell) };
-			const float2 windVelocity{ t_windArray.read(cell) };
-			const float windSpeed{ length(windVelocity) };
-			//const float2 windDirection{ windVelocity / (windSpeed + 0.000001f) };
-			
-			float warpAngle{ 0.0f };
-			float weight{ 0.0f };
-
-			for (int i{ 0 }; i < t_windWarping.count; ++i)
-			{
-				const float smoothedHeights[4]{ t_windWarping.smoothedHeights[i][getCellIndex(getWrappedCell(cell + int2{ -1, 0 }))].x,
-								                t_windWarping.smoothedHeights[i][getCellIndex(getWrappedCell(cell + int2{ 1, 0 }))].x,
-								                t_windWarping.smoothedHeights[i][getCellIndex(getWrappedCell(cell + int2{ 0, -1 }))].x,
-								                t_windWarping.smoothedHeights[i][getCellIndex(getWrappedCell(cell + int2{ 0, 1 }))].x };
-
-				const float scale{ t_windWarping.gradientStrengths[i] * 0.5f * c_parameters.rGridScale };
-				const float2 gradient{ scale * (smoothedHeights[1] - smoothedHeights[0]),
-								       scale * (smoothedHeights[3] - smoothedHeights[2]) };
-
-				const float gradientLength{ length(gradient) };
-				
-				float2 orthogonalDirection{ -gradient.y, gradient.x };
-				orthogonalDirection *= sign(dot(windVelocity, orthogonalDirection));
-				
-				float alpha{ fminf(gradientLength / (windSpeed + 1e-06f), 1.0f) }; 
-			
-				warpAngle += t_windWarping.strengths[i] * alpha * signed_angle(windVelocity, orthogonalDirection);
-				weight += t_windWarping.strengths[i];
-			}
-
-			if (weight > 0.0f)
-			{
-				warpAngle /= weight;
-			}
-
-			t_windArray.write(cell, rotate(windVelocity, warpAngle));
+			t_windArray.write(cell, __float22half2_rn(warpDirection * windSpeed));
 		}
 	}
 }
@@ -288,6 +236,10 @@ void windWarping(const LaunchParameters& t_launchParameters)
 
 	    for (int i{ 0 }; i < t_launchParameters.windWarping.count; ++i)
 	    {
+			// TODO: try C2R to heightBuffer instead? would reduce memory requirements?
+			// TODO: Maybe also use R2C? more memory but better performance?
+			// TODO: try out half precision? May only work for powers of two
+			// TODO: DOWNSAMPLE terrain to half resolution
 		    CUFFT_CHECK_ERROR(cufftExecC2C(t_launchParameters.fftPlan, t_launchParameters.windWarping.smoothedHeights[i], t_launchParameters.windWarping.smoothedHeights[i], CUFFT_INVERSE));
 	    }
 

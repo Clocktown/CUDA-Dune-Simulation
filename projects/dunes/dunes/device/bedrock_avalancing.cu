@@ -1,7 +1,6 @@
 #include "kernels.cuh"
 #include "constants.cuh"
 #include "grid.cuh"
-#include "multigrid.cuh"
 #include <dunes/core/simulation_parameters.hpp>
 #include <dunes/core/launch_parameters.hpp>
 #include <sthe/device/vector_extension.cuh>
@@ -9,7 +8,7 @@
 namespace dunes
 {
 
-__global__ void setupBedrockAvalancheKernel(Array2D<float2> t_terrainArray, Buffer<float2> t_terrainBuffer)
+__global__ void setupBedrockAvalancheKernel(Array2D<half2> t_terrainArray, Buffer<half2> t_terrainBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -23,7 +22,7 @@ __global__ void setupBedrockAvalancheKernel(Array2D<float2> t_terrainArray, Buff
 }
 
 template<BedrockAvalancheMode mode>
-__global__ void bedrockAvalancheKernel(const Array2D<float4> t_resistanceArray, Buffer<float2> t_terrainBuffer)
+__global__ void bedrockAvalancheKernel(const Array2D<half4> t_resistanceArray, Buffer<half2> t_terrainBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -34,9 +33,9 @@ __global__ void bedrockAvalancheKernel(const Array2D<float4> t_resistanceArray, 
 
 	const int cellIndex{ getCellIndex(cell) };
 
-	const float2 terrain{ t_terrainBuffer[cellIndex] };
+	const float2 terrain{ __half22float2(t_terrainBuffer[cellIndex]) };
 	const float height{ terrain.x };
-	const float object = t_resistanceArray.read(cell).y < 0.f ? 0.f : 1.f;
+	const float object = __half2float(t_resistanceArray.read(cell).a.y) < 0.f ? 0.f : 1.f;
 	if (object == 0.f) {
 		return;
 	}
@@ -49,7 +48,7 @@ __global__ void bedrockAvalancheKernel(const Array2D<float4> t_resistanceArray, 
 	for (int i{ 0 }; i < 8; ++i)
 	{
 		nextCellIndices[i] = getCellIndex(getWrappedCell(cell + c_offsets[i]));
-		const float2 nextTerrain{ t_terrainBuffer[nextCellIndices[i]] };
+		const float2 nextTerrain{ __half22float2(t_terrainBuffer[nextCellIndices[i]]) };
 		const float nextHeight{ nextTerrain.x };
 
 		const float heightDifference{ height - nextHeight };
@@ -73,20 +72,20 @@ __global__ void bedrockAvalancheKernel(const Array2D<float4> t_resistanceArray, 
 			{
 				if constexpr (mode == BedrockAvalancheMode::ToSand)
 				{
-					atomicAdd(&t_terrainBuffer[nextCellIndices[i]].y, scale * avalanches[i]);
+					atomicAdd(&t_terrainBuffer[nextCellIndices[i]].y, __float2half(scale * avalanches[i]));
 				}
 				else
 				{
-					atomicAdd(&t_terrainBuffer[nextCellIndices[i]].x, scale * avalanches[i]);
+                    atomicAdd(&t_terrainBuffer[nextCellIndices[i]].x, __float2half(scale * avalanches[i]));
 				}
 			}
 		}
 
-		atomicAdd(&t_terrainBuffer[cellIndex].x, -avalancheSize);
+		atomicAdd(&t_terrainBuffer[cellIndex].x, __float2half(-avalancheSize));
 	}
 }
 
-__global__ void finishBedrockAvalancheKernel(Array2D<float2> t_terrainArray, Buffer<float2> t_terrainBuffer)
+__global__ void finishBedrockAvalancheKernel(Array2D<half2> t_terrainArray, Buffer<half2> t_terrainBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
 
@@ -107,7 +106,7 @@ void bedrockAvalanching(const LaunchParameters& t_launchParameters)
 		return;
 	}
 
-	Buffer<float2> terrainBuffer{ reinterpret_cast<Buffer<float2>>(t_launchParameters.tmpBuffer) };
+	Buffer<half2> terrainBuffer{ reinterpret_cast<Buffer<half2>>(t_launchParameters.tmpBuffer) };
 	setupBedrockAvalancheKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.terrainArray, terrainBuffer);
 
 	if (t_launchParameters.bedrockAvalancheMode == BedrockAvalancheMode::ToSand)

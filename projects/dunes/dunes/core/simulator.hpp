@@ -74,9 +74,6 @@ namespace dunes
 		void setAvalancheAngle(const float t_avalancheAngle);
 		void setBedrockAngle(const float t_bedrockAngle);
 		void setVegetationAngle(const float t_vegetationAngle);
-		void setMultigridLevelCount(const int t_multigridLevelCount);
-		void setMultigridVCycleIterations(const int t_multigridVCycleIterations);
-		void setMultigridSolverIterations(const int t_multigridSolverIterations);
 		void setTimeMode(const TimeMode t_timeMode);
 		void setTimeScale(const float t_timeScale);
 		void setFixedDeltaTime(const float t_fixedDeltaTime);
@@ -124,7 +121,6 @@ namespace dunes
 		void setupArrays();
 		void setupBuffers();
 		void setupWindWarping();
-		void setupMultigrid();
 		void setupProjection();
 		void map();
 		void unmap();
@@ -178,10 +174,10 @@ namespace dunes
 		sthe::cu::Buffer m_slabBuffer;
 		sthe::cu::Buffer m_tmpBuffer;
 		std::array<sthe::cu::Buffer, 4> m_windWarpingBuffers;
-		std::vector<sthe::cu::Buffer> m_multigrid;
 		std::unique_ptr<sthe::cu::Buffer> m_coverageMap;
 		sthe::cu::Buffer m_velocityBuffer;
 		cudaTextureDesc m_textureDescriptor;
+        cudaTextureDesc m_textureDescriptorHalf;
 
 		bool m_isAwake;
 		bool m_isPaused;

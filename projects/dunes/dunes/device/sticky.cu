@@ -9,7 +9,7 @@ namespace dunes
 {
 
 	template<bool TUseBilinear>
-	__global__ void setupStickyKernel(const Array2D<float2> t_terrainArray, const Array2D<float2> t_windArray, Buffer<float> t_cliffBuffer)
+	__global__ void setupStickyKernel(const Array2D<half2> t_terrainArray, const Array2D<half2> t_windArray, Buffer<half> t_cliffBuffer)
 	{
 		const int2 index{ getGlobalIndex2D() };
 		const int2 stride{ getGridStride2D() };
@@ -20,10 +20,10 @@ namespace dunes
 		{
 			for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
 			{
-				const float2 terrain{ t_terrainArray.read(cell) };
+				const float2 terrain{ __half22float2(t_terrainArray.read(cell)) };
 				const float height{ terrain.x + terrain.y };
 
-				const float2 windVelocity = t_windArray.read(cell);
+				const float2 windVelocity = __half22float2(t_windArray.read(cell));
 				const float windSpeed = length(windVelocity);
 				const float2 windDirection = windVelocity / (windSpeed + 1e-06f);
 
@@ -37,18 +37,18 @@ namespace dunes
 
 				if (angle >= c_parameters.stickyAngle)
 				{
-					t_cliffBuffer[cellIndex] = cliffHeight;
+					t_cliffBuffer[cellIndex] = __float2half(cliffHeight);
 				}
 				else
 				{
-					t_cliffBuffer[cellIndex] = 0.0f;
+					t_cliffBuffer[cellIndex] = __float2half(0.0f);
 				}
 			}
 		}
 	}
 
 	template<WindShadowMode Mode, bool TUseBilinear>
-	__global__ void stickyKernel(const Array2D<float2> t_windArray, Array2D<float4> t_resistanceArray, Buffer<float> t_cliffBuffer)
+	__global__ void stickyKernel(const Array2D<half2> t_windArray, Array2D<half4> t_resistanceArray, Buffer<half> t_cliffBuffer)
 	{
 		const int2 index{ getGlobalIndex2D() };
 		const int2 stride{ getGridStride2D() };
@@ -61,7 +61,7 @@ namespace dunes
 			{
 				float2 nextPosition{ make_float2(cell + 0.5f) };
 				const float erosionResistance{ -c_parameters.stickyStrength };
-				float4 resistance{ t_resistanceArray.read(cell) };
+				float4 resistance{ half4toFloat4(t_resistanceArray.read(cell)) };
 				resistance.w = 0.f;
 
 				float2 windVelocity;
@@ -70,7 +70,7 @@ namespace dunes
 
 				if constexpr (Mode == WindShadowMode::Linear)
 				{
-					windVelocity = t_windArray.read(cell);
+					windVelocity = __half22float2(t_windArray.read(cell));
 					windSpeed = length(windVelocity);
 					windDirection = windVelocity / (windSpeed + 1e-06f);
 				}
@@ -88,7 +88,7 @@ namespace dunes
 
 					const int2 nextCell{ getNearestCell(nextPosition - 0.5f) };
 					const int nextCellIndex{ getCellIndex(getWrappedCell(nextCell)) };
-					const float cliffHeight{ t_cliffBuffer[nextCellIndex] };
+					const float cliffHeight{ __half2float(t_cliffBuffer[nextCellIndex]) };
 					const float correctedDistance = c_parameters.gridScale * length(make_float2(cell - nextCell));
 
 					if (cliffHeight > 0.0f)
@@ -108,65 +108,9 @@ namespace dunes
 						}
 					}
 				}
-				t_resistanceArray.write(cell, resistance);
+				t_resistanceArray.write(cell, toHalf4(resistance));
 			}
 		}
-		/*const int2 cell{ getGlobalIndex2D() };
-
-		if (isOutside(cell))
-		{
-			return;
-		}
-
-		float2 nextPosition{ make_float2(cell + 0.5f) };
-		const float erosionResistance{ -c_parameters.stickyStrength };
-		float4 resistance{ t_resistanceArray.read(cell) };
-		resistance.w = 0.f;
-
-		float2 windVelocity;
-		float windSpeed;
-		float2 windDirection;
-
-		if constexpr (Mode == WindShadowMode::Linear) {
-			windVelocity = t_windArray.read(cell);
-			windSpeed = length(windVelocity);
-			windDirection = windVelocity / (windSpeed + 1e-06f);
-		}
-
-		for (float distance = c_parameters.gridScale; distance <= c_parameters.stickyRange.y * c_parameters.maxStickyHeight; distance += c_parameters.gridScale)
-		{
-			if constexpr (Mode == WindShadowMode::Curved) {
-				windVelocity = sampleLinearOrNearest<TUseBilinear>(t_windArray, nextPosition);;
-				windSpeed = length(windVelocity);
-				windDirection = windVelocity / (windSpeed + 1e-06f);
-			}
-
-			nextPosition += windDirection;
-
-			const int2 nextCell{ getNearestCell(nextPosition - 0.5f) };
-			const int nextCellIndex{ getCellIndex(getWrappedCell(nextCell)) };
-			const float cliffHeight{ t_cliffBuffer[nextCellIndex] };
-			const float correctedDistance = c_parameters.gridScale * length(make_float2(cell - nextCell));
-
-			if (cliffHeight > 0.0f)
-			{
-				const float maxDistance{ fminf(cliffHeight, c_parameters.maxStickyHeight) };
-				const float erosionDistance{ c_parameters.stickyRange.x * maxDistance };
-				const float stickyDistance{ c_parameters.stickyRange.y * maxDistance };
-
-				if (correctedDistance <= erosionDistance)
-				{
-					resistance.w = erosionResistance;
-					break;
-				}
-				else if (correctedDistance <= stickyDistance)
-				{
-					resistance.w = fmaxf(fminf(0.1f + 1.0f - (correctedDistance - erosionDistance) / (stickyDistance - erosionDistance), 1.f), resistance.w);
-					//break;
-				}
-			}
-		}
-		t_resistanceArray.write(cell, resistance);*/
 	}
 
 	void sticky(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters)
