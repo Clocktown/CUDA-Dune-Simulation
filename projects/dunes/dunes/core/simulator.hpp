@@ -175,7 +175,6 @@ namespace dunes
 		sthe::cu::Buffer m_tmpBuffer;
 		std::array<sthe::cu::Buffer, 2> m_windWarpingBuffers;
 		std::unique_ptr<sthe::cu::Buffer> m_coverageMap;
-		sthe::cu::Buffer m_velocityBuffer;
 		cudaTextureDesc m_textureDescriptor;
         cudaTextureDesc m_textureDescriptorHalf;
 

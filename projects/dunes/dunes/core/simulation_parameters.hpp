@@ -28,6 +28,7 @@ struct WindWarping
 	float radii[2]{ 200.0f, 50.0f };
 	float strengths[2]{ 0.8f, 0.2f };
 	float gradientStrengths[2]{ 30.f, 5.f };
+    int               x_width;
 	Buffer<cuComplex> gaussKernels[2];
 	Buffer<cuComplex> smoothedHeights[2];
 };

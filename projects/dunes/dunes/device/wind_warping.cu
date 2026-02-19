@@ -219,14 +219,22 @@ void initializeWindWarping(const LaunchParameters& t_launchParameters, const Sim
 	}
 }
 
-void windWarping(const LaunchParameters&     t_launchParameters,
+void windWarping(LaunchParameters&     t_launchParameters,
                  const SimulationParameters& t_simulationParameters)
 {
 	if (t_launchParameters.windWarpingMode == WindWarpingMode::Standard)
 	{
-		Buffer<cuComplex> heightBuffer{ reinterpret_cast<Buffer<cuComplex>>(t_launchParameters.tmpBuffer) };
+        Buffer<cuComplex> smoothedHeights[2] { (cuComplex*)t_launchParameters.tmpBuffer,
+                    ((cuComplex*)t_launchParameters.tmpBuffer) +
+                            t_launchParameters.projection.x_width *
+                                    t_simulationParameters.windGridSize.y};
+        t_launchParameters.windWarping.smoothedHeights[0] = smoothedHeights[0];
+        t_launchParameters.windWarping.smoothedHeights[1] = smoothedHeights[1];
+        Buffer<cuComplex> heightBuffer {smoothedHeights[1] +
+                                        t_launchParameters.projection.x_width *
+                                                t_simulationParameters.windGridSize.y};
         Buffer<float> heightBufferReal {
-                    reinterpret_cast<Buffer<float>>(t_launchParameters.tmpBuffer)};
+                    reinterpret_cast<Buffer<float>>(heightBuffer)};
 	    setupWindWarpingKernel<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.terrainArray, heightBufferReal);
 
 	    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.fftPlanR2C, (cufftReal*)heightBuffer, heightBuffer));

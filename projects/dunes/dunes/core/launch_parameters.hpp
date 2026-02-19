@@ -51,7 +51,7 @@ struct Projection
 	int jacobiIterations{ 50 };
     cufftHandle       planR2C {0};
     cufftHandle       planC2R {0};
-	Buffer<cuComplex> velocities[2];
+    int                x_width;
 };
 
 struct LaunchParameters

@@ -116,24 +116,27 @@ namespace dunes {
 		}
 		else if (t_launchParameters.projection.mode == ProjectionMode::FFT)
 		{
-            Buffer<float> windX {(float*)t_launchParameters.projection.velocities[0]};
-            Buffer<float> windY {(float*)t_launchParameters.projection.velocities[1]};
-			setupProjection<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.windArray, windX, windY);
+            Buffer<cuComplex> windX {(cuComplex*)t_launchParameters.tmpBuffer};
+            Buffer<cuComplex> windY {((cuComplex*)t_launchParameters.tmpBuffer) +
+                                        t_launchParameters.projection.x_width * t_simulationParameters.windGridSize.y};
+			setupProjection<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.windArray, (float*)windX, (float*)windY);
 
-		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)t_launchParameters.projection.velocities[0], (cuComplex*)t_launchParameters.projection.velocities[0]));
-		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)t_launchParameters.projection.velocities[1], (cuComplex*)t_launchParameters.projection.velocities[1]));
+		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)windX, windX));
+		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)windY, windY));
 
 			dim3 gridSize;
 			gridSize.x = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.windGridSize.x / 2 + 1) / 8.0f));
 			gridSize.y = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.windGridSize.y) / 8.0f));
 			gridSize.z = 1;
 
-		    fftProjection<<<gridSize, dim3 {8, 8, 1}>>>(t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
+		    fftProjection<<<gridSize, dim3 {8, 8, 1}>>>(windX, windY);
 
-		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, (cuComplex*)t_launchParameters.projection.velocities[0], (cufftReal*)t_launchParameters.projection.velocities[0]));
-		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, (cuComplex*)t_launchParameters.projection.velocities[1], (cufftReal*)t_launchParameters.projection.velocities[1]));
+		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, windX, (cufftReal*)windX));
+		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, windY, (cufftReal*)windY));
 
-		    finalizeProjection<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.windArray, windX, windY);
+		    finalizeProjection<<<t_launchParameters.optimalGridSize2D,
+                                         t_launchParameters.optimalBlockSize2D>>>(
+                            t_launchParameters.windArray, (float*)windX, (float*)windY);
 		}
 	}
 }

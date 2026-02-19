@@ -298,8 +298,8 @@ namespace dunes
 		m_slabBuffer.reinitialize(m_simulationParameters.cellCount, sizeof(half));
 		m_launchParameters.slabBuffer = m_slabBuffer.getData<half>();
 
-		m_tmpBuffer.reinitialize(4 * m_simulationParameters.cellCount, sizeof(half));
-		m_launchParameters.tmpBuffer = m_tmpBuffer.getData<half>();
+		m_tmpBuffer.reinitialize(m_simulationParameters.cellCount, sizeof(cuComplex));
+		m_launchParameters.tmpBuffer = (half*)m_tmpBuffer.getData<cuComplex>();
 	}
 
 	void Simulator::setUseBilinear(const bool t_useBilinear) {
@@ -323,14 +323,14 @@ namespace dunes
         CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlanC2R, windGridSize.y, windGridSize.x, cufftType::CUFFT_C2R));
 
 		long long int complexSizes[2] = {windGridSize.y, (windGridSize.x / 2 + 1)};
+        m_launchParameters.windWarping.x_width = int(complexSizes[1]);
         auto          size {complexSizes[0] * complexSizes[1]};
 		for (int i{ 0 }; i < 2; ++i)
 		{
 			sthe::cu::Buffer& buffer{ m_windWarpingBuffers[i] };
-			buffer.reinitialize(2 * int(size), sizeof(cuComplex));
+			buffer.reinitialize(int(size), sizeof(cuComplex));
 
 			m_launchParameters.windWarping.gaussKernels[i] = buffer.getData<cuComplex>();
-			m_launchParameters.windWarping.smoothedHeights[i] = m_launchParameters.windWarping.gaussKernels[i] + size;
 		}
 	}
 
@@ -349,11 +349,7 @@ namespace dunes
 
 		// Buffer for the complex half-precision forward FFT output
 		// Stored in interleaved format (half2_X_velocity[0], half2_Y_velocity[0], ...)
-        long long int complexSizes[2] = {windGridSize.y, (windGridSize.x / 2 + 1)};
-        auto          size {complexSizes[0] * complexSizes[1]};
-        m_velocityBuffer.reinitialize(2 * int(size), sizeof(cuComplex));
-        m_launchParameters.projection.velocities[0] = m_velocityBuffer.getData<cuComplex>();
-        m_launchParameters.projection.velocities[1] = m_velocityBuffer.getData<cuComplex>() + size;
+        m_launchParameters.projection.x_width = (windGridSize.x / 2 + 1);
 
 		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, windGridSize.y, windGridSize.x, cufftType::CUFFT_R2C));
 		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, windGridSize.y, windGridSize.x, cufftType::CUFFT_C2R));
