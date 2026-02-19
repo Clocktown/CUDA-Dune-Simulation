@@ -23,7 +23,7 @@ namespace dunes
 				const float2 terrain{ __half22float2(t_terrainArray.read(cell)) };
 				const float height{ terrain.x + terrain.y };
 
-				const float2 windVelocity = __half22float2(t_windArray.read(cell));
+				const float2 windVelocity = sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f));
 				const float windSpeed = length(windVelocity);
 				const float2 windDirection = windVelocity / (windSpeed + 1e-06f);
 
@@ -70,7 +70,7 @@ namespace dunes
 
 				if constexpr (Mode == WindShadowMode::Linear)
 				{
-					windVelocity = __half22float2(t_windArray.read(cell));
+                    windVelocity = sampleLinearOrNearest<true>(t_windArray,0.5f * nextPosition);
 					windSpeed = length(windVelocity);
 					windDirection = windVelocity / (windSpeed + 1e-06f);
 				}
@@ -79,7 +79,7 @@ namespace dunes
 				{
 					if constexpr (Mode == WindShadowMode::Curved)
 					{
-						windVelocity = sampleLinearOrNearest<TUseBilinear>(t_windArray, nextPosition);;
+						windVelocity = sampleLinearOrNearest<true>(t_windArray, 0.5f * nextPosition);;
 						windSpeed = length(windVelocity);
 						windDirection = windVelocity / (windSpeed + 1e-06f);
 					}

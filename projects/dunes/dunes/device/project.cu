@@ -11,25 +11,28 @@
 namespace dunes {
 	__global__ void setupProjection(const Array2D<half2> t_windArray, Buffer<float> velocityBufferX, Buffer<float> velocityBufferY)
 	{
-		const int2 cell{ getGlobalIndex2D() };
+        const int2 index {getGlobalIndex2D()};
+        const int2 stride {getGridStride2D()};
+        int2       cell;
+        const int  width {2 * (c_parameters.windGridSize.x / 2 + 1)};
 
-		if (isOutside(cell))
-		{
-			return;
-		}
+		for(cell.x = index.x; cell.x < c_parameters.windGridSize.x; cell.x += stride.x)
+        {
+            for(cell.y = index.y; cell.y < c_parameters.windGridSize.y; cell.y += stride.y)
+            {
+                const int cellIndex {cell.x + cell.y * width};
 
-		const int width{ 2 * (c_parameters.gridSize.x / 2 + 1) };
-		const int cellIndex{ cell.x + cell.y * width };
-
-		const float2 velocity = __half22float2(t_windArray.read(cell));
-		velocityBufferX[cellIndex] = velocity.x;
-		velocityBufferY[cellIndex] = velocity.y;
+                const float2 velocity      = __half22float2(t_windArray.read(cell));
+                velocityBufferX[cellIndex] = velocity.x;
+                velocityBufferY[cellIndex] = velocity.y;
+            }
+        }
 	}
 
 	__global__ void fftProjection(Buffer<cuComplex> frequencyBufferX, Buffer<cuComplex> frequencyBufferY)
 	{
 		const int2 cell{ getGlobalIndex2D() };
-		const int2 size{ c_parameters.gridSize.x / 2 + 1, c_parameters.gridSize.y };
+		const int2 size{ c_parameters.windGridSize.x / 2 + 1, c_parameters.windGridSize.y };
 
 		if (isOutside(cell, size))
 		{
@@ -66,25 +69,27 @@ namespace dunes {
 		}
 
 		frequencyBufferX[cellIndex] = xterm;
-		frequencyBufferY[cellIndex] = yterm;
+        frequencyBufferY[cellIndex] = yterm;
 	}
 
 	__global__ void finalizeProjection(Array2D<half2> t_windArray, Buffer<float> velocityBufferX, Buffer<float> velocityBufferY)
 	{
-		const int2 cell{ getGlobalIndex2D() };
+        const int2 index {getGlobalIndex2D()};
+        const int2 stride {getGridStride2D()};
+        int2       cell;
+        const int  width {2 * (c_parameters.windGridSize.x / 2 + 1)};
+        const float scale {1.0f / static_cast<float>(c_parameters.windGridSize.x * c_parameters.windGridSize.y)};
 
-		if (isOutside(cell))
-		{
-			return;
-		}
+        for(cell.x = index.x; cell.x < c_parameters.windGridSize.x; cell.x += stride.x)
+        {
+            for(cell.y = index.y; cell.y < c_parameters.windGridSize.y; cell.y += stride.y)
+            {
 
-		const int width{ 2 * (c_parameters.gridSize.x / 2 + 1) };
-
-		const int cellIndex{ cell.x + cell.y * width };
-		const float scale{ 1.0f / static_cast<float>(c_parameters.gridSize.x * c_parameters.gridSize.y) };
-
-		const float2 velocity{ velocityBufferX[cellIndex], velocityBufferY[cellIndex] };
-		t_windArray.write(cell, __float22half2_rn(scale * velocity));
+                const int   cellIndex {cell.x + cell.y * width};
+                const float2 velocity {velocityBufferX[cellIndex], velocityBufferY[cellIndex]};
+                t_windArray.write(cell, __float22half2_rn(scale * velocity));
+            }
+        }
 	}
 
 	// Debug Operators for divergence reduction
@@ -111,27 +116,24 @@ namespace dunes {
 		}
 		else if (t_launchParameters.projection.mode == ProjectionMode::FFT)
 		{
-			setupProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
+            Buffer<float> windX {(float*)t_launchParameters.projection.velocities[0]};
+            Buffer<float> windY {(float*)t_launchParameters.projection.velocities[1]};
+			setupProjection<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.windArray, windX, windY);
 
 		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)t_launchParameters.projection.velocities[0], (cuComplex*)t_launchParameters.projection.velocities[0]));
 		    CUFFT_CHECK_ERROR(cufftExecR2C(t_launchParameters.projection.planR2C, (cufftReal*)t_launchParameters.projection.velocities[1], (cuComplex*)t_launchParameters.projection.velocities[1]));
 
 			dim3 gridSize;
-			gridSize.x = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.gridSize.x / 2 + 1) / 8.0f));
-			gridSize.y = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.gridSize.y) / 8.0f));
+			gridSize.x = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.windGridSize.x / 2 + 1) / 8.0f));
+			gridSize.y = static_cast<unsigned int>(ceilf(static_cast<float>(t_simulationParameters.windGridSize.y) / 8.0f));
 			gridSize.z = 1;
 
-		    fftProjection<<<gridSize, dim3{ 8, 8, 1 } >> >((cuComplex*)t_launchParameters.projection.velocities[0], (cuComplex*)t_launchParameters.projection.velocities[1]);
+		    fftProjection<<<gridSize, dim3 {8, 8, 1}>>>(t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
 
 		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, (cuComplex*)t_launchParameters.projection.velocities[0], (cufftReal*)t_launchParameters.projection.velocities[0]));
 		    CUFFT_CHECK_ERROR(cufftExecC2R(t_launchParameters.projection.planC2R, (cuComplex*)t_launchParameters.projection.velocities[1], (cufftReal*)t_launchParameters.projection.velocities[1]));
 
-		    finalizeProjection<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, t_launchParameters.projection.velocities[0], t_launchParameters.projection.velocities[1]);
-		
-			// Debug
-		    //initDivergencePressureKernel<<<t_launchParameters.gridSize2D, t_launchParameters.blockSize2D>>>(t_launchParameters.windArray, divergenceBuffer, pressureABuffer);
-		    //div = thrust::transform_reduce(thrust::device, divergenceBuffer, divergenceBuffer + t_simulationParameters.cellCount, Unary(), 0.0f, Binary());
-		    //printf("%f\n", div / t_simulationParameters.cellCount);
+		    finalizeProjection<<<t_launchParameters.optimalGridSize2D, t_launchParameters.optimalBlockSize2D>>>(t_launchParameters.windArray, windX, windY);
 		}
 	}
 }

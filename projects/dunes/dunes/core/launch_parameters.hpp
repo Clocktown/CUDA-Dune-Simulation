@@ -49,9 +49,9 @@ struct Projection
 {
 	ProjectionMode mode{ ProjectionMode::Jacobi };
 	int jacobiIterations{ 50 };
-	cufftHandle planR2C;
-	cufftHandle planC2R;
-	Buffer<float> velocities[2];
+    cufftHandle       planR2C {0};
+    cufftHandle       planC2R {0};
+	Buffer<cuComplex> velocities[2];
 };
 
 struct LaunchParameters
@@ -86,7 +86,8 @@ struct LaunchParameters
 	WindWarping windWarping;
 	Projection projection;
 
-	cufftHandle fftPlan{ 0 };
+	cufftHandle fftPlanR2C{ 0 };
+    cufftHandle fftPlanC2R{ 0 };
 };
 
 struct NoiseGenerationParameters 

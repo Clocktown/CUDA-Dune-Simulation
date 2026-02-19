@@ -173,7 +173,7 @@ namespace dunes
 		sthe::cu::Array2D m_resistanceArray;
 		sthe::cu::Buffer m_slabBuffer;
 		sthe::cu::Buffer m_tmpBuffer;
-		std::array<sthe::cu::Buffer, 4> m_windWarpingBuffers;
+		std::array<sthe::cu::Buffer, 2> m_windWarpingBuffers;
 		std::unique_ptr<sthe::cu::Buffer> m_coverageMap;
 		sthe::cu::Buffer m_velocityBuffer;
 		cudaTextureDesc m_textureDescriptor;

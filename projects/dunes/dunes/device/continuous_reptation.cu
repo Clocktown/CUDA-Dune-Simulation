@@ -36,7 +36,7 @@ __global__ void continuousAngularReptationKernel(const Array2D<half4> t_resistan
 	const float windShadow{ resistance.x * c_parameters.reptationUseWindShadow };
 
 	const float slab{ __half2float(t_slabBuffer[cellIndex]) };
-	const float2 wind{ __half22float2(t_windArray.read(cell)) };
+	const float2 wind{ sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f)) };
 
 	float baseAngle = c_parameters.avalancheAngle * exp(-slab * (1.f - windShadow) * length(wind) * c_parameters.reptationStrength);
 
@@ -74,7 +74,8 @@ __global__ void continuousReptationKernel(const Array2D<half2> t_terrainArray, B
 	const float height{ terrain.x + terrain.y };
 
 	const float slab{ __half2float(t_slabBuffer[cellIndex]) };
-    const float wind{ length(__half22float2(t_windArray.read(cell))) };
+        const float wind {
+                length(sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f)))};
 
 	float change{ 0.0f };
 
@@ -82,7 +83,8 @@ __global__ void continuousReptationKernel(const Array2D<half2> t_terrainArray, B
 	{
 		const int2 nextCell{ getWrappedCell(cell + c_offsets[i]) };
 		const float nextSlab{ t_slabBuffer[getCellIndex(nextCell)] };
-        const float nextWind{ length(__half22float2(t_windArray.read(cell))) };
+        const float nextWind {length(
+                sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(nextCell) + 0.5f)))};
 
 		const float2 nextTerrain{ __half22float2(t_terrainArray.read(nextCell)) };
 		const float nextHeight{ nextTerrain.x + nextTerrain.y };

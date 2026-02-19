@@ -15,12 +15,12 @@ __global__ void venturiKernel(Array2D<half2> t_terrainArray, Array2D<half2> t_wi
 
 	int2 cell;
 
-	for (cell.x = index.x; cell.x < c_parameters.gridSize.x; cell.x += stride.x)
+	for (cell.x = index.x; cell.x < c_parameters.windGridSize.x; cell.x += stride.x)
 	{
-		for (cell.y = index.y; cell.y < c_parameters.gridSize.y; cell.y += stride.y)
+		for (cell.y = index.y; cell.y < c_parameters.windGridSize.y; cell.y += stride.y)
 		{
 
-			const float2 terrain{ __half22float2(t_terrainArray.read(cell)) };
+			const float2 terrain{ sampleLinearOrNearest<true>(t_terrainArray, make_float2(2 * cell + 1) + 0.5f) };
 			const float height{ terrain.x + terrain.y };
 
 			const float venturiScale{ fmaxf(1.0f + c_parameters.venturiStrength * height, 0.5f) };

@@ -23,16 +23,16 @@ namespace dunes
 		float2 windVelocity;
 		float windSpeed;
 		float2 windDirection;
+        float2       nextPosition {make_float2(cell) + 0.5f};
 
 		if constexpr (Mode == WindShadowMode::Linear)
 		{
-			windVelocity = __half22float2(t_windArray.read(cell));
+            windVelocity = sampleLinearOrNearest<true>(t_windArray, 0.5f * nextPosition);
 			windSpeed = length(windVelocity);
 			windDirection = windVelocity / (windSpeed + 1e-06f);
 		}
 
 		const float height{ terrain.x + terrain.y };
-		float2 nextPosition{ make_float2(cell) + 0.5f };
 		//nextPosition -= windDirection;
 		float maxAngle{ 0.0f };
 
@@ -40,7 +40,7 @@ namespace dunes
 		{
 			if constexpr (Mode == WindShadowMode::Curved)
 			{
-				windVelocity = sampleLinearOrNearest<TUseBilinear>(t_windArray, nextPosition);
+				windVelocity = sampleLinearOrNearest<true>(t_windArray, 0.5f * nextPosition);
 				windSpeed = length(windVelocity);
 				windDirection = windVelocity / (windSpeed + 1e-06f);
 			}

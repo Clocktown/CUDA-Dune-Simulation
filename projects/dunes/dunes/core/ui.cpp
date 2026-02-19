@@ -48,15 +48,15 @@ namespace dunes
 		m_simulator->setWindWarpingMode(static_cast<WindWarpingMode>(m_windWarpingMode));
 		m_simulator->setWindWarpingCount(m_windWarpingCount);
 		m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
-		for (int i{ 0 }; i < 4; ++i)
+		for (int i{ 0 }; i < 2; ++i)
 		{
 			m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
 		}
-		for (int i{ 0 }; i < 4; ++i)
+		for (int i{ 0 }; i < 2; ++i)
 		{
 			m_simulator->setWindWarpingGradientStrength(i, m_windWarpingGradientStrengths[i]);
 		}
-		for (int i{ 0 }; i < 4; ++i)
+		for (int i{ 0 }; i < 2; ++i)
 		{
 			m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
 		}
@@ -911,25 +911,25 @@ namespace dunes
 					m_simulator->setWindWarpingDivisor(m_windWarpingDivisor);
 				}
 
-				if (ImGui::DragFloat4("Strenghts", m_windWarpingStrengths.data(), 0.05f))
+				if (ImGui::DragFloat2("Strenghts", m_windWarpingStrengths.data(), 0.05f))
 				{
-					for (int i{ 0 }; i < 4; ++i)
+					for (int i{ 0 }; i < 2; ++i)
 					{
 						m_simulator->setWindWarpingStrength(i, m_windWarpingStrengths[i]);
 					}
 				}
 
-				if (ImGui::DragFloat4("Gradient Strenghts", m_windWarpingGradientStrengths.data(), 0.05f))
+				if (ImGui::DragFloat2("Gradient Strenghts", m_windWarpingGradientStrengths.data(), 0.05f))
 				{
-					for (int i{ 0 }; i < 4; ++i)
+					for (int i{ 0 }; i < 2; ++i)
 					{
 						m_simulator->setWindWarpingGradientStrength(i, m_windWarpingGradientStrengths[i]);
 					}
 				}
 
-				if (ImGui::DragFloat4("Radii", m_windWarpingRadii.data()))
+				if (ImGui::DragFloat2("Radii", m_windWarpingRadii.data()))
 				{
-					for (int i{ 0 }; i < 4; ++i)
+					for (int i{ 0 }; i < 2; ++i)
 					{
 						m_simulator->setWindWarpingRadius(i, m_windWarpingRadii[i]);
 					}

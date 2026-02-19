@@ -25,7 +25,7 @@ namespace dunes
 			{
 				float2 terrain{ __half22float2(t_terrainArray.read(cell)) };
 
-				const float2 windVelocity{ __half22float2(t_windArray.read(cell)) };
+				const float2 windVelocity {sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f))};
 				const float windSpeed{ length(windVelocity) };
 
 				const float4 resistance{ half4toFloat4(t_resistanceArray.read(cell)) };
@@ -60,7 +60,7 @@ namespace dunes
 		const int cellIndex{ getCellIndex(cell) };
 		const float slab{ __half2float(t_slabBuffer[cellIndex]) };
 
-		const float2 windVelocity{ __half22float2(t_windArray.read(cell)) };
+		const float2 windVelocity { sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f))};
 
 		const float2 position{ make_float2(cell) };
 
@@ -107,7 +107,7 @@ namespace dunes
 		const int cellIndex{ getCellIndex(cell) };
 		float slab{ 0.f };
 
-		const float2 windVelocity{ __half22float2(t_windArray.read(cell)) };
+		const float2 windVelocity { sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f))};
 
 		const float2 position{ make_float2(cell) };
 
@@ -157,7 +157,7 @@ namespace dunes
 				float2 terrain{ __half22float2(t_terrainArray.read(cell)) };
 				const float slab{ __half2float(t_advectedSlabBuffer[cellIndex]) };
 
-				const float windSpeed{ length(__half22float2(t_windArray.read(cell))) };
+				const float windSpeed {length(sampleLinearOrNearest<true>(t_windArray,0.5f * (make_float2(cell) + 0.5f)))};
 
 				const float4 resistance{ half4toFloat4(t_resistanceArray.read(cell)) };
 				const float vegetation = fmaxf(resistance.y, 0.f);

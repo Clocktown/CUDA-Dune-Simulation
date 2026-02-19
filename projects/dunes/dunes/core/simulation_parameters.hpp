@@ -25,11 +25,11 @@ struct WindWarping
 {
 	int count{ 2 };
 	float i_divisor{ 1.f / 20.0f };
-	float radii[4]{ 200.0f, 50.0f, 0.0f, 0.0f };
-	float strengths[4]{ 0.8f, 0.2f, 0.0f, 0.0f };
-	float gradientStrengths[4]{ 30.f, 5.f, 0.0f, 0.0f };
-	Buffer<cuComplex> gaussKernels[4];
-	Buffer<cuComplex> smoothedHeights[4];
+	float radii[2]{ 200.0f, 50.0f };
+	float strengths[2]{ 0.8f, 0.2f };
+	float gradientStrengths[2]{ 30.f, 5.f };
+	Buffer<cuComplex> gaussKernels[2];
+	Buffer<cuComplex> smoothedHeights[2];
 };
 
 struct SimulationParameters
@@ -38,6 +38,11 @@ struct SimulationParameters
 	float gridScale{ 1.0f };
 	float rGridScale{ 1.0f / gridScale };
 	int cellCount{ gridSize.x * gridSize.y };
+
+	int2 windGridSize {1024, 1024};
+    float windGridScale {2.f};
+    float rWindGridScale {1.f / windGridScale};
+    int   windCellCount {windGridSize.x * windGridSize.y};
 
 	float2 windDirection{ 1.0f, 0.0f };
 	float windSpeed{ 10.0f };

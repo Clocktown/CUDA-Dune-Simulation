@@ -84,7 +84,8 @@ namespace dunes
 	// Destructor
 	Simulator::~Simulator()
 	{
-		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlan));
+		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlanR2C));
+        CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlanC2R));
 		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.projection.planR2C));
 		CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.projection.planC2R));
 	}
@@ -106,10 +107,14 @@ namespace dunes
 		m_simulationParameters.gridScale = t_gridScale;
 		m_simulationParameters.rGridScale = 1.0f / t_gridScale;
 
-		if (m_launchParameters.fftPlan != 0)
-		{
-			CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlan));
-		}
+		// Assume that gridSize is divisible by 2
+
+		m_simulationParameters.windGridSize.x = t_gridSize.x / 2;
+        m_simulationParameters.windGridSize.y = t_gridSize.y / 2;
+        m_simulationParameters.windCellCount  = m_simulationParameters.windGridSize.x *
+                                                m_simulationParameters.windGridSize.y;
+        m_simulationParameters.windGridScale  = 2 * t_gridScale;
+        m_simulationParameters.rWindGridScale = 0.5f / t_gridScale;
 
 		//CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, cufftType::CUFFT_C2C));
 
@@ -133,7 +138,7 @@ namespace dunes
 		initializeTerrain(m_launchParameters, m_initializationParameters);
 		initializeWindWarping(m_launchParameters, m_simulationParameters);
 		venturi(m_launchParameters);
-		windWarping(m_launchParameters);
+		windWarping(m_launchParameters, m_simulationParameters);
 		pressureProjection(m_launchParameters, m_simulationParameters);
 		windShadow(m_launchParameters);
 
@@ -197,7 +202,7 @@ namespace dunes
 			venturi(m_launchParameters);
 			m_watches[1].stop();
 			m_watches[2].start();
-			windWarping(m_launchParameters);
+			windWarping(m_launchParameters, m_simulationParameters);
 			m_watches[2].stop();
 			m_watches[9].start();
 			pressureProjection(m_launchParameters, m_simulationParameters);
@@ -277,7 +282,7 @@ namespace dunes
 		m_terrain->setGridScale(m_simulationParameters.gridScale);
 
 		m_terrainMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RG16F, false);
-		m_windMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RG16F, false);
+		m_windMap->reinitialize(m_simulationParameters.windGridSize.x, m_simulationParameters.windGridSize.y, GL_RG16F, false);
 		m_resistanceMap->reinitialize(m_simulationParameters.gridSize.x, m_simulationParameters.gridSize.y, GL_RGBA16F, false);
 	}
 
@@ -303,32 +308,55 @@ namespace dunes
 
 	void Simulator::setupWindWarping()
 	{
-		const int2 gridSize{ m_simulationParameters.gridSize };
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlan, gridSize.y, gridSize.x, cufftType::CUFFT_C2C));
+		const int2 windGridSize{ m_simulationParameters.windGridSize };
+        if(m_launchParameters.fftPlanR2C != 0)
+        {
+            CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlanR2C));
+        }
+		if(m_launchParameters.fftPlanC2R != 0)
+        {
+            CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.fftPlanC2R));
+        }
 
-		for (int i{ 0 }; i < 4; ++i)
+		// R2C: temporary heightBuffer (in tmpBuffer), windGridSize; to Gausskernels & Smoothedheights at "halved" size
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlanR2C, windGridSize.y, windGridSize.x, cufftType::CUFFT_R2C));
+        CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.fftPlanC2R, windGridSize.y, windGridSize.x, cufftType::CUFFT_C2R));
+
+		long long int complexSizes[2] = {windGridSize.y, (windGridSize.x / 2 + 1)};
+        auto          size {complexSizes[0] * complexSizes[1]};
+		for (int i{ 0 }; i < 2; ++i)
 		{
 			sthe::cu::Buffer& buffer{ m_windWarpingBuffers[i] };
-			buffer.reinitialize(2 * m_simulationParameters.cellCount, sizeof(cuComplex));
+			buffer.reinitialize(2 * int(size), sizeof(cuComplex));
 
 			m_launchParameters.windWarping.gaussKernels[i] = buffer.getData<cuComplex>();
-			m_launchParameters.windWarping.smoothedHeights[i] = m_launchParameters.windWarping.gaussKernels[i] + m_simulationParameters.cellCount;
+			m_launchParameters.windWarping.smoothedHeights[i] = m_launchParameters.windWarping.gaussKernels[i] + size;
 		}
 	}
 
 	void Simulator::setupProjection()
 	{
-		const int2 gridSize{ m_simulationParameters.gridSize };
-		const int cellCount{ m_simulationParameters.cellCount };
+		const int2 windGridSize{ m_simulationParameters.windGridSize };
+		const int windCellCount{ m_simulationParameters.windCellCount };
+        if(m_launchParameters.projection.planR2C != 0)
+        {
+            CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.projection.planR2C));
+        }
+        if(m_launchParameters.projection.planC2R != 0)
+        {
+            CUFFT_CHECK_ERROR(cufftDestroy(m_launchParameters.projection.planC2R));
+        }
 
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, gridSize.y, gridSize.x, cufftType::CUFFT_R2C));
-		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, gridSize.y, gridSize.x, cufftType::CUFFT_C2R));
+		// Buffer for the complex half-precision forward FFT output
+		// Stored in interleaved format (half2_X_velocity[0], half2_Y_velocity[0], ...)
+        long long int complexSizes[2] = {windGridSize.y, (windGridSize.x / 2 + 1)};
+        auto          size {complexSizes[0] * complexSizes[1]};
+        m_velocityBuffer.reinitialize(2 * int(size), sizeof(cuComplex));
+        m_launchParameters.projection.velocities[0] = m_velocityBuffer.getData<cuComplex>();
+        m_launchParameters.projection.velocities[1] = m_velocityBuffer.getData<cuComplex>() + size;
 
-		const int size{ (gridSize.x / 2 + 1) * gridSize.y };
-
-		m_velocityBuffer.reinitialize(4 * size, sizeof(float));
-		m_launchParameters.projection.velocities[0] = m_velocityBuffer.getData<float>();
-		m_launchParameters.projection.velocities[1] = m_launchParameters.projection.velocities[0] + 2 * size;
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planR2C, windGridSize.y, windGridSize.x, cufftType::CUFFT_R2C));
+		CUFFT_CHECK_ERROR(cufftPlan2d(&m_launchParameters.projection.planC2R, windGridSize.y, windGridSize.x, cufftType::CUFFT_C2R));
 	}
 
 	void Simulator::setupCoverageCalculation() {
@@ -476,7 +504,7 @@ namespace dunes
 	void Simulator::setWindWarpingCount(const int t_windWarpingCount)
 	{
 		STHE_ASSERT(t_windWarpingCount >= 0, "Wind warping count must be greater than or equal to 0");
-		STHE_ASSERT(t_windWarpingCount <= 4, "Wind warping count must be smaller than or equal to 4");
+		STHE_ASSERT(t_windWarpingCount <= 2, "Wind warping count must be smaller than or equal to 2");
 
 		m_launchParameters.windWarping.count = t_windWarpingCount;
 	}
@@ -489,7 +517,7 @@ namespace dunes
 	void Simulator::setWindWarpingRadius(const int t_index, const float t_windWarpingRadius)
 	{
 		STHE_ASSERT(t_index >= 0, "Index must be greater than or equal to 0");
-		STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
+		STHE_ASSERT(t_index < 2, "Index must be smaller than 2");
 
 		m_launchParameters.windWarping.radii[t_index] = t_windWarpingRadius;
 
@@ -502,7 +530,7 @@ namespace dunes
 	void Simulator::setWindWarpingStrength(const int t_index, const float t_windWarpingStrength)
 	{
 		STHE_ASSERT(t_index >= 0, "Index must be greater than or equal to 0");
-		STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
+		STHE_ASSERT(t_index < 2, "Index must be smaller than 2");
 
 		m_launchParameters.windWarping.strengths[t_index] = t_windWarpingStrength;
 	}
@@ -510,7 +538,7 @@ namespace dunes
 	void Simulator::setWindWarpingGradientStrength(const int t_index, const float t_windWarpingGradientStrength)
 	{
 		STHE_ASSERT(t_index >= 0, "Index must be greater than or equal to 0");
-		STHE_ASSERT(t_index < 4, "Index must be smaller than 4");
+		STHE_ASSERT(t_index < 2, "Index must be smaller than 2");
 
 		m_launchParameters.windWarping.gradientStrengths[t_index] = t_windWarpingGradientStrength;
 	}

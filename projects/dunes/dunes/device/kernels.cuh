@@ -12,7 +12,8 @@ void addSandForCoverage(const LaunchParameters& t_launchParameters, int2 res, bo
 void initializeWindWarping(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters);
 
 void venturi(const LaunchParameters& t_launchParameters);
-void windWarping(const LaunchParameters& t_launchParameters);
+void windWarping(const LaunchParameters&     t_launchParameters,
+                 const SimulationParameters& t_simulationParameters);
 void windShadow(const LaunchParameters& t_launchParameters);
 void sticky(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters);
 void pressureProjection(const LaunchParameters& t_launchParameters, const SimulationParameters& t_simulationParameters);
