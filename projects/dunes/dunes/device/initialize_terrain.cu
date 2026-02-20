@@ -161,7 +161,7 @@ namespace dunes
 		const float4 resistance{ 0.0f, values[2], clamp(values[3], 0.f, 1.f), 0.0f };
 		t_resistanceArray.write(cell, toHalf4(resistance));
 
-		t_slabBuffer[getCellIndex(cell)] = __float2half(0.0f);
+		t_slabBuffer[getCellIndex(cell)] = CUDART_ZERO_FP16;
 	}
 
 	__global__ void addSandForCoverageKernel(Array2D<half2> t_terrainArray, float amount)

@@ -26,52 +26,48 @@ template <bool TUseAvalancheStrength>
 __global__ void atomicInPlaceAvalanchingKernel(Buffer<half2> t_terrainBuffer, const Buffer<half> t_reptationBuffer)
 {
 	const int2 cell{ getGlobalIndex2D() };
-
 	if (isOutside(cell))
 	{
 		return;
 	}
-
 	const int cellIndex{ getCellIndex(cell) };
-
-	const float avalancheAngle{ __half2float(t_reptationBuffer[cellIndex]) };
-
-	const float2 terrain{ __half22float2(t_terrainBuffer[cellIndex]) };
-	const float height{ terrain.x + terrain.y };
-	int nextCellIndices[8];
+	const float avalancheAngle {__half2float(__ldg(&t_reptationBuffer[cellIndex]))};
+	const half2 terrain{ t_terrainBuffer[cellIndex] };
+	const float height{ __half2float(terrain.x + terrain.y) };
 	float avalanches[8];
 	float avalancheSum{ 0.0f };
 	float maxAvalanche{ 0.0f };
-
+	#pragma unroll
 	for (int i{ 0 }; i < 8; ++i)
 	{
-		nextCellIndices[i] = getCellIndex(getWrappedCell(cell + c_offsets[i]));
-        const float2 nextTerrain{ __half22float2(t_terrainBuffer[nextCellIndices[i]]) };
-		const float nextHeight{ nextTerrain.x + nextTerrain.y };
-
+		int nextCell = getCellIndex(getWrappedCell(cell + c_offsets[i]));
+        const half2 nextTerrain{ t_terrainBuffer[nextCell] };
+		const float nextHeight{ __half2float(nextTerrain.x + nextTerrain.y) };
 		const float heightDifference{ height - nextHeight };
-		avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i] * c_parameters.gridScale, 0.0f);
-		avalancheSum += avalanches[i];
-		maxAvalanche = fmaxf(maxAvalanche, avalanches[i]);
+        avalanches[i] = fmaxf(heightDifference - avalancheAngle * c_distances[i], 0.0f);
+        avalancheSum += avalanches[i];
+        maxAvalanche = avalanches[i] > maxAvalanche ? avalanches[i] : maxAvalanche;
 	}
-
 	if (avalancheSum > 0.0f)
 	{
-		const float rAvalancheSum{ 1.0f / avalancheSum };
-		const float avalancheSize{ fminf((TUseAvalancheStrength ? c_parameters.avalancheStrength : 1.0f) * maxAvalanche /
-										 (1.0f + maxAvalanche * rAvalancheSum), terrain.y) };
-
-
-		const float scale{ avalancheSize * rAvalancheSum };
-
+        float avalancheSize;
+        if constexpr(TUseAvalancheStrength)
+        {
+            avalancheSize = fminf(c_parameters.avalancheStrength * (maxAvalanche * avalancheSum) / (maxAvalanche + avalancheSum), __half2float(terrain.y));
+        }
+        else
+        {
+            avalancheSize = fminf((maxAvalanche * avalancheSum) / (maxAvalanche + avalancheSum), __half2float(terrain.y));
+        }
+		const float scale { avalancheSize / avalancheSum };
+		#pragma unroll
 		for (int i{ 0 }; i < 8; ++i)
 		{
 			if (avalanches[i] > 0.0f)
 			{
-				atomicAdd(&t_terrainBuffer[nextCellIndices[i]].y, __float2half(scale * avalanches[i]));
+                atomicAdd(&t_terrainBuffer[getCellIndex(getWrappedCell(cell + c_offsets[i]))].y, __float2half(scale * avalanches[i]));
 			}
 		}
-
 		atomicAdd(&t_terrainBuffer[cellIndex].y, __float2half(- avalancheSize));
 	}
 }

@@ -42,7 +42,7 @@ namespace dunes
 				const float slab{ saltation };
 
 				t_slabBuffer[cellIndex] += __float2half(slab);
-				t_advectedSlabBuffer[cellIndex] = __float2half(0.0f);
+				t_advectedSlabBuffer[cellIndex] = CUDART_ZERO_FP16;
 			}
 		}
 	}

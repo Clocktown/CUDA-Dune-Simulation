@@ -41,7 +41,8 @@ __global__ void continuousAngularReptationKernel(const Array2D<half4> t_resistan
 	float baseAngle = c_parameters.avalancheAngle * exp(-slab * (1.f - windShadow) * length(wind) * c_parameters.reptationStrength);
 
 	// Store precomputed angle
-	t_reptationBuffer[cellIndex] = __float2half(lerp(baseAngle, c_parameters.vegetationAngle, fmaxf(resistance.y, 0.f)));
+        t_reptationBuffer[cellIndex] = __float2half(c_parameters.gridScale * lerp(
+                baseAngle, c_parameters.vegetationAngle, fmaxf(resistance.y, 0.f)));
 }
 
 __global__ void noReptationKernel(const Array2D<half4> t_resistanceArray, Buffer<half> t_reptationBuffer)
@@ -57,7 +58,8 @@ __global__ void noReptationKernel(const Array2D<half4> t_resistanceArray, Buffer
 	const float vegetation{ t_resistanceArray.read(cell).a.y };
 
 	// Store precomputed angle
-	t_reptationBuffer[cellIndex] = __half2float(lerp(c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(vegetation, 0.f)));
+        t_reptationBuffer[cellIndex] = __half2float(c_parameters.gridScale * lerp(
+                c_parameters.avalancheAngle, c_parameters.vegetationAngle, fmaxf(vegetation, 0.f)));
 }
 
 __global__ void continuousReptationKernel(const Array2D<half2> t_terrainArray, Buffer<half> t_slabBuffer, Buffer<half> t_reptationBuffer, const Array2D<half2> t_windArray)

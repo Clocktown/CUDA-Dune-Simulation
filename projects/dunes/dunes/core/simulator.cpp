@@ -39,7 +39,7 @@ namespace dunes
 		const float threadCount{ static_cast<float>(smCount * smThreadCount) };
 		
 		m_launchParameters.blockSize1D = 512;
-		m_launchParameters.blockSize2D = dim3{ 8, 8 };
+		m_launchParameters.blockSize2D = dim3{ 16, 16 };
 		
 		// https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
 		m_launchParameters.optimalBlockSize1D = 256;

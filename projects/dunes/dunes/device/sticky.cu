@@ -41,7 +41,7 @@ namespace dunes
 				}
 				else
 				{
-					t_cliffBuffer[cellIndex] = __float2half(0.0f);
+					t_cliffBuffer[cellIndex] = CUDART_ZERO_FP16;
 				}
 			}
 		}
